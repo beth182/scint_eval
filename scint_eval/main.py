@@ -62,6 +62,19 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     obs = observations.sort_obs(variable, files_obs, DOYstart, DOYstop, obs_site, z0zdlist, saveyn, savepath, sample,
                                 instrument)
 
+    # grouping obs together
+    # [allobsarenans, stringtime, stringtemp, obvstimedict, obvstempdict, adjustedobvsheight]
+    group_obs = [obs[4], obs[2], obs[3], obs[0], obs[1], obs[5]]
+
+    # define height of observation - this is different for wind (as there are more outputs from the sort_obs dict)
+    if variable == 'wind' or variable == 'kup':
+        disheight = obs[8]
+    else:
+        disheight = obs[6]
+
+    # gets zeff
+    zeff = look_up.scint_zeff[scint_path][0]
+
     print('END')
 
 

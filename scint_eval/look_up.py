@@ -454,6 +454,6 @@ grid_dict_colours = {1: 'dimgrey',
 # taken from the daily scintillometry functions
 # keys are paths (see main_scint)
 # values are effective heights
-scint_zeff = {12: [75., 1.],
-              14: [46., 1.],
-              15: [42., 1.]}
+scint_zeff = {12: [81.2, 1.],
+              14: [46., 1.],  # ToDo: update this
+              15: [42., 1.]}  # ToDo: update this

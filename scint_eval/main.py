@@ -1,7 +1,10 @@
 from calendar import isleap
 import os
 
+from scint_eval import look_up
 from scint_eval.functions import file_read
+from scint_eval.functions import roughness
+from scint_eval.functions import observations
 
 
 def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrument, sample,
@@ -47,6 +50,17 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
                                         "Z:/micromet/Tier_processing/rv006011/new_data_scint/data/"
                                         )
 
+    # define roughness and displacemet
+    # roughness.py
+    # note: this step doesn't matter with the scint runs. As we are evaluating a surface model output.
+    # This step is only included to keep things running, and values are over-written in the sort_model function.
+    z0zdlist = roughness.roughness_and_displacement(1, 0.8, look_up.obs_z0_macdonald[obs_site],
+                                                    look_up.obs_zd_macdonald[obs_site])
+
+    # sort observations
+    # observations.py
+    obs = observations.sort_obs(variable, files_obs, DOYstart, DOYstop, obs_site, z0zdlist, saveyn, savepath, sample,
+                                instrument)
 
     print('END')
 
@@ -115,4 +129,3 @@ if __name__ == "__main__":
 print(' ')
 print(' ')
 print('FINISH')
-

@@ -6,6 +6,8 @@ from scint_eval.functions import file_read
 from scint_eval.functions import roughness
 from scint_eval.functions import observations
 from scint_eval.functions import find_source_area
+from scint_eval.functions import grid_percentages
+from scint_eval.functions import manipulate_time_objects
 
 
 def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrument, sample,
@@ -63,28 +65,31 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     obs = observations.sort_obs(variable, files_obs, DOYstart, DOYstop, obs_site, z0zdlist, saveyn, savepath, sample,
                                 instrument)
 
-    # grouping obs together
-    # [allobsarenans, stringtime, stringtemp, obvstimedict, obvstempdict, adjustedobvsheight]
-    group_obs = [obs[4], obs[2], obs[3], obs[0], obs[1], obs[5]]
+    # convert from dictionary to lists
+    time_output, vals_output = manipulate_time_objects.dicts_to_lists(time_dict=obs[0],
+                                                                      val_dict=obs[1],
+                                                                      time_strings=obs[2],
+                                                                      val_strings=obs[3])
 
-    # define height of observation - this is different for wind (as there are more outputs from the sort_obs dict)
-    if variable == 'wind' or variable == 'kup':
-        disheight = obs[8]
-    else:
-        disheight = obs[6]
+    # Only take values on the hour
+    time_hour, vals_hour = manipulate_time_objects.take_hourly_vars(time=time_output, vals=vals_output)
 
-    # gets zeff
-    zeff = look_up.scint_zeff[scint_path][0]
+    # Take only hours with SA made
+    # list of hours with SA made
+    sa_hours_avail = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 
-    # gets z0
-    z0_scint = look_up.scint_zeff[scint_path][1]
-
-    # get time every hour
-    hours = find_source_area.take_hourly_vars(time_dict=obs[0], string_time=obs[2])
-
-    sa = find_source_area.find_source_area(time_dict=hours, string_time=obs[2])
+    time = []
+    vals = []
+    for hour, val in zip(time_hour, vals_hour):
+        if hour.hour in sa_hours_avail:
+            time.append(hour)
+            vals.append(val)
 
     # find source area raster
+    sa_list = find_source_area.find_source_area(time=time)
+
+    for hour, sa in zip(time, sa_list):
+        SA_percents = grid_percentages.SA_grid_percentages(sa, savepath, hour.strftime('%H'))
 
     print('END')
 

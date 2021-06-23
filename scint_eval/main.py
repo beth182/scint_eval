@@ -5,6 +5,7 @@ from scint_eval import look_up
 from scint_eval.functions import file_read
 from scint_eval.functions import roughness
 from scint_eval.functions import observations
+from scint_eval.functions import find_source_area
 
 
 def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrument, sample,
@@ -74,6 +75,16 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     # gets zeff
     zeff = look_up.scint_zeff[scint_path][0]
+
+    # gets z0
+    z0_scint = look_up.scint_zeff[scint_path][1]
+
+    # get time every hour
+    hours = find_source_area.take_hourly_vars(time_dict=obs[0], string_time=obs[2])
+
+    sa = find_source_area.find_source_area(time_dict=hours, string_time=obs[2])
+
+    # find source area raster
 
     print('END')
 

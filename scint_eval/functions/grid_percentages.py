@@ -63,7 +63,7 @@ def prepare_model_grid_percentages(time, sa_list, savepath,
                 grid_val = grid_vals[grid]
 
                 # if the percentage is larger than 1
-                if grid_val > 1:
+                if grid_val > 0:
                     # append to dictionary
                     included_grids_vals_raw[grid] = grid_val
 
@@ -119,7 +119,7 @@ def append_grids_to_csv(time_key, model_site, percentage_vals,
         # get the index of where the percentage is going to go in the dataframe
         # this would normally be - take away 1 from the grid (grid 1 - 42 = index 0 - 41)
         # but as I have time as my first index, then WD, then L, so I am adding 2
-        index = grid + 2
+        index = grid
 
         # replace the zero in the array with the correct percent for grids which have a value here
         zeros_array[index] = percent
@@ -782,3 +782,24 @@ def average_model_grids(included_grids, DOYstart_mod, DOYstop_mod, percentage_va
     included_grids['WAverage'] = w_average_grouped
 
     return included_grids
+
+
+def centre_and_average_grid(scint_path, included_grids):
+    """
+
+    :return:
+    """
+
+    # dict for average and centre grid
+    centre_and_av = {}
+    if scint_path == 12:  # BCT --> IMU
+        centre = 13  # This is correct
+    elif scint_path == 14:  # IMU --> SWT
+        centre = 22  # ish ??? could aslo be 31, 32
+    elif scint_path == 15:  # SCT --> SWT
+        centre = 37  # either 37 or 38
+    centre_and_av[centre] = included_grids[centre]
+    centre_and_av['Average'] = included_grids['Average']
+    centre_and_av['WAverage'] = included_grids['WAverage']
+
+    return centre_and_av

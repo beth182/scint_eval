@@ -8,6 +8,7 @@ from scint_eval.functions import observations
 from scint_eval.functions import find_source_area
 from scint_eval.functions import grid_percentages
 from scint_eval.functions import manipulate_time_objects
+from scint_eval.functions import times_series
 
 
 def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrument, sample,
@@ -85,8 +86,8 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     # Take only hours with SA made
     # list of hours with SA made
-    # sa_hours_avail = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-    sa_hours_avail = [5, 6]
+    sa_hours_avail = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    # sa_hours_avail = [5]
 
     time = []
     vals = []
@@ -99,20 +100,32 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     sa_list = find_source_area.find_source_area(time=time)
 
     model_site_dict, percentage_vals_dict = grid_percentages.prepare_model_grid_percentages(time=time,
-                                                                                                        sa_list=sa_list,
-                                                                                                        savepath=savepath)
+                                                                                            sa_list=sa_list,
+                                                                                            savepath=savepath)
 
-    included_grids, model_site = grid_percentages.determine_which_model_files(model_site_dict, DOYstart_mod, DOYstop_mod, run,
-                                                                  instrument,
-                                                                  sample, variable,
-                                                                  obs_level, model_format, disheight, z0zdlist, saveyn,
-                                                                  savepath)
+    included_grids, model_site = grid_percentages.determine_which_model_files(model_site_dict, DOYstart_mod,
+                                                                              DOYstop_mod, run,
+                                                                              instrument,
+                                                                              sample, variable,
+                                                                              obs_level, model_format, disheight,
+                                                                              z0zdlist, saveyn,
+                                                                              savepath)
 
-    included_grids_av = grid_percentages.average_model_grids(included_grids, DOYstart_mod, DOYstop_mod,
+    included_grids = grid_percentages.average_model_grids(included_grids, DOYstart_mod, DOYstop_mod,
                                                              percentage_vals_dict, model_site_dict, model_site)
 
     # time series plot
-    time_series_plot(variable, saveyn, model_site, DOYstart, DOYstop, savepath + 'all_', run, included_grids, group_obs)
+    times_series.time_series_plot(variable, saveyn, model_site, DOYstart, DOYstop, savepath + 'all_', run,
+                                  included_grids, group_obs)
+
+    centre_and_av = grid_percentages.centre_and_average_grid(scint_path, included_grids)
+
+    # time_series.py
+    times_series.time_series_plot(variable, saveyn, model_site, DOYstart, DOYstop, savepath + 'av_', run, centre_and_av, group_obs)
+
+
+
+
 
     print('END')
 

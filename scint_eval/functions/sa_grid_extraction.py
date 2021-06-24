@@ -112,3 +112,10 @@ def SA_grid_percentages(raster_path, save_path, time_string):
     plt.close('all')
 
     return grid_vals, calculated_sum
+
+
+# raster_path = 'C:/Users/beths/Desktop/LANDING/fp_raster_tests/hourly/applicable_hours/BCT_IMU_65000_2016_142_05.tif'
+# save_path = 'D:/Documents/scint_eval/plots/2016142_2016142_H_IMU_12/'
+# time_string = 'test'
+#
+# SA_grid_percentages(raster_path, save_path, time_string)

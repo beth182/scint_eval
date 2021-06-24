@@ -1,5 +1,6 @@
 import datetime as dt
 import numpy as np
+import ephem
 
 
 # Elliott's function to create datetime objects from the model
@@ -33,3 +34,47 @@ def time_to_datetime(tstr, timeRaw):
     else:
         print('Raw time not in seconds, minutes or hours. No processed time created.')
         return
+
+
+def calculate_time(date, lat, lon, whatdoyouwant, utc_time):
+    """
+    a function to calculate times of sunrise or sunset or noon for a given day and location.
+
+    :param date: datetime object of the time to convert to decimal time.
+    :param lat: latitude of the location for which the times are being calculated.
+    :param lon: longitude of the location for which the times are being calculated.
+    :param whatdoyouwant: tell the function what you want to caclulate. 3 options:
+    0 = time of sunrise.
+    1 = time of sunset.
+    2 = time of noon.
+    :param utc_time: how many hours to add on to convert to UTC time.
+
+    :return forreturn: time in decimal time.
+    """
+    # strip the datetime object
+    datestripped = date.strftime("%Y/%m/%d 00:00:00")
+
+    # Use lat and lon to create ephem observer instance and update with given
+    # values
+    my_location = ephem.Observer()
+    my_location.lat = str(lat)
+    my_location.lon = str(lon)
+    my_location.date = datestripped
+
+    # Get sunrise of the current day
+    sunrise = my_location.next_rising(ephem.Sun())
+    sunset = my_location.next_setting(ephem.Sun())
+    noon = my_location.next_transit(ephem.Sun())
+
+    # choices of what you want to calculate
+    if whatdoyouwant == 0:
+        # sunrise
+        forreturn = ephem.Date(sunrise + utc_time * ephem.hour).datetime()
+    if whatdoyouwant == 1:
+        # sunset
+        forreturn = ephem.Date(sunset + utc_time * ephem.hour).datetime()
+    if whatdoyouwant == 2:
+        # 'transit' -- i.e noon, for us normal speaking people
+        forreturn = ephem.Date(noon + utc_time * ephem.hour).datetime()
+
+    return forreturn

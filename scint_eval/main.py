@@ -9,6 +9,7 @@ from scint_eval.functions import find_source_area
 from scint_eval.functions import grid_percentages
 from scint_eval.functions import manipulate_time_objects
 from scint_eval.functions import times_series
+from scint_eval.functions import filter_data
 
 
 def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrument, sample,
@@ -112,20 +113,27 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
                                                                               savepath)
 
     included_grids = grid_percentages.average_model_grids(included_grids, DOYstart_mod, DOYstop_mod,
-                                                             percentage_vals_dict, model_site_dict, model_site)
+                                                          percentage_vals_dict, model_site_dict, model_site)
 
     # time series plot
-    times_series.time_series_plot(variable, saveyn, model_site, DOYstart, DOYstop, savepath + 'all_', run,
-                                  included_grids, group_obs)
+    # times_series.time_series_plot(variable, saveyn, model_site, DOYstart, DOYstop, savepath + 'all_', run,
+    #                               included_grids, group_obs)
 
     centre_and_av = grid_percentages.centre_and_average_grid(scint_path, included_grids)
 
-    # time_series.py
-    times_series.time_series_plot(variable, saveyn, model_site, DOYstart, DOYstop, savepath + 'av_', run, centre_and_av, group_obs)
+    # times_series.time_series_plot(variable, saveyn, model_site, DOYstart, DOYstop, savepath + 'av_', run, centre_and_av,
+    #                               group_obs)
 
+    # removes nans in the data sets
+    # clean.py
 
-
-
+    # average = lon
+    # waverage = ukv
+    nans = filter_data.remove_nans(group_obs[1], group_obs[2], group_obs[3], group_obs[4],
+                                   centre_and_av['Average'][1], centre_and_av['Average'][3],
+                                   centre_and_av['WAverage'][1], centre_and_av['WAverage'][3],
+                                   centre_and_av['Average'][0], centre_and_av['Average'][2],
+                                   centre_and_av['WAverage'][0], centre_and_av['WAverage'][2])
 
     print('END')
 

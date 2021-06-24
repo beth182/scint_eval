@@ -11,7 +11,7 @@ from scint_eval.functions import manipulate_time_objects
 
 
 def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrument, sample,
-         format, obs_level, scint_path):
+         model_format, obs_level, scint_path):
     """
     MAIN FUNCTION FOR NEW FILE FORMAT MODEL FILES.
     """
@@ -47,10 +47,9 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     ################################################################################################################
     # finding observation files
     # file_read.py
-    files_obs = file_read.finding_files(format, 'obs', DOYstart, DOYstop, obs_site, run, instrument, sample,
+    files_obs = file_read.finding_files(model_format, 'obs', DOYstart, DOYstop, obs_site, run, instrument, sample,
                                         variable, obs_level,
-                                        "Z:/micromet/Tier_processing/rv006011/new_data_storage/",
-                                        "Z:/micromet/Tier_processing/rv006011/new_data_scint/data/"
+                                        obs_path="Z:/micromet/Tier_processing/rv006011/new_data_scint/data/"
                                         )
 
     # define roughness and displacemet
@@ -65,6 +64,16 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     obs = observations.sort_obs(variable, files_obs, DOYstart, DOYstop, obs_site, z0zdlist, saveyn, savepath, sample,
                                 instrument)
 
+    # grouping obs together
+    # [ allobsarenans,  stringtime, stringtemp, obvstimedict,   obvstempdict,   adjustedobvsheight  ]
+    group_obs = [obs[4], obs[2], obs[3], obs[0], obs[1], obs[5]]
+
+    # define height of observation - this is different for wind (as there are more outputs from the sort_obs dict)
+    if variable == 'wind' or variable == 'kup':
+        disheight = obs[8]
+    else:
+        disheight = obs[6]
+
     # convert from dictionary to lists
     time_output, vals_output = manipulate_time_objects.dicts_to_lists(time_dict=obs[0],
                                                                       val_dict=obs[1],
@@ -76,7 +85,8 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     # Take only hours with SA made
     # list of hours with SA made
-    sa_hours_avail = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    # sa_hours_avail = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    sa_hours_avail = [5, 6]
 
     time = []
     vals = []
@@ -88,8 +98,21 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     # find source area raster
     sa_list = find_source_area.find_source_area(time=time)
 
-    for hour, sa in zip(time, sa_list):
-        SA_percents = grid_percentages.SA_grid_percentages(sa, savepath, hour.strftime('%H'))
+    model_site_dict, percentage_vals_dict = grid_percentages.prepare_model_grid_percentages(time=time,
+                                                                                                        sa_list=sa_list,
+                                                                                                        savepath=savepath)
+
+    included_grids, model_site = grid_percentages.determine_which_model_files(model_site_dict, DOYstart_mod, DOYstop_mod, run,
+                                                                  instrument,
+                                                                  sample, variable,
+                                                                  obs_level, model_format, disheight, z0zdlist, saveyn,
+                                                                  savepath)
+
+    included_grids_av = grid_percentages.average_model_grids(included_grids, DOYstart_mod, DOYstop_mod,
+                                                             percentage_vals_dict, model_site_dict, model_site)
+
+    # time series plot
+    time_series_plot(variable, saveyn, model_site, DOYstart, DOYstop, savepath + 'all_', run, included_grids, group_obs)
 
     print('END')
 
@@ -138,7 +161,7 @@ else:
     raise ValueError('Path chosen not an option.')
 
 file_format = ['old', 'new']
-format = file_format[1]
+model_format = file_format[1]
 
 if __name__ == "__main__":
 
@@ -153,7 +176,7 @@ if __name__ == "__main__":
         os.mkdir(save_folder)
 
     main(obs_site, DOYstart_choice, DOYstop_choice, variable, save_folder, 1, run,
-         instrument, sample, format, obs_level, scint_path)
+         instrument, sample, model_format, obs_level, scint_path)
 
 print(' ')
 print(' ')

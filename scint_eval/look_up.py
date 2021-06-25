@@ -457,3 +457,5 @@ grid_dict_colours = {1: 'dimgrey',
 scint_zeff = {12: [81.2, 1.],
               14: [46., 1.],  # ToDo: update this
               15: [42., 1.]}  # ToDo: update this
+
+scint_3_b_3_upwind = {12: [10, 11, 12, 19, 20, 21, 28, 29, 30]}

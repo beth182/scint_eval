@@ -9,7 +9,8 @@ from scint_eval.functions import find_source_area
 from scint_eval.functions import grid_percentages
 from scint_eval.functions import manipulate_time_objects
 from scint_eval.functions import times_series
-from scint_eval.functions import filter_data
+from scint_eval.functions import plotting_funs
+from scint_eval.functions import array_retrieval
 
 
 def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrument, sample,
@@ -118,22 +119,67 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     # time series plot
     # times_series.time_series_plot(variable, saveyn, model_site, DOYstart, DOYstop, savepath + 'all_', run,
     #                               included_grids, group_obs)
-
-    centre_and_av = grid_percentages.centre_and_average_grid(scint_path, included_grids)
-
     # times_series.time_series_plot(variable, saveyn, model_site, DOYstart, DOYstop, savepath + 'av_', run, centre_and_av,
     #                               group_obs)
 
-    # removes nans in the data sets
-    # clean.py
 
-    # average = lon
-    # waverage = ukv
-    nans = filter_data.remove_nans(group_obs[1], group_obs[2], group_obs[3], group_obs[4],
-                                   centre_and_av['Average'][1], centre_and_av['Average'][3],
-                                   centre_and_av['WAverage'][1], centre_and_av['WAverage'][3],
-                                   centre_and_av['Average'][0], centre_and_av['Average'][2],
-                                   centre_and_av['WAverage'][0], centre_and_av['WAverage'][2])
+
+    obs_time, obs_vals = array_retrieval.retrive_arrays_obs(group_obs)
+    obs_time, obs_vals = array_retrieval.rm_nans(obs_time, obs_vals)
+
+    mod_time, mod_vals = array_retrieval.retrive_array_model(included_grids, 13)
+
+    obs_time_hourly, obs_vals_hourly, mod_vals = array_retrieval.take_common_times(obs_time, obs_vals, mod_time, mod_vals)
+
+
+    model_grid_vals = {}
+    model_grid_time = {}
+
+    for grid_choice in included_grids.keys():
+
+        mod_time, mod_vals = array_retrieval.retrive_array_model(included_grids, grid_choice)
+
+        model_grid_vals[grid_choice] = mod_vals
+        model_grid_time[grid_choice] = mod_time
+
+    # # wav and av
+    # mod_time_av, mod_vals_av = array_retrieval.retrive_array_model(included_grids, 'Average')
+    # mod_time_wav, mod_vals_wav = array_retrieval.retrive_array_model(included_grids, 'WAverage')
+    #
+    # assert mod_time_av.all() == mod_time_wav.all()
+
+    zeff = look_up.scint_zeff[scint_path][0]
+
+    plotting_funs.detailed_time_series(obs_time, obs_vals,
+                                       obs_time_hourly, obs_vals_hourly,
+
+                                       model_grid_time, model_grid_vals,
+                         variable, zeff, savepath, DOYstart, DOYstop, model_site_dict)
+
+
+
+
+
+    print('end')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     print('END')
 

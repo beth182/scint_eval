@@ -783,23 +783,3 @@ def average_model_grids(included_grids, DOYstart_mod, DOYstop_mod, percentage_va
 
     return included_grids
 
-
-def centre_and_average_grid(scint_path, included_grids):
-    """
-
-    :return:
-    """
-
-    # dict for average and centre grid
-    centre_and_av = {}
-    if scint_path == 12:  # BCT --> IMU
-        centre = 13  # This is correct
-    elif scint_path == 14:  # IMU --> SWT
-        centre = 22  # ish ??? could aslo be 31, 32
-    elif scint_path == 15:  # SCT --> SWT
-        centre = 37  # either 37 or 38
-    centre_and_av[centre] = included_grids[centre]
-    centre_and_av['Average'] = included_grids['Average']
-    centre_and_av['WAverage'] = included_grids['WAverage']
-
-    return centre_and_av

@@ -122,21 +122,18 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     # times_series.time_series_plot(variable, saveyn, model_site, DOYstart, DOYstop, savepath + 'av_', run, centre_and_av,
     #                               group_obs)
 
-
-
     obs_time, obs_vals = array_retrieval.retrive_arrays_obs(group_obs)
     obs_time, obs_vals = array_retrieval.rm_nans(obs_time, obs_vals)
 
     mod_time, mod_vals = array_retrieval.retrive_array_model(included_grids, 13)
 
-    obs_time_hourly, obs_vals_hourly, mod_vals = array_retrieval.take_common_times(obs_time, obs_vals, mod_time, mod_vals)
-
+    obs_time_hourly, obs_vals_hourly, mod_vals = array_retrieval.take_common_times(obs_time, obs_vals, mod_time,
+                                                                                   mod_vals)
 
     model_grid_vals = {}
     model_grid_time = {}
 
     for grid_choice in included_grids.keys():
-
         mod_time, mod_vals = array_retrieval.retrive_array_model(included_grids, grid_choice)
 
         model_grid_vals[grid_choice] = mod_vals
@@ -152,29 +149,8 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     plotting_funs.detailed_time_series(obs_time, obs_vals,
                                        obs_time_hourly, obs_vals_hourly,
-
                                        model_grid_time, model_grid_vals,
-                         variable, zeff, savepath, DOYstart, DOYstop, model_site_dict)
-
-
-
-
-
-    print('end')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                                       variable, zeff, savepath, DOYstart, DOYstop, model_site_dict)
 
 
 

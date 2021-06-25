@@ -61,9 +61,9 @@ def simple_times_series(time, obs, model_av, model_wav, zeff, variable, DOYstart
 def detailed_time_series(obs_time, obs_vals,
                          obs_time_hourly, obs_vals_hourly,
                          model_grid_time, model_grid_vals,
-                         # mod_time_av, mod_vals_av, mod_vals_wav,
                          variable, zeff, savepath, DOYstart, DOYstop,
-                         model_site_dict):
+                         model_site_dict,
+                         percentage_covered_by_model):
     """
 
     :return:
@@ -82,13 +82,15 @@ def detailed_time_series(obs_time, obs_vals,
     obs_N_hourly = len(obs_vals_hourly)
     obs_N = len(obs_vals)
 
+    per_covered = list_calculated_sum(model_grid_time, percentage_covered_by_model)
+
     max_grid_vals, min_grid_vals, n_grids = variation_in_grids(model_grid_time, model_grid_vals, model_site_dict)
 
     ax1.fill_between(model_grid_time[list(model_grid_time.keys())[0]], max_grid_vals, min_grid_vals, color='pink',
                      alpha=0.4, label='Model grid range')
 
-    ax1.plot(model_grid_time['Average'], model_grid_vals['Average'], label='Average', color='red')
-    ax1.plot(model_grid_time['WAverage'], model_grid_vals['WAverage'], label='WAverage', color='blue')
+    ax1.plot(model_grid_time['Average'], model_grid_vals['Average'], label='Average', color='red', marker='.')
+    ax1.plot(model_grid_time['WAverage'], model_grid_vals['WAverage'], label='WAverage', color='blue', marker='.')
 
     ax1.plot(obs_time, obs_vals, linestyle='None', marker='o', color='grey',
              label="Obs @ %d m \n N = %d" % (zeff, obs_N))
@@ -109,11 +111,19 @@ def detailed_time_series(obs_time, obs_vals,
 
     ax1.legend(bbox_to_anchor=(1, 0.5), fontsize=15, loc='center left')
 
-    ax2.plot(model_grid_time[list(model_grid_time.keys())[0]], n_grids, linestyle='None', marker='x', color='k')
+    ax2.plot(model_grid_time[list(model_grid_time.keys())[0]], n_grids, marker='x', linestyle='None', color='k')
     ax2.set_xlabel('Time (h)')
     ax2.xaxis.set_major_formatter(DateFormatter('%H'))
     ax2.set_ylabel("# of grids in source area")
     # ax2.set_xlim([datetime.datetime(2016, 5, 21, 4, 30), datetime.datetime(2016, 5, 21, 19, 30)])
+
+    ax3 = ax2.twinx()
+    ax3.plot(model_grid_time[list(model_grid_time.keys())[0]], per_covered, marker='^', linestyle='None', color='green')
+    ax3.set_ylabel("% SA covered by grid network")
+    ax3.xaxis.set_major_formatter(DateFormatter('%H'))
+
+    ax3.yaxis.label.set_color('green')
+    ax3.tick_params(axis='y', colors='green')
 
     plt.tight_layout()
 
@@ -121,6 +131,30 @@ def detailed_time_series(obs_time, obs_vals,
                 bbox_inches='tight')
 
     print('end')
+
+
+def list_calculated_sum(model_grid_time, percentage_covered_by_model):
+    """
+
+    :return:
+    """
+
+    per_covered = []
+
+    times_list = model_grid_time[list(model_grid_time.keys())[0]]
+
+    for i, time in enumerate(times_list):
+
+        time_string = time.strftime("%y%m%d%H")
+
+        try:
+            per_cover = percentage_covered_by_model[time_string]
+        except KeyError:
+            per_cover = np.nan
+
+        per_covered.append(per_cover)
+
+    return per_covered
 
 
 def variation_in_grids(model_grid_time, model_grid_vals, model_site_dict):

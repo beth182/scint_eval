@@ -26,6 +26,7 @@ def prepare_model_grid_percentages(time, sa_list, savepath,
     # will have hours as keys, and then list of grid numbers or grid percentages
     model_site_dict = {}
     percentage_vals_dict = {}
+    percentage_covered_by_model = {}
 
     for hour, sa in zip(time, sa_list):
 
@@ -42,19 +43,23 @@ def prepare_model_grid_percentages(time, sa_list, savepath,
             # gets column names
             # [1:] gets rid of 'hour'
             no_zeros = df_row.loc[:, (df_row != 0).any(axis=0)]
-            model_site = list(no_zeros.columns)[1:]
-            percentage_vals = no_zeros.values.tolist()[0][1:]
+
+            calculated_sum = no_zeros.values.tolist()[0][1]
+
+            model_site = list(no_zeros.columns)[2:]
+            percentage_vals = no_zeros.values.tolist()[0][2:]
 
             # append to dictionaries
             model_site_dict[time_key] = model_site
             percentage_vals_dict[time_key] = percentage_vals
+            percentage_covered_by_model[time_key] = calculated_sum
+
 
         else:
-
-            SA_percents = sa_grid_extraction.SA_grid_percentages(sa, savepath, hour.strftime('%H'))
-
             # gets the percentage values for each grid
-            grid_vals = SA_percents[0]
+            grid_vals, calculated_sum = sa_grid_extraction.SA_grid_percentages(sa, savepath, hour.strftime('%H'))
+
+            # calculated sum is the % of the total footprint captured falling within the model grids
 
             # new dict for grids to be included
             included_grids_vals_raw = {}
@@ -92,14 +97,15 @@ def prepare_model_grid_percentages(time, sa_list, savepath,
             # append to dictionaries
             model_site_dict[time_key] = model_site
             percentage_vals_dict[time_key] = percentage_vals
+            percentage_covered_by_model[time_key] = calculated_sum
 
             # append to a csv - to cut-down on processing time
-            append_grids_to_csv(time_key, model_site, percentage_vals)
+            append_grids_to_csv(time_key, model_site, percentage_vals, calculated_sum)
 
-    return model_site_dict, percentage_vals_dict
+    return model_site_dict, percentage_vals_dict, percentage_covered_by_model
 
 
-def append_grids_to_csv(time_key, model_site, percentage_vals,
+def append_grids_to_csv(time_key, model_site, percentage_vals, calculated_sum,
                         csv_path='C:/Users/beths/Desktop/LANDING/ukv_grid_sa_percentages.csv'):
     """
     function to append to a csv - to cut-down on processing time
@@ -109,23 +115,26 @@ def append_grids_to_csv(time_key, model_site, percentage_vals,
     # reads the csv
     existing_df = pd.read_csv(csv_path)
 
-    # creates array of 0's with the same length as time, then number of grids (42) - total = 43
-    zeros_array = np.zeros(43)
+    # creates array of 0's with the same length as time, calculated_sum, then number of grids (42) - total = 44
+    zeros_array = np.zeros(44)
 
     # first value in array is the time
     zeros_array[0] = int(time_key)
+
+    # second is calculated sum
+    zeros_array[1] = calculated_sum
 
     for grid, percent in zip(model_site, percentage_vals):
         # get the index of where the percentage is going to go in the dataframe
         # this would normally be - take away 1 from the grid (grid 1 - 42 = index 0 - 41)
         # but as I have time as my first index, then WD, then L, so I am adding 2
-        index = grid
+        index = grid + 1
 
         # replace the zero in the array with the correct percent for grids which have a value here
         zeros_array[index] = percent
 
     # creates coloumn names for the dataframe: hour, then grid numbers
-    column_list = ['hour']
+    column_list = ['hour', 'calculated_sum']
     for i in range(1, 43):
         column_list.append(str(i))
 

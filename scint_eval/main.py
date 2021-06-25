@@ -88,8 +88,9 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     # Take only hours with SA made
     # list of hours with SA made
-    sa_hours_avail = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-    # sa_hours_avail = [5]
+    # sa_hours_avail = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    # sa_hours_avail = [1]
+    sa_hours_avail = [1,2,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,22,23,0]
 
     time = []
     vals = []
@@ -101,9 +102,10 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     # find source area raster
     sa_list = find_source_area.find_source_area(time=time)
 
-    model_site_dict, percentage_vals_dict = grid_percentages.prepare_model_grid_percentages(time=time,
-                                                                                            sa_list=sa_list,
-                                                                                            savepath=savepath)
+    model_site_dict, percentage_vals_dict, percentage_covered_by_model = grid_percentages.prepare_model_grid_percentages(
+        time=time,
+        sa_list=sa_list,
+        savepath=savepath)
 
     included_grids, model_site = grid_percentages.determine_which_model_files(model_site_dict, DOYstart_mod,
                                                                               DOYstop_mod, run,
@@ -150,12 +152,9 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     plotting_funs.detailed_time_series(obs_time, obs_vals,
                                        obs_time_hourly, obs_vals_hourly,
                                        model_grid_time, model_grid_vals,
-                                       variable, zeff, savepath, DOYstart, DOYstop, model_site_dict)
-
-
-
-
-
+                                       variable, zeff, savepath, DOYstart, DOYstop,
+                                       model_site_dict,
+                                       percentage_covered_by_model)
 
     print('END')
 

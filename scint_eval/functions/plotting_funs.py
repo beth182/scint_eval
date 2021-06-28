@@ -119,7 +119,8 @@ def detailed_time_series(obs_time, obs_vals,
 
     ax3 = ax2.twinx()
     # 50 because that is the max percentage currently coming out of the SA model repo for the example day
-    ax3.plot(model_grid_time[list(model_grid_time.keys())[0]], (np.asarray(per_covered)/100)* 50, marker='^', linestyle='None', color='green')
+    ax3.plot(model_grid_time[list(model_grid_time.keys())[0]], (np.asarray(per_covered) / 100) * 50, marker='^',
+             linestyle='None', color='green')
     ax3.set_ylabel("% SA covered by grid network")
     ax3.xaxis.set_major_formatter(DateFormatter('%H'))
 

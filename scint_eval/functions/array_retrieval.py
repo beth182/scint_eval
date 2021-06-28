@@ -33,7 +33,6 @@ def retrive_arrays_obs(included_obs):
 
 
 def retrive_array_model(included_models, model_grid_choice):
-
     try:
         included_model = included_models[model_grid_choice]
 
@@ -43,13 +42,12 @@ def retrive_array_model(included_models, model_grid_choice):
         tempdict = included_model[3]
 
     except KeyError:
-        print('No source area included in grid %d' %model_grid_choice)
+        print('No source area included in grid %d' % model_grid_choice)
 
         stringtime = []
         stringtemp = []
         timedict = []
         tempdict = []
-
 
     times = []
     vals = []
@@ -69,7 +67,6 @@ def retrive_array_model(included_models, model_grid_choice):
 
 
 def rm_nans(times, vals):
-
     index_nans = np.argwhere(np.isnan(vals))
 
     vals_rm_nans = np.delete(vals, index_nans)
@@ -79,7 +76,6 @@ def rm_nans(times, vals):
 
 
 def take_common_times(time_a, vals_a, time_b, vals_b):
-
     index_a = np.in1d(time_a, time_b)
     time_a_common = time_a[index_a]
     vals_a_common = vals_a[index_a]
@@ -92,8 +88,3 @@ def take_common_times(time_a, vals_a, time_b, vals_b):
     assert time_a_common.all() == time_b_common.all()
 
     return time_a_common, vals_a_common, vals_b_common
-
-
-
-
-

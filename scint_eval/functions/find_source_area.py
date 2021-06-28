@@ -2,9 +2,10 @@
 # function to find file path to raster with source area
 import datetime
 
+
 def find_source_area(time,
-                     in_dir = 'C:/Users/beths/Desktop/LANDING/fp_raster_tests/hourly/',
-                     name_start = 'BCT_IMU_65000_'):
+                     in_dir='C:/Users/beths/Desktop/LANDING/fp_raster_tests/hourly/',
+                     name_start='BCT_IMU_65000_'):
     """
 
     :return:
@@ -22,23 +23,3 @@ def find_source_area(time,
         sa_paths.append(sa_path)
 
     return sa_paths
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    print('end')

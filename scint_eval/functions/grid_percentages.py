@@ -791,4 +791,3 @@ def average_model_grids(included_grids, DOYstart_mod, DOYstop_mod, percentage_va
     included_grids['WAverage'] = w_average_grouped
 
     return included_grids
-

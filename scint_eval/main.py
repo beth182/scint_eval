@@ -90,7 +90,7 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     # list of hours with SA made
     # sa_hours_avail = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     # sa_hours_avail = [1]
-    sa_hours_avail = [1,2,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,22,23,0]
+    sa_hours_avail = [1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23, 0]
 
     time = []
     vals = []
@@ -127,11 +127,6 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     obs_time, obs_vals = array_retrieval.retrive_arrays_obs(group_obs)
     obs_time, obs_vals = array_retrieval.rm_nans(obs_time, obs_vals)
 
-    mod_time, mod_vals = array_retrieval.retrive_array_model(included_grids, 13)
-
-    obs_time_hourly, obs_vals_hourly, mod_vals = array_retrieval.take_common_times(obs_time, obs_vals, mod_time,
-                                                                                   mod_vals)
-
     model_grid_vals = {}
     model_grid_time = {}
 
@@ -141,20 +136,21 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
         model_grid_vals[grid_choice] = mod_vals
         model_grid_time[grid_choice] = mod_time
 
-    # # wav and av
-    # mod_time_av, mod_vals_av = array_retrieval.retrive_array_model(included_grids, 'Average')
-    # mod_time_wav, mod_vals_wav = array_retrieval.retrive_array_model(included_grids, 'WAverage')
-    #
-    # assert mod_time_av.all() == mod_time_wav.all()
+    time_eval, obs_vals_eval, mod_vals_eval = array_retrieval.take_common_times(obs_time, obs_vals,
+                                                                                model_grid_time['WAverage'],
+                                                                                model_grid_vals['WAverage'])
 
     zeff = look_up.scint_zeff[scint_path][0]
 
     plotting_funs.detailed_time_series(obs_time, obs_vals,
-                                       obs_time_hourly, obs_vals_hourly,
+                                       time_eval, obs_vals_eval,
                                        model_grid_time, model_grid_vals,
                                        variable, zeff, savepath, DOYstart, DOYstop,
                                        model_site_dict,
                                        percentage_covered_by_model)
+
+    # 3 arrays to be used for eval:
+    # time_eval, obs_vals_eval, mod_vals_eval
 
     print('END')
 

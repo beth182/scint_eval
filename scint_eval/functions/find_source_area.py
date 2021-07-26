@@ -4,7 +4,7 @@ import datetime
 
 
 def find_source_area(time,
-                     in_dir='C:/Users/beths/Desktop/LANDING/fp_raster_tests/hourly/',
+                     in_dir='C:/Users/beths/Desktop/LANDING/fp_output/hourly/',
                      name_start='BCT_IMU_65000_'):
     """
 

@@ -4,7 +4,7 @@ import os
 from scint_eval import look_up
 from scint_eval.functions import file_read
 from scint_eval.functions import roughness
-from scint_eval.functions import observations
+from scint_eval.functions import observations_new_scint
 from scint_eval.functions import find_source_area
 from scint_eval.functions import grid_percentages
 from scint_eval.functions import manipulate_time_objects
@@ -52,7 +52,7 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     # file_read.py
     files_obs = file_read.finding_files(model_format, 'obs', DOYstart, DOYstop, obs_site, run, instrument, sample,
                                         variable, obs_level,
-                                        obs_path="Z:/micromet/Tier_processing/rv006011/new_data_scint/data/"
+                                        obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
                                         )
 
     # define roughness and displacemet
@@ -64,7 +64,7 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     # sort observations
     # observations.py
-    obs = observations.sort_obs(variable, files_obs, DOYstart, DOYstop, obs_site, z0zdlist, saveyn, savepath, sample,
+    obs = observations_new_scint.sort_obs(variable, files_obs, DOYstart, DOYstop, obs_site, z0zdlist, saveyn, savepath, sample,
                                 instrument)
 
     # grouping obs together
@@ -160,7 +160,7 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 DOYstart_choice = 2016142
 DOYstop_choice = 2016142
 
-sample = '15min'
+sample = '1min'
 obs_level = 'L1'
 run = '21Z'
 

@@ -92,7 +92,7 @@ def detailed_time_series(obs_time, obs_vals,
     ax1.plot(model_grid_time['Average'], model_grid_vals['Average'], label='Average', color='red', marker='.')
     ax1.plot(model_grid_time['WAverage'], model_grid_vals['WAverage'], label='WAverage', color='blue', marker='.')
 
-    ax1.plot(obs_time, obs_vals, linestyle='None', marker='o', color='grey',
+    ax1.plot(obs_time, obs_vals, linestyle='None', marker='.', color='grey',
              label="Obs @ %d m \n N = %d" % (zeff, obs_N))
     ax1.plot(obs_time_hourly, obs_vals_hourly, linestyle='None', marker='o', color='k',
              label="Obs ending on hour, N = %d" % obs_N_hourly)

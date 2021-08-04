@@ -160,7 +160,8 @@ variable_info = {'Tair': ['Air Temperature ($^{\circ}$C)', 'levels', '$^{\circ}$
 
                  'sd_v': ['sd_v'],  # Added for scintillometry eval
                  'L': ['L'],  # Added for scintillometry eval
-                 'ustar': ['ustar']  # Added for scintillometry eval
+                 'ustar': ['ustar'],  # Added for scintillometry eval
+                 'PAR_W': ['PAR']  # Added for kdown allignment tests
                  }
 
 # calculated from notebooks/surface_altitudes/lon_ukv_surface_altitudes.ipynb

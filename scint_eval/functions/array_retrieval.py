@@ -32,7 +32,8 @@ def retrive_arrays_obs(included_obs):
     return times_array, vals_array
 
 
-def retrive_array_model(included_models, model_grid_choice):
+def retrive_arrays_model(included_models, model_grid_choice):
+
     try:
         included_model = included_models[model_grid_choice]
 

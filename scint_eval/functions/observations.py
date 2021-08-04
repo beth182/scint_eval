@@ -423,10 +423,11 @@ def sort_obs(variable,
             elif variable == 'ustar':
                 obvstair = obvs_ncfile.variables['ustar']
 
-
             else:
-                print('variable choice not an option')
-                sys.exit()
+                try:
+                    obvstair = obvs_ncfile.variables[variable]
+                except:
+                    raise ValueError('Variable choice not an option')
 
             obvstairvalues = obvstair[:, 0, 0, 0]
 

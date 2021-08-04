@@ -4,6 +4,7 @@ from matplotlib.dates import DateFormatter
 import pylab
 import sys
 import numpy as np
+import datetime as dt
 
 from scint_eval import look_up
 from scint_eval.functions import tools
@@ -164,6 +165,22 @@ def time_series_plot(variable,
             print('run choice not an option.')
             sys.exit()
 
+        # Plotting observations
+        if allobsarenans == True:
+            print("All obs are nans; can't plot the obs")
+        else:
+
+            # for temp, time in zip(stringtemp, stringtime):
+            #     plotting_funs.plotCollection(ax, np.asarray(obvstimedict[time]) - dt.timedelta(minutes=15), obvstempdict[temp], color='k', linestyle='None',
+            #                                  marker='.',
+            #                                  label="Obs @ %d m \n N = %d" % (adjustedobvsheight, obs_N))
+
+            for temp, time in zip(stringtemp, stringtime):
+                plotting_funs.plotCollection(ax, obvstimedict[time], obvstempdict[temp], color='k',
+                                             linestyle='None',
+                                             marker='.',
+                                             label="Obs @ %d m \n N = %d" % (adjustedobvsheight, obs_N))
+
         # plotting models
         for model in included_model_list:
 
@@ -211,15 +228,21 @@ def time_series_plot(variable,
                                                         look_up.site_location[sitechoice][0], 1,
                                                         0)
 
+                        epnoon = tools.calculate_time(time_0, look_up.site_location[sitechoice][1],
+                                                        look_up.site_location[sitechoice][0], 2,
+                                                        0)
+
                         plt.plot([epsunrise, epsunrise], [0, 700], color='orange', linestyle='--', lw=2,
                                  label='sunrise')
                         plt.plot([epsunset, epsunset], [0, 700], color='purple', linestyle='--', lw=2, label='sunset')
+                        plt.plot([epnoon, epnoon], [0, 900], color='green', linestyle='--', lw=2, label='noon')
 
                     else:
                         pass
 
                     plotting_funs.plotCollection(ax, modeltimedict[time][:], modeltempdict[temp][:],
                                                  color=look_up.model_options[model][1],
+                                                 # linestyle='None', marker='.',
                                                  label=new_model_dict[model][1])
 
 
@@ -265,15 +288,6 @@ def time_series_plot(variable,
                                              color=colour_model,
                                              label=new_model_dict['WAverage'][1])
 
-        # Plotting observations
-        if allobsarenans == True:
-            print("All obs are nans; can't plot the obs")
-        else:
-
-            for temp, time in zip(stringtemp, stringtime):
-                plotting_funs.plotCollection(ax, obvstimedict[time], obvstempdict[temp], color='k', linestyle='None',
-                                             marker='.',
-                                             label="Obs @ %d m \n N = %d" % (adjustedobvsheight, obs_N))
 
         plt.ylabel(label_string)
         plt.gcf().autofmt_xdate()
@@ -301,10 +315,7 @@ def time_series_plot(variable,
             plt.show()
         if saveyn == 1:
             if is_it_daily == False:
-                pylab.savefig(
-                    savestring + str(variable) + '_lon_and_ukv_' + str(sitechoice) + '_' + str(
-                        DOYstart) + '_' + str(DOYstop) + '.png',
-                    bbox_inches='tight')
+                pylab.savefig(savestring + str(variable) + '_lon_and_ukv_' + str(sitechoice) + '_' + str(DOYstart) + '_' + str(DOYstop) + '.png', bbox_inches='tight')
             else:
                 # it is a daily run
                 pylab.savefig('/storage/basic/micromet/Tier_processing/rv006011/gluster_replacement/' +

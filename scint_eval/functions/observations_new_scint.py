@@ -15,7 +15,7 @@ mpl.rcParams.update({'font.size': 20})  # updating the matplotlib fontsize
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-def sort_obs(variable,
+def sort_obs_new_scint(variable,
              files,
              DOYstart,
              DOYstop,

@@ -13,6 +13,7 @@ from scint_eval.functions import plotting_funs
 from scint_eval.functions import array_retrieval
 from scint_eval.functions import sort_model
 from scint_eval.functions import kdown_timeseries_tests
+from scint_eval.functions import kdown_averages_tests
 
 
 def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrument, sample,
@@ -57,11 +58,6 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
                                         obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_raw/data/"
                                         )
 
-    files_obs_par = file_read.finding_files(model_format, 'obs', DOYstart, DOYstop, obs_site, run, 'SKYE', sample,
-                                        'PAR_W', obs_level,
-                                        obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_raw/data/"
-                                        )
-
     # define roughness and displacemet
     # roughness.py
     # note: this step doesn't matter with the scint runs. As we are evaluating a surface model output.
@@ -75,15 +71,10 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
                                                     savepath, sample,
                                                     instrument)
 
-    obs_par = observations.sort_obs('PAR_W', files_obs_par, DOYstart, DOYstop, obs_site, z0zdlist, saveyn,
-                                savepath, sample,
-                                instrument)
 
     # grouping obs together
     # [ allobsarenans,  stringtime, stringtemp, obvstimedict,   obvstempdict,   adjustedobvsheight  ]
     group_obs = [obs[4], obs[2], obs[3], obs[0], obs[1], obs[5]]
-
-    group_obs_par = [obs_par[4], obs_par[2], obs_par[3], obs_par[0], obs_par[1], obs_par[5]]
 
     # define height of observation - this is different for wind (as there are more outputs from the sort_obs dict)
     if variable == 'wind' or variable == 'kup':
@@ -128,13 +119,11 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     obs_time, obs_vals = array_retrieval.retrive_arrays_obs(group_obs)
 
-    obs_time_par, obs_vals_par = array_retrieval.retrive_arrays_obs(group_obs_par)
-
     mod_time, mod_vals = array_retrieval.retrive_arrays_model(included_models, 'ukv')
 
-    # kdown plot
-    kdown_timeseries_tests.kdown_timeseries(obs_time, obs_vals, obs_time_par, obs_vals_par, mod_time, mod_vals, obs_site,
-                     DOYstart, DOYstop, saveyn, savepath, variable)
+    # kdown samples
+
+    kdown_averages_tests.compare_samples(obs_time, obs_vals, savepath)
 
 
 
@@ -158,14 +147,14 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 # c h o i c e s
 DOYstart_choice = 2016201
 DOYstop_choice = 2016201
-sample = '15min'
-obs_level = 'L1'
+sample = '5s'
+obs_level = 'L0'
 run = '21Z'
 # For scintillometry, variable is always sensible heat currently - needn't ever change this
 variable = 'kdown'
 
-obs_site = 'IMU'
-instrument = 'Davis'
+obs_site = 'KSSW'
+instrument = 'CNR4'
 
 file_format = ['old', 'new']
 model_format = file_format[1]

@@ -48,9 +48,9 @@ def kdown_timeseries(obs_time, obs_vals,
     ax.scatter(obs_time, obs_vals, marker='.', color='k', label='kdn obs')
     ax.plot(mod_time, mod_vals, color='blue', label='kdn mod')
 
-    index_max_ob = np.where(obs_vals == np.max(obs_vals))
-    index_max_mod = np.where(mod_vals == np.max(mod_vals))
-    index_max_ob_par = np.where(obs_vals_par == np.max(obs_vals_par))
+    index_max_ob = np.where(obs_vals == np.max(obs_vals))[0]
+    index_max_mod = np.where(mod_vals == np.max(mod_vals))[0]
+    index_max_ob_par = np.where(obs_vals_par == np.max(obs_vals_par))[0]
 
     ax.scatter(obs_time[index_max_ob], obs_vals[index_max_ob], color='r', marker='o')
     ax2.scatter(obs_time_par[index_max_ob_par], obs_vals_par[index_max_ob_par], color='r', marker='o')

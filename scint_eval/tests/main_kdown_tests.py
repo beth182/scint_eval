@@ -13,6 +13,7 @@ from scint_eval.functions import plotting_funs
 from scint_eval.functions import array_retrieval
 from scint_eval.functions import sort_model
 from scint_eval.functions import kdown_timeseries_tests
+from scint_eval.functions import kdown_averages_tests
 
 
 def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrument, sample,
@@ -129,6 +130,15 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     obs_time, obs_vals = array_retrieval.retrive_arrays_obs(group_obs)
 
     obs_time_par, obs_vals_par = array_retrieval.retrive_arrays_obs(group_obs_par)
+
+
+    df = kdown_averages_tests.kdown_averages(obs_time, obs_vals, 60)
+    obs_time = df.index
+    obs_vals = df['vals']
+    df_par = kdown_averages_tests.kdown_averages(obs_time_par, obs_vals_par, 60)
+    obs_time_par = df_par.index
+    obs_vals_par = df_par['vals']
+
 
     mod_time, mod_vals = array_retrieval.retrive_arrays_model(included_models, 'ukv')
 

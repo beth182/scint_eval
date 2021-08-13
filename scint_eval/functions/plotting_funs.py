@@ -5,9 +5,9 @@ import pylab
 import numpy as np
 import datetime
 from matplotlib import gridspec
+import pandas as pd
 
 from scint_eval import look_up
-
 
 # function to group labels in the plots -- otherwise, the same label will appear multiple times
 # as it gives one to each file/day being looped over
@@ -203,3 +203,93 @@ def variation_in_grids(model_grid_time, model_grid_vals, model_site_dict):
         n_grids.append(n_model_grids)
 
     return max_vals, min_vals, n_grids
+
+
+def plots_vars(all_days_vars):
+    """
+    Makes stacked plot of retrieved vars
+    :param all_days_vars:
+    :return:
+    """
+
+    for day in sorted(all_days_vars.keys()):
+
+        var_dict = all_days_vars[day]
+
+        time = var_dict['time']
+        QH = var_dict['QH']
+        z_f = var_dict['z_f']
+        wind_direction = var_dict['wind_direction']
+        wind_speed = var_dict['wind_speed_adj']
+        stab_param = var_dict['stab_param']
+
+
+        df_dict = {'time': time, 'QH': QH, 'z_f': z_f, 'wind_direction': wind_direction, 'wind_speed': wind_speed, 'stab_param': stab_param}
+
+        df = pd.DataFrame(df_dict)
+        df = df.set_index('time')
+
+        # average df
+        five_min = df.resample('5T', closed='right', label='right').mean()
+        fifteen_min = df.resample('15T', closed='right', label='right').mean()
+        sixty_min = df.resample('60T', closed='right', label='right').mean()
+
+        plt.figure(figsize=(10, 70))
+        ax5 = plt.subplot(5, 1, 1)
+        ax4 = plt.subplot(5, 1, 2)
+        ax3 = plt.subplot(5, 1, 3)
+        ax2 = plt.subplot(5, 1, 4)
+        ax1 = plt.subplot(5, 1, 5)
+
+        ax1.plot(df.index, df['z_f'], color='k')
+        ax1.set_ylabel('z_f')
+
+        # QH
+        ax2.scatter(df.index, df['QH'], marker='.', label='1min', alpha=0.15, color='blue', s=10)
+        ax2.scatter(five_min.index, five_min['QH'], marker='o', label='5min', alpha=0.4, color='blue', s=10)
+        ax2.scatter(fifteen_min.index, fifteen_min['QH'], marker='^', label='15min', alpha=0.7, color='blue', s=20)
+        ax2.scatter(sixty_min.index, sixty_min['QH'], marker='s', label='60min', alpha=1.0, color='blue', s=30)
+        ax2.set_ylabel('QH')
+        ax2.set_xticks([])
+        ax2.legend()
+
+        # STAB
+        ax3.scatter(df.index, df['stab_param'], marker='.', label='1min', alpha=0.15, color='green', s=10)
+        ax3.scatter(five_min.index, five_min['stab_param'], marker='o', label='5min', alpha=0.4, color='green', s=10)
+        ax3.scatter(fifteen_min.index, fifteen_min['stab_param'], marker='^', label='15min', alpha=0.7, color='green', s=20)
+        ax3.scatter(sixty_min.index, sixty_min['stab_param'], marker='s', label='60min', alpha=1.0, color='green', s=30)
+        ax3.set_ylabel('z/L')
+        ax3.set_xticks([])
+
+        # WD
+        ax4.scatter(df.index, df['wind_direction'], marker='.', label='1min', alpha=0.15, color='purple', s=10)
+        ax4.scatter(five_min.index, five_min['wind_direction'], marker='o', label='5min', alpha=0.4, color='purple', s=10)
+        ax4.scatter(fifteen_min.index, fifteen_min['wind_direction'], marker='^', label='15min', alpha=0.7, color='purple', s=20)
+        ax4.scatter(sixty_min.index, sixty_min['wind_direction'], marker='s', label='60min', alpha=1.0, color='purple', s=30)
+        ax4.set_ylabel('wind direction')
+        ax4.set_xticks([])
+
+        ax5.scatter(df.index, df['wind_speed'], marker='.', label='1min', alpha=0.15, color='red', s=10)
+        ax5.scatter(five_min.index, five_min['wind_speed'], marker='o', label='5min', alpha=0.4, color='red', s=10)
+        ax5.scatter(fifteen_min.index, fifteen_min['wind_speed'], marker='^', label='15min', alpha=0.7, color='red', s=20)
+        ax5.scatter(sixty_min.index, sixty_min['wind_speed'], marker='s', label='60min', alpha=1.0, color='red', s=30)
+        ax5.set_ylabel('wind speed')
+        ax5.set_xticks([])
+
+        plt.tight_layout()
+        plt.subplots_adjust(wspace=0, hspace=0)
+
+        plt.gcf().autofmt_xdate()
+        ax1.xaxis.set_major_formatter(DateFormatter('%j %H'))
+        ax1.set_xlabel('DOY HH')
+
+
+
+        plt.show()
+
+
+        print('end')
+
+
+
+    print('end')

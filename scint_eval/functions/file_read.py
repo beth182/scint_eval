@@ -430,14 +430,14 @@ def findfiles(modpath,
             if MO_format == 'old':
                 startstepobvs = 0
                 for item in obvsexistlist:
-                    stingname = 'obvs' + year + str(startstepobvs)
+                    stingname = 'obs' + year + str(startstepobvs)
                     obvsdict[stingname] = item
                     startstepobvs += 1
 
             elif MO_format == 'new':
                 obsDOYs = []
                 for item in obvsexistlist:
-                    DOY = item[-12:-9]
+                    DOY = item[-11:-8]
                     obsDOYs.append(DOY)
                 # Making a list of the index where the DOY changes
                 doychangeobs = []
@@ -452,24 +452,24 @@ def findfiles(modpath,
                     else:
                         obslistdoy0 = obsDOYs
                         obslist0 = obvsexistlist
-                        obvsdict['obvs' + year + str(obslistdoy0[0])] = obslist0
+                        obvsdict['obs' + year + str(obslistdoy0[0])] = obslist0
                 else:
                     # Creating a dictionary for the values of each DOY
                     # first item
                     obslistdoy0 = obsDOYs[0:doychangeobs[0]]
                     obslist0 = obvsexistlist[0:doychangeobs[0]]
-                    obvsdict['obvs' + year + str(obslistdoy0[0])] = obslist0
+                    obvsdict['obs' + year + str(obslistdoy0[0])] = obslist0
                     # middle items
                     obsi = 1
                     for item in range(1, len(doychangeobs)):
                         listdoy = obsDOYs[doychangeobs[obsi - 1]:doychangeobs[obsi]]
                         list = obvsexistlist[doychangeobs[obsi - 1]:doychangeobs[obsi]]
-                        obvsdict['obvs' + year + str(listdoy[0])] = list
+                        obvsdict['obs' + year + str(listdoy[0])] = list
                         obsi += 1
                     # final item
                     obslistdoyend = obsDOYs[doychangeobs[-1]:len(obsDOYs)]
                     obslistend = obvsexistlist[doychangeobs[-1]:len(obvsexistlist)]
-                    obvsdict['obvs' + year + str(obslistdoyend[0])] = obslistend
+                    obvsdict['obs' + year + str(obslistdoyend[0])] = obslistend
 
             else:
                 print('MO_format choice not an option.')

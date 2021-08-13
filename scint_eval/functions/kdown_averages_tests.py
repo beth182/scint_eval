@@ -19,10 +19,10 @@ def kdown_averages(obs_time, obs_vals, minute_resolution):
 
     # resample to minute_resolution
     # time-ending
-    resample_df = df.resample(freq_string, on='time', closed='right', label='right').mean()
+    # resample_df = df.resample(freq_string, on='time', closed='right', label='right').mean()
 
     # time starting
-    # resample_df = df.resample(freq_string, on='time').mean()
+    resample_df = df.resample(freq_string, on='time').mean()
 
     sample_count = df.resample(freq_string, on='time', closed='right', label='right')['vals'].count()
     n_samples = sample_count.rename('n_samples')

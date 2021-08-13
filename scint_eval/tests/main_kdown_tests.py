@@ -132,12 +132,12 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     obs_time_par, obs_vals_par = array_retrieval.retrive_arrays_obs(group_obs_par)
 
 
-    df = kdown_averages_tests.kdown_averages(obs_time, obs_vals, 60)
-    obs_time = df.index
-    obs_vals = df['vals']
-    df_par = kdown_averages_tests.kdown_averages(obs_time_par, obs_vals_par, 60)
-    obs_time_par = df_par.index
-    obs_vals_par = df_par['vals']
+    # df = kdown_averages_tests.kdown_averages(obs_time, obs_vals, 60)
+    # obs_time = df.index
+    # obs_vals = df['vals']
+    # df_par = kdown_averages_tests.kdown_averages(obs_time_par, obs_vals_par, 60)
+    # obs_time_par = df_par.index
+    # obs_vals_par = df_par['vals']
 
 
     mod_time, mod_vals = array_retrieval.retrive_arrays_model(included_models, 'ukv')
@@ -168,14 +168,14 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 # c h o i c e s
 DOYstart_choice = 2016201
 DOYstop_choice = 2016201
-sample = '15min'
-obs_level = 'L1'
+sample = '5s'
+obs_level = 'L0'
 run = '21Z'
 # For scintillometry, variable is always sensible heat currently - needn't ever change this
 variable = 'kdown'
 
-obs_site = 'IMU'
-instrument = 'Davis'
+obs_site = 'KSSW'
+instrument = 'CNR4'
 
 file_format = ['old', 'new']
 model_format = file_format[1]

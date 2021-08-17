@@ -25,7 +25,7 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
                                         obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
                                         )
 
-    all_days_vars = retrieve_var.retrive_var(files_obs, ['QH', 'wind_direction', 'wind_speed_adj', 'stab_param'])
+    all_days_vars = retrieve_var.retrive_var(files_obs, ['QH', 'wind_direction', 'wind_speed_adj', 'kdown', 'z_0', 'z_d', 'sa_area_km2'])
 
     plotting_funs.plots_vars(all_days_vars)
 
@@ -37,8 +37,8 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
 ########################################################################################################################
 # c h o i c e s
-DOYstart_choice = 2016142
-DOYstop_choice = 2016142
+DOYstart_choice = 2016111
+DOYstop_choice = 2016111
 
 sample = '1min'
 obs_level = 'L1'

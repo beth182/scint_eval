@@ -217,92 +217,141 @@ def plots_vars(all_days_vars):
         var_dict = all_days_vars[day]
 
         time = var_dict['time']
-        QH = var_dict['QH']
-        z_f = var_dict['z_f']
+
+        stab_param = var_dict['stab_param']
+
+
         wind_direction = var_dict['wind_direction']
         wind_speed = var_dict['wind_speed_adj']
         kdown = var_dict['kdown']
+        QH = var_dict['QH']
+
+        area = var_dict['sa_area_km2']
         z_0 = var_dict['z_0']
         z_d = var_dict['z_d']
-        area = var_dict['sa_area_km2']
+        z_f = var_dict['z_f']
 
 
-        df_dict = {'time': time, 'QH': QH, 'z_f': z_f, 'wind_direction': wind_direction, 'wind_speed': wind_speed, 'kdown': kdown, 'z_0': z_0, 'z_d': z_d, 'area': area}
+        df_dict = {'time': time, 'QH': QH, 'z_f': z_f, 'wind_direction': wind_direction, 'wind_speed': wind_speed, 'kdown': kdown, 'z_0': z_0, 'z_d': z_d, 'area': area, 'stab_param': stab_param}
 
         df = pd.DataFrame(df_dict)
         df = df.set_index('time')
 
+        # filter out any times which are NOT unstable
+        df.loc[df.stab_param > -0.03] = np.nan
+
         # average df
         five_min = df.resample('5T', closed='right', label='right').mean()
-        fifteen_min = df.resample('15T', closed='right', label='right').mean()
+        ten_min = df.resample('10T', closed='right', label='right').mean()
         sixty_min = df.resample('60T', closed='right', label='right').mean()
 
+        # construct title
+        doy = df.index[0].strftime('%j')
+        year = df.index[0].strftime('%Y')
+        title_string = 'Year: ' + year + ', DOY: ' + doy
+
         plt.figure(figsize=(10, 70))
-        ax5 = plt.subplot(5, 1, 1)
-        ax4 = plt.subplot(5, 1, 2)
-        ax3 = plt.subplot(5, 1, 3)
-        ax2 = plt.subplot(5, 1, 4)
-        ax1 = plt.subplot(5, 1, 5)
 
-        ax6 = ax1.twinx()
+        spec = gridspec.GridSpec(ncols=2, nrows=4,
+                                 width_ratios=[2, 1])
 
-        ax1.plot(df.index, df['z_f'], color='k', label='z$_{f}$')
-        ax6.plot(df.index, df['z_0'], color='blue', label='z$_{0}$', linestyle='--')
-        ax1.plot(df.index, df['z_d'], color='red', label='z$_{d}$', linestyle=':')
-        ax1.set_ylabel('z (m)')
-        ax6.spines['right'].set_color('blue')
-        ax6.tick_params(colors='blue', which='both')
-        ax1.legend(frameon=False)
-        ax6.legend(frameon=False)
+        ax1 = plt.subplot(spec[0])
+        ax3 = plt.subplot(spec[2])
+        ax5 = plt.subplot(spec[4])
+        ax7 = plt.subplot(spec[6])
 
-        # QH
-        ax2.scatter(df.index, df['QH'], marker='.', label='1min', alpha=0.15, color='blue', s=10)
-        ax2.scatter(five_min.index, five_min['QH'], marker='o', label='5', alpha=0.4, color='green', s=10)
-        ax2.scatter(fifteen_min.index, fifteen_min['QH'], marker='^', label='15', alpha=0.7, color='red', s=10)
-        ax2.scatter(sixty_min.index, sixty_min['QH'], marker='x', label='60', alpha=1.0, color='purple', s=10)
-        ax2.set_ylabel('Q$_{H}$ (W m$^{2}$)')
-        ax2.set_xticks([])
-        ax2.legend(frameon=False)
+        ax2 = plt.subplot(spec[1])
+        ax4 = plt.subplot(spec[3])
+        ax6 = plt.subplot(spec[5])
+        ax8 = plt.subplot(spec[7])
 
-        # KDOWN
-        ax3.scatter(df.index, df['kdown'], marker='.', label='1min', alpha=0.15, color='blue', s=10)
-        ax3.scatter(five_min.index, five_min['kdown'], marker='o', label='5min', alpha=0.4, color='green', s=10)
-        ax3.scatter(fifteen_min.index, fifteen_min['kdown'], marker='^', label='15min', alpha=0.7, color='red', s=10)
-        ax3.scatter(sixty_min.index, sixty_min['kdown'], marker='x', label='60min', alpha=1.0, color='purple', s=10)
-        ax3.set_ylabel('k$_{\downarrow}$ (W m$^{2}$)')
+        # LHS METEOROLOGY
+
+        # 1 - WIND DIR
+        # WD
+        ax1.scatter(df.index, df['wind_direction'], marker='.', alpha=0.15, color='blue', s=10)
+        ax1.scatter(five_min.index, five_min['wind_direction'], marker='o', alpha=0.4, color='green', s=10)
+        ax1.scatter(ten_min.index, ten_min['wind_direction'], marker='^', alpha=0.7, color='red', s=10)
+        ax1.scatter(sixty_min.index, sixty_min['wind_direction'], marker='x', alpha=1.0, color='purple', s=10)
+        ax1.set_ylabel('Wind Direction ($^{\circ}$)')
+        ax1.set_xticks([])
+        ax1.set_title(title_string)
+
+        # 2 - WIND SPEED
+        ax3.scatter(df.index, df['wind_speed'], marker='.', alpha=0.15, color='blue', s=10)
+        ax3.scatter(five_min.index, five_min['wind_speed'], marker='o', alpha=0.4, color='green', s=10)
+        ax3.scatter(ten_min.index, ten_min['wind_speed'], marker='^', alpha=0.7, color='red', s=10)
+        ax3.scatter(sixty_min.index, sixty_min['wind_speed'], marker='x', alpha=1.0, color='purple', s=10)
+        ax3.set_ylabel('Wind Speed (m s$^{-1}$)')
         ax3.set_xticks([])
 
-        # WD
-        ax4.scatter(df.index, df['wind_direction'], marker='.', label='1min', alpha=0.15, color='blue', s=10)
-        ax4.scatter(five_min.index, five_min['wind_direction'], marker='o', label='5min', alpha=0.4, color='green', s=10)
-        ax4.scatter(fifteen_min.index, fifteen_min['wind_direction'], marker='^', label='15min', alpha=0.7, color='red', s=10)
-        ax4.scatter(sixty_min.index, sixty_min['wind_direction'], marker='x', label='60min', alpha=1.0, color='purple', s=10)
-        ax4.set_ylabel('Wind Direction ($^{\circ}$)')
-        ax4.set_xticks([])
-
-        ax5.scatter(df.index, df['wind_speed'], marker='.', label='1 min', alpha=0.15, color='blue', s=10)
-        ax5.scatter(five_min.index, five_min['wind_speed'], marker='o', label='5 min', alpha=0.4, color='green', s=10)
-        ax5.scatter(fifteen_min.index, fifteen_min['wind_speed'], marker='^', label='15 min', alpha=0.7, color='red', s=10)
-        ax5.scatter(sixty_min.index, sixty_min['wind_speed'], marker='x', label='60 min', alpha=1.0, color='purple', s=10)
-        ax5.set_ylabel('Wind Speed (m s$^{-1}$)')
+        # 3 - KDOWN
+        ax5.scatter(df.index, df['kdown'], marker='.', alpha=0.15, color='blue', s=10)
+        ax5.scatter(five_min.index, five_min['kdown'], marker='o', alpha=0.4, color='green', s=10)
+        ax5.scatter(ten_min.index, ten_min['kdown'], marker='^', alpha=0.7, color='red', s=10)
+        ax5.scatter(sixty_min.index, sixty_min['kdown'], marker='x', alpha=1.0, color='purple', s=10)
+        ax5.set_ylabel('K$_{\downarrow}$ (W m$^{-2}$)')
         ax5.set_xticks([])
 
-        plt.tight_layout()
+        # 4 QH
+        # QH
+        ax7.scatter(df.index, df['QH'], marker='.', label='1 min', alpha=0.15, color='blue', s=10)
+        ax7.scatter(five_min.index, five_min['QH'], marker='o', label='5', alpha=0.4, color='green', s=10)
+        ax7.scatter(ten_min.index, ten_min['QH'], marker='^', label='10', alpha=0.7, color='red', s=10)
+        ax7.scatter(sixty_min.index, sixty_min['QH'], marker='x', label='60', alpha=1.0, color='purple', s=10)
+        ax7.set_ylabel('Q$_{H}$ (W m$^{-2}$)')
+        ax7.legend(frameon=False, loc='upper left')
+
+        # RHS
+        # 1 - SOURCE AREA
+        ax2.plot(sixty_min.index, sixty_min['area'], color='purple', marker='x')
+        ax2.set_ylabel('SA area (km$^{2}$)')
+        ax2.yaxis.set_label_position("right")
+        ax2.yaxis.tick_right()
+        ax2.set_xticks([])
+
+        # 2 - z0
+        ax4.plot(sixty_min.index, sixty_min['z_0'], color='purple', marker='x')
+        ax4.set_ylabel('z$_{0}$ (m)')
+        ax4.yaxis.set_label_position("right")
+        ax4.yaxis.tick_right()
+        ax4.set_xticks([])
+
+        # 3 - zd
+        ax6.plot(sixty_min.index, sixty_min['z_d'], color='purple', marker='x')
+        ax6.set_ylabel('z$_{d}$ (m)')
+        ax6.yaxis.set_label_position("right")
+        ax6.yaxis.tick_right()
+        ax6.set_xticks([])
+
+        # 4 - zf
+        ax8.plot(sixty_min.index, sixty_min['z_f'], color='purple', marker='x')
+        ax8.set_ylabel('z$_{f}$ (m)')
+        ax8.yaxis.set_label_position("right")
+        ax8.yaxis.tick_right()
+
+        # plt.tight_layout()
         plt.subplots_adjust(wspace=0, hspace=0)
 
-        plt.gcf().autofmt_xdate()
-        ax1.xaxis.set_major_formatter(DateFormatter('%H'))
-        ax1.set_xlabel('Time')
+        plt.gcf().autofmt_xdate(rotation=0)
+        ax8.xaxis.set_major_formatter(DateFormatter('%H'))
+        ax7.xaxis.set_major_formatter(DateFormatter('%H'))
+        ax8.set_xlabel('Time (H)')
+        ax7.set_xlabel('Time (H)')
 
-        ax1.set_xlim(min(df[~np.isnan(QH)].index), max(df[~np.isnan(QH)].index))
-        ax2.set_xlim(min(df[~np.isnan(QH)].index), max(df[~np.isnan(QH)].index))
-        ax3.set_xlim(min(df[~np.isnan(QH)].index), max(df[~np.isnan(QH)].index))
-        ax4.set_xlim(min(df[~np.isnan(QH)].index), max(df[~np.isnan(QH)].index))
-        ax5.set_xlim(min(df[~np.isnan(QH)].index), max(df[~np.isnan(QH)].index))
-        ax6.set_xlim(min(df[~np.isnan(QH)].index), max(df[~np.isnan(QH)].index))
+        ax1.set_xlim(min(df[~np.isnan(df['QH'])].index), max(df[~np.isnan(df['QH'])].index))
+        ax2.set_xlim(min(df[~np.isnan(df['QH'])].index), max(df[~np.isnan(df['QH'])].index))
+        ax3.set_xlim(min(df[~np.isnan(df['QH'])].index), max(df[~np.isnan(df['QH'])].index))
+        ax4.set_xlim(min(df[~np.isnan(df['QH'])].index), max(df[~np.isnan(df['QH'])].index))
+        ax5.set_xlim(min(df[~np.isnan(df['QH'])].index), max(df[~np.isnan(df['QH'])].index))
+        ax6.set_xlim(min(df[~np.isnan(df['QH'])].index), max(df[~np.isnan(df['QH'])].index))
+        ax7.set_xlim(min(df[~np.isnan(df['QH'])].index), max(df[~np.isnan(df['QH'])].index))
+        ax8.set_xlim(min(df[~np.isnan(df['QH'])].index), max(df[~np.isnan(df['QH'])].index))
+
+        plt.setp(ax7.get_xticklabels()[-1], visible=False)
+
 
         plt.show()
-
 
         print('end')
 

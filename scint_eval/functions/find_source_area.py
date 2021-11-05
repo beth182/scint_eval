@@ -5,7 +5,7 @@ import datetime
 
 def find_source_area(time,
                      in_dir='C:/Users/beths/Desktop/LANDING/fp_output/hourly/',
-                     name_start='BCT_IMU_65000_'):
+                     name_start='BCT_IMU_15000_'):
     """
 
     :return:
@@ -15,11 +15,7 @@ def find_source_area(time,
 
     for hour in time:
         # find path
-        if hour != datetime.datetime(2016, 5, 22, 0, 0):
-            sa_path = in_dir + name_start + '2016_142_' + hour.strftime('%H') + '.tif'
-        else:
-            sa_path = in_dir + name_start + '2016_143_' + hour.strftime('%H') + '.tif'
-
+        sa_path = in_dir + name_start + hour.strftime('%Y') + '_' + hour.strftime('%j') + '_' + hour.strftime('%H') + '_' + hour.strftime('%M') + '.tif'
         sa_paths.append(sa_path)
 
     return sa_paths

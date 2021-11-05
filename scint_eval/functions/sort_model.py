@@ -13,7 +13,6 @@ from scint_eval.functions import tools
 from scint_eval.functions import plotting_funs
 
 plt.switch_backend('agg')
-mpl.rcParams.update({'font.size': 20})  # updating the matplotlib fontsize
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -199,34 +198,44 @@ def sort_models(variable,
         # finds altitude from function
         altitude = look_up.find_altitude(site_format, model)
 
-        if MO_format == 'old':
-            modheightlon = modlon_ncfile.variables['height']
-            modheightlistlon = modheightlon[:, 1, 1] + altitude
 
-        elif MO_format == 'new':
-            # model level variables
-            if variable == 'Tair' or variable == 'RH' or variable == 'Press':
+        if variable == 'BL_H':
 
-                try:
-                    modheightlon = modlon_ncfile.variables['level_height']
-                    modheightlistlon = modheightlon[:] + altitude
+            modheightlon = modlon_ncfile.variables['level_height']
+            modheightlistlon = modheightlon[:]
 
-                except KeyError as error:
-                    dodgeyfileslon.append(modlonpath)
-                    print(' ')
-                    print('ERROR HERE: ', modlonpath)
-                    print("Could not read in ", error, " as this is not a variable in the file")
-                    print(' ')
-                    continue
 
-            # surface level variables
-            elif variable == 'kdown' or variable == 'kup' or variable == 'ldown' or variable == 'lup' or variable == 'netallwave' or variable == 'H' or variable == 'LE':
-                modheightlon = np.zeros(70)
-                modheightlistlon = modheightlon[:] + altitude
 
         else:
-            print('MO_format not an option.')
-            sys.exit()
+
+            if MO_format == 'old':
+                modheightlon = modlon_ncfile.variables['height']
+                modheightlistlon = modheightlon[:, 1, 1] + altitude
+
+            elif MO_format == 'new':
+                # model level variables
+                if variable == 'Tair' or variable == 'RH' or variable == 'Press':
+
+                    try:
+                        modheightlon = modlon_ncfile.variables['level_height']
+                        modheightlistlon = modheightlon[:] + altitude
+
+                    except KeyError as error:
+                        dodgeyfileslon.append(modlonpath)
+                        print(' ')
+                        print('ERROR HERE: ', modlonpath)
+                        print("Could not read in ", error, " as this is not a variable in the file")
+                        print(' ')
+                        continue
+
+                # surface level variables
+                elif variable == 'kdown' or variable == 'kup' or variable == 'ldown' or variable == 'lup' or variable == 'netallwave' or variable == 'H' or variable == 'LE':
+                    modheightlon = np.zeros(70)
+                    modheightlistlon = modheightlon[:] + altitude
+
+            else:
+                print('MO_format not an option.')
+                sys.exit()
 
         # finds the closest value of model height to observation, and saves the index
         # if there is no observation files, disheight will be returned as an empty list. So this list is replaced by
@@ -636,7 +645,6 @@ def sort_models(variable,
                 modtempvalueslon0 = modtemplon[0, index_to_start:, 0, 1, 1]
                 modtempvalueslon2 = modtemplon[0, index_to_start:, 0, 1, 1]
 
-
             elif MO_format == 'new':
                 try:
                     modtemplon = modlon_ncfile.variables['surface_upward_sensible_heat_flux']
@@ -651,6 +659,19 @@ def sort_models(variable,
             else:
                 print('MO_format not an option.')
                 sys.exit()
+
+
+        elif variable == 'BL_H':
+            modtemplon = modlon_ncfile.variables['boundary_layer_heat_fluxes']
+            # finds temperature values at the closest model height to obs
+            modtempvalueslon = modtemplon[index_lat, index_lon, index_to_start:index_to_start + hoursbeforerepeat,
+                               heightindexlon]
+
+            # taking the next closest heights
+            modtempvalueslon0 = modtemplon[index_lat, index_lon, index_to_start:index_to_start + hoursbeforerepeat,
+                                heightindexlon0]
+            modtempvalueslon2 = modtemplon[index_lat, index_lon, index_to_start:index_to_start + hoursbeforerepeat,
+                                heightindexlon2]
 
 
         elif variable == 'LE':
@@ -718,6 +739,9 @@ def sort_models(variable,
                 else:
                     print('MO_format not an option.')
                     sys.exit()
+
+            elif variable == 'BL_H':
+                modtempvalueslonmean = np.mean(modtemplon[:, :, i, heightindexlon])
 
             elif variable == 'Press':
                 if MO_format == 'old':

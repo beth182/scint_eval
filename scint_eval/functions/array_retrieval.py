@@ -2,6 +2,8 @@
 # Functions to reteive arrays from model eval scrips
 
 import numpy as np
+import datetime as dt
+import pandas as pd
 
 
 def retrive_arrays_obs(included_obs):
@@ -24,13 +26,26 @@ def retrive_arrays_obs(included_obs):
 
     for day in stringtime:
         for time in obvstimedict[day]:
-            times.append(time)
+            # round time to the nearest minute
+            rounded_time = roundTime(time)
+
+            times.append(rounded_time)
 
     vals_array = np.asarray(vals)
     times_array = np.asarray(times)
 
     return times_array, vals_array
 
+def roundTime(dt_ob=None, roundTo=60):
+   """Round a datetime object to any time lapse in seconds
+   dt : datetime.datetime object, default now.
+   roundTo : Closest number of seconds to round to, default 1 minute.
+   Author: Thierry Husson 2012 - Use it as you want but don't blame me.
+   """
+   if dt_ob == None : dt_ob = dt_ob.datetime.now()
+   seconds = (dt_ob.replace(tzinfo=None) - dt_ob.min).seconds
+   rounding = (seconds+roundTo/2) // roundTo * roundTo
+   return dt_ob + dt.timedelta(0,rounding-seconds,-dt_ob.microsecond)
 
 def retrive_arrays_model(included_models, model_grid_choice):
 
@@ -89,3 +104,29 @@ def take_common_times(time_a, vals_a, time_b, vals_b):
     assert time_a_common.all() == time_b_common.all()
 
     return time_a_common, vals_a_common, vals_b_common
+
+
+def time_average_values(vals, time, minute_resolution):
+    """
+    Time average a variable
+    :param vals:
+    :param time:
+    :param minute_resolution: int of number of minutes to average to
+    :return:
+    """
+
+    # put the data into a pandas dataframe
+
+    df_dict = {'time': time, 'vals': vals}
+
+    df = pd.DataFrame(df_dict)
+
+    # construct a string to go into resample denoting the rule
+    freq_string = str(minute_resolution) + 'T'
+
+    # resample to minute_resolution
+    resample_df = df.resample(freq_string, on='time', closed='right', label='right').mean()
+
+    resample_df = resample_df.reset_index()
+
+    return np.asarray(resample_df['time'].to_list()), np.asarray(resample_df['vals'].to_list())

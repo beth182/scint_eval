@@ -9,7 +9,7 @@ from scint_eval.functions import sort_model
 from scint_eval.functions import sa_grid_extraction
 from scint_eval import look_up
 
-mpl.rcParams.update({'font.size': 20})  # updating the matplotlib fontsize
+# mpl.rcParams.update({'font.size': 20})  # updating the matplotlib fontsize
 
 
 def prepare_model_grid_percentages(time, sa_list, savepath,

@@ -2,11 +2,18 @@
 
 from calendar import isleap
 import os
-
-from scint_eval import look_up
-from scint_eval.functions import file_read
 from scint_eval.functions import retrieve_var
 from scint_eval.functions import plotting_funs
+from scint_eval.functions import file_read
+
+
+from scint_eval.functions import array_retrieval
+from scint_eval.functions import sort_model
+from scint_eval.functions import roughness
+from scint_eval.functions import find_source_area
+from scint_eval.functions import grid_percentages
+from scint_eval import look_up
+
 
 
 
@@ -25,9 +32,190 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
                                         obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
                                         )
 
+    files_obs_10minsa = file_read.finding_files(model_format, 'obs', DOYstart, DOYstop, obs_site, run, instrument, '1min_sa10min',
+                                        variable, obs_level,
+                                        obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
+                                        )
+
     all_days_vars = retrieve_var.retrive_var(files_obs, ['QH', 'wind_direction', 'wind_speed_adj', 'kdown', 'z_0', 'z_d', 'sa_area_km2', 'stab_param'])
 
-    plotting_funs.plots_vars(all_days_vars)
+    all_days_vars_10minsa = retrieve_var.retrive_var(files_obs_10minsa,
+                                             ['QH', 'wind_direction', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
+                                              'sa_area_km2', 'stab_param'])
+
+
+    ###########################
+    # DOY 142
+    files_obs_142 = file_read.finding_files(model_format, 'obs', 2016142, 2016142, obs_site, run, instrument, sample,
+                                        variable, obs_level,
+                                        obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
+                                        )
+
+    files_obs_10minsa_142 = file_read.finding_files(model_format, 'obs', 2016142, 2016142, obs_site, run, instrument, '1min_sa10min',
+                                        variable, obs_level,
+                                        obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
+                                        )
+
+    all_days_vars_142 = retrieve_var.retrive_var(files_obs_142,
+                                             ['QH', 'wind_direction', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
+                                              'sa_area_km2', 'stab_param'])
+
+    all_days_vars_10minsa_142 = retrieve_var.retrive_var(files_obs_10minsa_142,
+                                                     ['QH', 'wind_direction', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
+                                                      'sa_area_km2', 'stab_param'])
+
+    ###########################
+    # deal with the stupid key system
+    all_days_vars_142 = all_days_vars_142['obs2016142']
+    all_days_vars_10minsa_142 = all_days_vars_10minsa_142['obs2016_sa']
+    all_days_vars = all_days_vars['obs'+str(DOYstart)]
+    all_days_vars_10minsa = all_days_vars_10minsa['obs2016_sa']
+
+    ####################################################################################################################
+    # Finding model files
+
+    if run == '21Z':
+        # string out of the chosen starting DOY and year
+        str_year = str(DOYstart)[:4]
+        str_DOY = str(DOYstart)[4:]
+        # if the start DOY is the first day of the year:
+        if str_DOY == '001':
+            # we now have to start with the year before the chosen year
+            new_start_year = int(str_year) - 1
+            # to get the start DOY, we need to know what the last DOY of the previous year is
+            # so is it a leap year (366 days) or not?
+            if isleap(new_start_year):
+                # leap year
+                new_start_DOY = 366
+            else:
+                # normal year
+                new_start_DOY = 365
+            # combining the new start year and new DOY start
+            DOYstart_mod = int(str(new_start_year) + str(new_start_DOY))
+        else:
+            new_start_DOY = str(int(str_DOY) - 1).zfill(3)
+            DOYstart_mod = int(str_year + new_start_DOY)
+    else:
+        DOYstart_mod = DOYstart
+    DOYstop_mod = DOYstop - 1
+
+    # define roughness and displacemet
+    # roughness.py
+    # note: this step doesn't matter with the scint runs. As we are evaluating a surface model output.
+    # This step is only included to keep things running, and values are over-written in the sort_model function.
+    z0zdlist = roughness.roughness_and_displacement(1, 0.8, look_up.obs_z0_macdonald[obs_site],
+                                                    look_up.obs_zd_macdonald[obs_site])
+
+    ####################################################################################################################
+    # KDOWN
+    # finding UKV files
+    # file_read.py
+    file_dict_ukv_kdown = file_read.finding_files(model_format,
+                                            'ukv',
+                                            DOYstart_mod,
+                                            DOYstop_mod,
+                                            'IMU',
+                                            run,
+                                            instrument,
+                                            sample,
+                                            'kdown',
+                                            obs_level,
+                                            model_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/"
+                                            )
+
+    # ordering UKV model files
+    # file_read.py
+    files_ukv_kdown = file_read.order_model_stashes('ukv', file_dict_ukv_kdown, 'kdown')
+
+    ukv_kdown = sort_model.sort_models('kdown', 'ukv', files_ukv_kdown, 0, z0zdlist, DOYstart, DOYstop,
+                                 'IMU', saveyn,
+                                 savepath, model_format, grid_choice='E')
+
+    # define dict for included models
+    included_models_kdown = {}
+    group_ukv_kdown = [ukv_kdown[5], ukv_kdown[6], ukv_kdown[0], ukv_kdown[1], ukv_kdown[10]]
+    # append to dict
+    included_models_kdown['ukv'] = group_ukv_kdown
+
+    mod_time_kdown, mod_vals_kdown = array_retrieval.retrive_arrays_model(included_models_kdown, 'ukv')
+    ####################################################################################################################
+
+    # QH
+
+    # CHANGE HERE
+    # sa_hours_avail = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]  # 142
+    sa_hours_avail = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]  # 111
+
+    time = []
+    for hour in all_days_vars['time']:
+        if hour.hour in sa_hours_avail:
+            time.append(hour)
+
+    # find source area raster
+    sa_list = find_source_area.find_source_area(time=time,
+                                                in_dir='C:/Users/beths/Desktop/LANDING/fp_output/111/hourly/')  # CHANGE HERE
+
+    model_site_dict, percentage_vals_dict, percentage_covered_by_model = grid_percentages.prepare_model_grid_percentages(
+        time=time,
+        sa_list=sa_list,
+        savepath=savepath)
+
+    included_grids, model_site = grid_percentages.determine_which_model_files(model_site_dict, DOYstart_mod,
+                                                                              DOYstop_mod, run,
+                                                                              instrument,
+                                                                              sample, variable,
+                                                                              obs_level, model_format, 0,
+                                                                              z0zdlist, saveyn,
+                                                                              savepath)
+
+    included_grids = grid_percentages.average_model_grids(included_grids, DOYstart_mod, DOYstop_mod,
+                                                          percentage_vals_dict, model_site_dict, model_site)
+
+    model_grid_vals = {}
+    model_grid_time = {}
+
+    for grid_choice in included_grids.keys():
+        mod_time, mod_vals = array_retrieval.retrive_arrays_model(included_grids, grid_choice)
+
+        model_grid_vals[grid_choice] = mod_vals
+        model_grid_time[grid_choice] = mod_time
+
+
+    mod_time_qh_wav = model_grid_time['WAverage']
+    mod_vals_qh_wav = model_grid_vals['WAverage']
+
+
+
+
+
+
+    plotting_funs.plots_vars_mod(all_days_vars, all_days_vars_10minsa,
+                                 mod_time_kdown, mod_vals_kdown,
+                                 mod_time_qh_wav, mod_vals_qh_wav,
+                                 savepath)
+
+
+
+    ###########################
+    # plots
+
+    # plotting_funs.plots_vars(all_days_vars, all_days_vars_10minsa)
+
+    # plotting_funs.qh_comparison(all_days_vars, all_days_vars_10minsa)
+
+    # plotting_funs.qh_vs_zf(all_days_vars, all_days_vars_10minsa)
+
+    # plotting_funs.qh_vs_zf_both_days(all_days_vars, all_days_vars_10minsa, all_days_vars_142, all_days_vars_10minsa_142)
+
+    # plotting_funs.find_mean_zf(all_days_vars_10minsa)
+
+    # plotting_funs.find_mean_zf_both_days(all_days_vars_10minsa, all_days_vars_10minsa_142)
+
+    # plotting_funs.qh_vs_zf_hour_mean(all_days_vars_10minsa)
+
+    # plotting_funs.qh_vs_zf_day_mean(all_days_vars_10minsa)
+
+    # plotting_funs.qh_vs_zf_day_mean_both_days(all_days_vars_10minsa, all_days_vars_10minsa_142)
 
 
 
@@ -37,6 +225,9 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
 ########################################################################################################################
 # c h o i c e s
+# DOYstart_choice = 2016142
+# DOYstop_choice = 2016142
+
 DOYstart_choice = 2016111
 DOYstop_choice = 2016111
 

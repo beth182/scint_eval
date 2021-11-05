@@ -5,15 +5,12 @@ from scint_eval import look_up
 from scint_eval.functions import file_read
 from scint_eval.functions import roughness
 from scint_eval.functions import observations_new_scint
-from scint_eval.functions import observations
 from scint_eval.functions import find_source_area
 from scint_eval.functions import grid_percentages
 from scint_eval.functions import manipulate_time_objects
-from scint_eval.functions import times_series
 from scint_eval.functions import plotting_funs
 from scint_eval.functions import array_retrieval
-from scint_eval.functions import sort_model
-from scint_eval.functions import eval_functions
+import datetime as dt
 
 
 def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrument, sample,
@@ -75,11 +72,17 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     # [ allobsarenans,  stringtime, stringtemp, obvstimedict,   obvstempdict,   adjustedobvsheight  ]
     group_obs = [obs[4], obs[2], obs[3], obs[0], obs[1], obs[5]]
 
+    obs_time, obs_vals = array_retrieval.retrive_arrays_obs(group_obs)
+    obs_time, obs_vals = array_retrieval.rm_nans(obs_time, obs_vals)
+
     # define height of observation - this is different for wind (as there are more outputs from the sort_obs dict)
     if variable == 'wind' or variable == 'kup':
         disheight = obs[8]
     else:
         disheight = obs[6]
+
+    ###################################################################################################################
+    # JUST GRIDS IN SCINT SA
 
     # convert from dictionary to lists
     time_output, vals_output = manipulate_time_objects.dicts_to_lists(time_dict=obs[0],
@@ -96,18 +99,8 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     # sa_hours_avail = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     # sa_hours_avail = [1]
     # sa_hours_avail = [1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23, 0]
-    # sa_hours_avail = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]  # 142
+    sa_hours_avail = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]  # 142
     # sa_hours_avail = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]  # 111
-
-    if DOYstart == 2016111:
-        sa_hours_avail = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]  # 111
-        in_dir_sa_list = 'C:/Users/beths/Desktop/LANDING/fp_output/111/hourly/'
-    elif DOYstart == 2016142:
-        sa_hours_avail = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]  # 142
-        in_dir_sa_list = 'C:/Users/beths/Desktop/LANDING/fp_output/142/hourly/'
-    else:
-        print('DOY NOT A CHOICE')
-
 
     time = []
     vals = []
@@ -118,109 +111,89 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     # find source area raster
     sa_list = find_source_area.find_source_area(time=time,
-                                                in_dir=in_dir_sa_list)  # CHANGE HERE
+                                                in_dir='C:/Users/beths/Desktop/LANDING/fp_output/142/hourly/')  # CHANGE HERE
 
     model_site_dict, percentage_vals_dict, percentage_covered_by_model = grid_percentages.prepare_model_grid_percentages(
         time=time,
         sa_list=sa_list,
-        savepath=savepath)
+        savepath=savepath,
+        csv_path='C:/Users/beths/Desktop/LANDING/ukv_grid_sa_percentages.csv')
 
+    included_grids_kdown, model_site_kdown = grid_percentages.determine_which_model_files(model_site_dict, DOYstart_mod,
+                                                                                          DOYstop_mod, run,
+                                                                                          instrument,
+                                                                                          sample, 'kdown',
+                                                                                          obs_level, model_format,
+                                                                                          disheight,
+                                                                                          z0zdlist, saveyn,
+                                                                                          savepath)
 
+    included_grids_kdown = grid_percentages.average_model_grids(included_grids_kdown, DOYstart_mod, DOYstop_mod,
+                                                                percentage_vals_dict, model_site_dict, model_site_kdown)
+
+    model_grid_vals_kdown = {}
+    model_grid_time_kdown = {}
+
+    for grid_choice in included_grids_kdown.keys():
+        mod_time, mod_vals = array_retrieval.retrive_arrays_model(included_grids_kdown, grid_choice)
+
+        model_grid_vals_kdown[grid_choice] = mod_vals
+        # push kdown vals forward by 15 mins - as model output is 15 min average time starting
+        model_grid_time_kdown[grid_choice] = mod_time + dt.timedelta(minutes=15)
+
+    ####################################################################################################################
+    # ALL GRIDS
+
+    model_site_dict_all, percentage_vals_dict_all, percentage_covered_by_model_all = grid_percentages.prepare_model_grid_percentages(
+        time=time,
+        sa_list=sa_list,
+        savepath=savepath,
+        csv_path='C:/Users/beths/Desktop/LANDING/ukv_grid_sa_percentages_all grids.csv')
+
+    included_grids_kdown_all, model_site_kdown_all = grid_percentages.determine_which_model_files(model_site_dict_all,
+                                                                                                  DOYstart_mod,
+                                                                                                  DOYstop_mod, run,
+                                                                                                  instrument,
+                                                                                                  sample, 'kdown',
+                                                                                                  obs_level,
+                                                                                                  model_format,
+                                                                                                  disheight,
+                                                                                                  z0zdlist, saveyn,
+                                                                                                  savepath)
+
+    included_grids_kdown_all = grid_percentages.average_model_grids(included_grids_kdown_all, DOYstart_mod, DOYstop_mod,
+                                                                    percentage_vals_dict_all, model_site_dict_all,
+                                                                    model_site_kdown_all)
+
+    model_grid_vals_kdown_all = {}
+    model_grid_time_kdown_all = {}
+
+    for grid_choice in included_grids_kdown_all.keys():
+        mod_time, mod_vals = array_retrieval.retrive_arrays_model(included_grids_kdown_all, grid_choice)
+
+        model_grid_vals_kdown_all[grid_choice] = mod_vals
+        # push kdown vals forward by 15 mins - as model output is 15 min average time starting
+        model_grid_time_kdown_all[grid_choice] = mod_time + dt.timedelta(minutes=15)
+
+    ####################################################################################################################
+
+    plotting_funs.detailed_time_series_kdown(obs_time, obs_vals,
+                                             model_grid_time_kdown, model_grid_vals_kdown,
+                                             model_site_dict,
+                                             model_grid_time_kdown_all, model_grid_vals_kdown_all,
+                                             model_site_dict_all,
+                                             'kdown', savepath, DOYstart, DOYstop)
 
     print('end')
 
-
-
-    included_grids, model_site = grid_percentages.determine_which_model_files(model_site_dict, DOYstart_mod,
-                                                                              DOYstop_mod, run,
-                                                                              instrument,
-                                                                              sample, variable,
-                                                                              obs_level, model_format, disheight,
-                                                                              z0zdlist, saveyn,
-                                                                              savepath)
-
-    included_grids = grid_percentages.average_model_grids(included_grids, DOYstart_mod, DOYstop_mod,
-                                                          percentage_vals_dict, model_site_dict, model_site)
-
-    # old time series plot
-    # centre_and_av = {'Average': included_grids['Average'], 'WAverage': included_grids['WAverage']}
-    # times_series.time_series_plot(variable, saveyn, model_site, DOYstart, DOYstop, savepath + 'all_', run, included_grids, group_obs)
-    # times_series.time_series_plot(variable, saveyn, model_site, DOYstart, DOYstop, savepath + 'av_', run, centre_and_av, group_obs)
-
-    obs_time, obs_vals = array_retrieval.retrive_arrays_obs(group_obs)
-    obs_time, obs_vals = array_retrieval.rm_nans(obs_time, obs_vals)
-
-    # time average the observations
-    obs_time_av, obs_vals_av = array_retrieval.time_average_values(obs_vals, obs_time, 10)
-
-    model_grid_vals = {}
-    model_grid_time = {}
-
-    for grid_choice in included_grids.keys():
-        mod_time, mod_vals = array_retrieval.retrive_arrays_model(included_grids, grid_choice)
-
-        model_grid_vals[grid_choice] = mod_vals
-        model_grid_time[grid_choice] = mod_time
-
-    time_eval, obs_vals_eval, mod_vals_eval = array_retrieval.take_common_times(obs_time_av, obs_vals_av,
-                                                                                model_grid_time['WAverage'],
-                                                                                model_grid_vals['WAverage'])
-
-    return time_eval, obs_vals_eval, mod_vals_eval
-
-    # plotting_funs.detailed_time_series(obs_time, obs_vals,
-    #                                    time_eval, obs_vals_eval,
-    #                                    model_grid_time, model_grid_vals,
-    #                                    variable, zeff, savepath, DOYstart, DOYstop,
-    #                                    model_site_dict,
-    #                                    percentage_covered_by_model)
-
-
-
-    # # PLOT BL STASH CODE
-    # file_dict_ukv_13 = file_read.finding_files(model_format,
-    #                                            'ukv',
-    #                                            DOYstart_mod,
-    #                                            DOYstop_mod,
-    #                                            'IMU',
-    #                                            run,
-    #                                            instrument,
-    #                                            sample,
-    #                                            'BL_H',
-    #                                            obs_level,
-    #                                            model_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/"
-    #                                            )
-    #
-    # files_ukv_13 = file_read.order_model_stashes('ukv', file_dict_ukv_13, 'BL_H')
-    #
-    # from scint_eval.functions import stats_of_BL_H
-    #
-    # stats_of_BL_H.stats_BL_flux(files_ukv_13)
-    #
-    # ukv_13 = sort_model.sort_models('BL_H', 'ukv', files_ukv_13, disheight, z0zdlist, DOYstart_mod, DOYstop_mod,
-    #                                 'IMU', saveyn,
-    #                                 savepath, model_format, 'E')
-    #
-    # BL_H_13_list = [ukv_13[5], ukv_13[6], ukv_13[0], ukv_13[1], ukv_13[10]]
-    # included_BL_H = {'BL_H_13': BL_H_13_list}
-    # mod_time_13, mod_vals_13 = array_retrieval.retrive_arrays_model(included_BL_H, 'BL_H_13')
-    # model_grid_vals['BL_H_13'] = mod_vals_13
-    # model_grid_time['BL_H_13'] = mod_time_13
-    #
-    # plotting_funs.detailed_time_series(obs_time, obs_vals,
-    #                                    model_grid_time, model_grid_vals,
-    #                                    variable, savepath, DOYstart, DOYstop,
-    #                                    model_site_dict,
-    #                                    percentage_covered_by_model, BL_H_z=ukv_13[10])
-
-    # 3 arrays to be used for eval:
-    # time_eval, obs_vals_eval, mod_vals_eval
-
-    print('END')
+    # all_days_vars_10minsa = retrieve_var.retrive_var(files_obs,
+    #                                                  ['kdown'])
 
 
 ########################################################################################################################
 # c h o i c e s
+
+# CHANGE HERE
 # DOYstart_choice = 2016111
 # DOYstop_choice = 2016111
 
@@ -231,8 +204,7 @@ sample = '1min_sa10min'
 obs_level = 'L1'
 run = '21Z'
 
-# For scintillometry, variable is always sensible heat currently - needn't ever change this
-variable = 'H'
+variable = 'kdown'
 
 # Description of paths can be seen at
 # https://docs.google.com/spreadsheets/d/1gajURSbBKqc0sUAjd-cStRCjUIeh30U2i6GGeRuV-yE/edit#gid=996311903
@@ -280,16 +252,8 @@ if __name__ == "__main__":
     if not os.path.exists(save_folder):
         os.mkdir(save_folder)
 
-    time_eval_142, obs_vals_eval_142, mod_vals_eval_142 = main(obs_site, DOYstart_choice, DOYstop_choice, variable, save_folder, 1, run,
+    main(obs_site, DOYstart_choice, DOYstop_choice, variable, save_folder, 1, run,
          instrument, sample, model_format, obs_level, scint_path)
-
-    time_eval_111, obs_vals_eval_111, mod_vals_eval_111 = main(obs_site, 2016111, 2016111, variable,
-                                                               save_folder, 1, run,
-                                                               instrument, sample, model_format, obs_level, scint_path)
-
-    eval_functions.plot_difference(mod_vals_eval_142, obs_vals_eval_142, time_eval_142,
-                                   mod_vals_eval_111, obs_vals_eval_111, time_eval_111,
-                                   save_folder)
 
 print(' ')
 print(' ')

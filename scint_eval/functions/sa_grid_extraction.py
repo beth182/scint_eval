@@ -6,7 +6,7 @@ import numpy as np
 from rasterio.mask import mask
 import pylab
 import matplotlib as mpl
-
+# mpl.use('TkAgg')
 
 def SA_grid_percentages(raster_path, save_path, time_string):
     """

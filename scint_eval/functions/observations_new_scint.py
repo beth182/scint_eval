@@ -11,8 +11,6 @@ import numpy as np
 from scint_eval import look_up
 from scint_eval.functions import plotting_funs
 
-mpl.rcParams.update({'font.size': 20})  # updating the matplotlib fontsize
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 def sort_obs_new_scint(variable,
@@ -386,7 +384,7 @@ def sort_obs_new_scint(variable,
                 obvstair = obvs_ncfile.variables['press']
             elif variable == 'kdown':
                 # reads in incoming shortwave radiation
-                obvstair = obvs_ncfile.variables['Kdn']
+                obvstair = obvs_ncfile.variables['kdown']
             elif variable == 'kup':
                 # reads in outgoing shortwave radiation
                 obvstair = obvs_ncfile.variables['Kup']
@@ -399,7 +397,7 @@ def sort_obs_new_scint(variable,
             elif variable == 'netallwave':
                 # reads in net all-wave radiation
                 obvstair = obvs_ncfile.variables['Qstar']
-            elif variable == 'H':
+            elif variable == 'H' or variable == 'BL_H':
 
                 # reads in sensible heat flux
                 obvstair = obvs_ncfile.variables['QH']
@@ -475,8 +473,11 @@ def sort_obs_new_scint(variable,
         # ToDo: make this flexable for other sites!
         # 27/3/18 -- taken out, to make new adjustment with the model
         # adjustedobvsheight = obvheightvalue - 17.98
+
         # adjusting for roughness length and displacement height
-        disheight = obvheightvalue - z0zd[4]
+        # disheight = obvheightvalue - z0zd[4]
+        disheight = np.nanmean(obvs_ncfile.variables['z_f'][:])
+
         # names to use for plotting in order - otherwise strange lines appear all over the plot,
         # trying to link datetimes together
         stringtemp = []

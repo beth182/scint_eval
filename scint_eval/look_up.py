@@ -111,7 +111,8 @@ variables = {'Tair': 'm01s16i004',
              'kup': ['m01s01i235', 'm01s01i201'],
              'RH_q': ['m01s16i004', 'm01s00i408', 'm01s00i010'],
              'H': 'm01s03i217',
-             'LE': 'm01s03i234'}
+             'LE': 'm01s03i234',
+             'BL_H': 'm01s03i216'}
 
 # dict to help with adding new variables to Model Eval
 # still will have to make edits to sort_obs and sort_models when adding a new variable
@@ -161,8 +162,8 @@ variable_info = {'Tair': ['Air Temperature ($^{\circ}$C)', 'levels', '$^{\circ}$
                  'sd_v': ['sd_v'],  # Added for scintillometry eval
                  'L': ['L'],  # Added for scintillometry eval
                  'ustar': ['ustar'],  # Added for scintillometry eval
-                 'PAR_W': ['PAR']  # Added for kdown allignment tests
-                 }
+                 'PAR_W': ['PAR'],  # Added for kdown allignment tests
+                 'BL_H': ['BL Heat Flux (W m$^{-2}$)', 'levels', 'W m$^{-2}$', [25, 80], 10, [-50, 300]]}
 
 # calculated from notebooks/surface_altitudes/lon_ukv_surface_altitudes.ipynb
 # stash m01s00i033
@@ -451,12 +452,5 @@ grid_dict_colours = {1: 'dimgrey',
                      'Average': 'red',
                      'WAverage': 'blue'
                      }
-
-# taken from the daily scintillometry functions
-# keys are paths (see main_scint)
-# values are effective heights
-scint_zeff = {12: [81.2, 1.],
-              14: [46., 1.],  # ToDo: update this
-              15: [42., 1.]}  # ToDo: update this
 
 scint_3_b_3_upwind = {12: [10, 11, 12, 19, 20, 21, 28, 29, 30]}

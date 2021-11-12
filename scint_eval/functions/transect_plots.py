@@ -18,7 +18,7 @@ def plot_transects(path_11, pt_11,
 
     # which path has the highest element
     transect_list = [pt_11, pt_12, pt_13, pt_14, pt_15]
-    transect_max_list = [max(i.gdf["z_asl_max"]) for i in transect_list]
+    transect_max_list = [max(i.gdf["z_asl_max_bdsm"]) for i in transect_list]
     y_lim_max = max(transect_max_list)
 
     fig = plt.figure(constrained_layout=True, figsize=(10, 14))
@@ -99,43 +99,56 @@ def plot_transects(path_11, pt_11,
 
     ax3_t.set_ylabel("Path Weighting")
 
-    bld_bar_11 = ax1.bar(pt_11.gdf.index * pt_11.point_res, pt_11.gdf["z_asl_max"], hori_res, color='grey')
-    # bld_line_11 = ax1.plot(pt_11.gdf.index * pt_11.point_res, pt_11.gdf["z_asl_max"], color='blue',
-    #                        label='Building heights')
+    # bld_bar_11 = ax1.bar(pt_11.gdf.index * pt_11.point_res, pt_11.gdf["z_asl_max_bdsm"], hori_res, color='grey')
+    # # bld_line_11 = ax1.plot(pt_11.gdf.index * pt_11.point_res, pt_11.gdf["z_asl_max"], color='blue',
+    # #                        label='Building heights')
+    # dem_bar_11 = ax1.bar(pt_11.gdf.index * pt_11.point_res, pt_11.gdf["z_asl_max_dem"], hori_res, color='brown')
 
-    bld_bar_12 = ax2.bar(pt_12.gdf.index * pt_12.point_res, pt_12.gdf["z_asl_max"], hori_res, color='grey')
-    # bld_line_12 = ax2.plot(pt_12.gdf.index * pt_12.point_res, pt_12.gdf["z_asl_max"], color='blue',
-    #                        label='Building heights')
+    bld_bar_11 = ax1.bar(pt_11.gdf.index * pt_11.point_res, pt_11.gdf["z_asl_max_bdsm"] - pt_11.gdf["z_asl_max_dem"], hori_res, color='grey')
+    dem_bar_11 = ax1.bar(pt_11.gdf.index * pt_11.point_res, pt_11.gdf["z_asl_max_dem"]*-1, hori_res, color='sienna')
 
-    bld_bar_13 = ax3.bar(pt_13.gdf.index * pt_13.point_res, pt_13.gdf["z_asl_max"], hori_res, color='grey')
-    # bld_line_13 = ax3.plot(pt_13.gdf.index * pt_13.point_res, pt_13.gdf["z_asl_max"], color='blue',
-    #                        label='Building heights')
 
-    bld_bar_14 = ax4.bar(pt_14.gdf.index * pt_14.point_res, pt_14.gdf["z_asl_max"], hori_res, color='grey')
-    # bld_line_14 = ax4.plot(pt_14.gdf.index * pt_14.point_res, pt_14.gdf["z_asl_max"], color='blue',
-    #                        label='Building heights')
+    # bld_bar_12 = ax2.bar(pt_12.gdf.index * pt_12.point_res, pt_12.gdf["z_asl_max_bdsm"], hori_res, color='grey')
+    # # bld_line_12 = ax2.plot(pt_12.gdf.index * pt_12.point_res, pt_12.gdf["z_asl_max"], color='blue',
+    # #                        label='Building heights')
+    bld_bar_12 = ax2.bar(pt_12.gdf.index * pt_12.point_res, pt_12.gdf["z_asl_max_bdsm"] - pt_12.gdf["z_asl_max_dem"], hori_res, color='grey')
+    dem_bar_12 = ax2.bar(pt_12.gdf.index * pt_12.point_res, pt_12.gdf["z_asl_max_dem"]*-1, hori_res, color='sienna')
 
-    bld_bar_15 = ax5.bar(pt_15.gdf.index * pt_15.point_res, pt_15.gdf["z_asl_max"], hori_res, color='grey')
-    # bld_line_15 = ax5.plot(pt_15.gdf.index * pt_15.point_res, pt_15.gdf["z_asl_max"], color='blue',
-    #                        label='Building heights')
+    # bld_bar_13 = ax3.bar(pt_13.gdf.index * pt_13.point_res, pt_13.gdf["z_asl_max_bdsm"], hori_res, color='grey')
+    # # bld_line_13 = ax3.plot(pt_13.gdf.index * pt_13.point_res, pt_13.gdf["z_asl_max"], color='blue',
+    # #                        label='Building heights')
+    bld_bar_13 = ax3.bar(pt_13.gdf.index * pt_13.point_res, pt_13.gdf["z_asl_max_bdsm"] - pt_13.gdf["z_asl_max_dem"], hori_res, color='grey')
+    dem_bar_13 = ax3.bar(pt_13.gdf.index * pt_13.point_res, pt_13.gdf["z_asl_max_dem"]*-1, hori_res, color='sienna')
+
+    # bld_bar_14 = ax4.bar(pt_14.gdf.index * pt_14.point_res, pt_14.gdf["z_asl_max_bdsm"], hori_res, color='grey')
+    # # bld_line_14 = ax4.plot(pt_14.gdf.index * pt_14.point_res, pt_14.gdf["z_asl_max"], color='blue',
+    # #                        label='Building heights')
+    bld_bar_14 = ax4.bar(pt_14.gdf.index * pt_14.point_res, pt_14.gdf["z_asl_max_bdsm"] - pt_14.gdf["z_asl_max_dem"], hori_res, color='grey')
+    dem_bar_14 = ax4.bar(pt_14.gdf.index * pt_14.point_res, pt_14.gdf["z_asl_max_dem"]*-1, hori_res, color='sienna')
+
+    # bld_bar_15 = ax5.bar(pt_15.gdf.index * pt_15.point_res, pt_15.gdf["z_asl_max_bdsm"], hori_res, color='grey')
+    # # bld_line_15 = ax5.plot(pt_15.gdf.index * pt_15.point_res, pt_15.gdf["z_asl_max"], color='blue',
+    # #                        label='Building heights')
+    bld_bar_15 = ax5.bar(pt_15.gdf.index * pt_15.point_res, pt_15.gdf["z_asl_max_bdsm"] - pt_15.gdf["z_asl_max_dem"], hori_res, color='grey')
+    dem_bar_15 = ax5.bar(pt_15.gdf.index * pt_15.point_res, pt_15.gdf["z_asl_max_dem"]*-1, hori_res, color='sienna')
 
     # plot the path
-    path_line_11 = ax1.plot(pt_11.gdf.path_length_m, pt_11.gdf["path_height_asl"], color='red',
+    path_line_11 = ax1.plot(pt_11.gdf.path_length_m, pt_11.gdf["path_height_asl"], color='blue',
                             label='LAS path')
 
     path_line_12 = ax2.plot(pt_12.gdf.path_length_m, pt_12.gdf["path_height_asl"], color='red',
                             label='LAS path')
 
-    path_line_13 = ax3.plot(pt_13.gdf.path_length_m, pt_13.gdf["path_height_asl"], color='red',
+    path_line_13 = ax3.plot(pt_13.gdf.path_length_m, pt_13.gdf["path_height_asl"], color='green',
                             label='LAS path')
 
-    path_line_14 = ax4.plot(pt_14.gdf.path_length_m, pt_14.gdf["path_height_asl"], color='red',
+    path_line_14 = ax4.plot(pt_14.gdf.path_length_m, pt_14.gdf["path_height_asl"], color='orange',
                             label='LAS path')
 
-    path_line_15 = ax5.plot(pt_15.gdf.path_length_m, pt_15.gdf["path_height_asl"], color='red',
+    path_line_15 = ax5.plot(pt_15.gdf.path_length_m, pt_15.gdf["path_height_asl"], color='magenta',
                             label='LAS path')
 
-    ax3.set_ylabel('Height (m asl)')
+    ax3.set_ylabel('Height (m)')
 
     ax1.set_xticks([])
     ax2.set_xticks([])
@@ -148,11 +161,11 @@ def plot_transects(path_11, pt_11,
     ax4.set_xlim(0 - 10, x_lim_max + 10)
     ax5.set_xlim(0 - 10, x_lim_max + 10)
 
-    ax1.set_ylim(0, y_lim_max + 10)
-    ax2.set_ylim(0, y_lim_max + 10)
-    ax3.set_ylim(0, y_lim_max + 10)
-    ax4.set_ylim(0, y_lim_max + 10)
-    ax5.set_ylim(0, y_lim_max + 10)
+    # ax1.set_ylim(0, y_lim_max + 10)
+    # ax2.set_ylim(0, y_lim_max + 10)
+    # ax3.set_ylim(0, y_lim_max + 10)
+    # ax4.set_ylim(0, y_lim_max + 10)
+    # ax5.set_ylim(0, y_lim_max + 10)
 
     # add effective beam height label
     ebh_11 = pt_11.effective_beam_height()
@@ -242,11 +255,16 @@ path_15 = sct.ScintillometerPair(x=[284450.1944, 285407],
                                  pair_id='SCT_SWT',
                                  crs='epsg:32631')
 
-pt_11 = path_11.path_transect('D:/Documents/scintools/example_inputs/rasters/height_surface_4m.tif', hori_res)
-pt_12 = path_12.path_transect('D:/Documents/scintools/example_inputs/rasters/height_surface_4m.tif', hori_res)
-pt_13 = path_13.path_transect('D:/Documents/scintools/example_inputs/rasters/height_surface_4m.tif', hori_res)
-pt_14 = path_14.path_transect('D:/Documents/scintools/example_inputs/rasters/height_surface_4m.tif', hori_res)
-pt_15 = path_15.path_transect('D:/Documents/scintools/example_inputs/rasters/height_surface_4m.tif', hori_res)
+bdsm_file = 'D:/Documents/scintools/example_inputs/rasters/height_surface_4m.tif'
+dem_file = 'D:/Documents/scintools/example_inputs/rasters/height_terrain_4m.tif'
+
+pt_11 = path_11.path_transect(bdsm_file, dem_file, hori_res)
+
+
+pt_12 = path_12.path_transect(bdsm_file, dem_file, hori_res)
+pt_13 = path_13.path_transect(bdsm_file, dem_file, hori_res)
+pt_14 = path_14.path_transect(bdsm_file, dem_file, hori_res)
+pt_15 = path_15.path_transect(bdsm_file, dem_file, hori_res)
 
 plot_transects(path_11, pt_11,
                path_12, pt_12,

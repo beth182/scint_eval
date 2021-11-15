@@ -110,6 +110,57 @@ def plot_data_avail(days_list,
     plt.figure(figsize=(13, 4))
     ax = plt.subplot(1, 1, 1)
 
+    # define seasons start and stop
+    DJF_16_start = dt.datetime.strptime('2016 01 01', "%Y %m %d")
+    DJF_16_stop = dt.datetime.strptime('2016 03 01', "%Y %m %d")
+    MAM_16_start = dt.datetime.strptime('2016 03 01', "%Y %m %d")
+    MAM_16_stop = dt.datetime.strptime('2016 06 01', "%Y %m %d")
+    JJA_16_start = dt.datetime.strptime('2016 06 01', "%Y %m %d")
+    JJA_16_stop = dt.datetime.strptime('2016 09 01', "%Y %m %d")
+    SON_16_start = dt.datetime.strptime('2016 09 01', "%Y %m %d")
+    SON_16_stop = dt.datetime.strptime('2016 12 01', "%Y %m %d")
+
+
+    DJF_17_start = dt.datetime.strptime('2016 12 01', "%Y %m %d")
+    DJF_17_stop = dt.datetime.strptime('2017 03 01', "%Y %m %d")
+    MAM_17_start = dt.datetime.strptime('2017 03 01', "%Y %m %d")
+    MAM_17_stop = dt.datetime.strptime('2017 06 01', "%Y %m %d")
+    JJA_17_start = dt.datetime.strptime('2017 06 01', "%Y %m %d")
+    JJA_17_stop = dt.datetime.strptime('2017 09 01', "%Y %m %d")
+    SON_17_start = dt.datetime.strptime('2017 09 01', "%Y %m %d")
+    SON_17_stop = dt.datetime.strptime('2017 12 01', "%Y %m %d")
+
+    DJF_18_start = dt.datetime.strptime('2017 12 01', "%Y %m %d")
+    DJF_18_stop = dt.datetime.strptime('2018 03 01', "%Y %m %d")
+    MAM_18_start = dt.datetime.strptime('2018 03 01', "%Y %m %d")
+    MAM_18_stop = dt.datetime.strptime('2018 06 01', "%Y %m %d")
+    JJA_18_start = dt.datetime.strptime('2018 06 01', "%Y %m %d")
+    JJA_18_stop = dt.datetime.strptime('2018 09 01', "%Y %m %d")
+    SON_18_start = dt.datetime.strptime('2018 09 01', "%Y %m %d")
+    SON_18_stop = dt.datetime.strptime('2018 12 01', "%Y %m %d")
+
+    DJF_19_start = dt.datetime.strptime('2018 12 01', "%Y %m %d")
+    DJF_19_stop = dt.datetime.strptime('2019 03 01', "%Y %m %d")
+
+    ax.axvspan(DJF_16_start, DJF_16_stop, alpha=0.3, color='lightblue')
+    ax.axvspan(DJF_17_start, DJF_17_stop, alpha=0.3, color='lightblue')
+    ax.axvspan(DJF_18_start, DJF_18_stop, alpha=0.3, color='lightblue')
+    ax.axvspan(DJF_19_start, DJF_19_stop, alpha=0.3, color='lightblue')
+
+    ax.axvspan(MAM_16_start, MAM_16_stop, alpha=0.3, color='thistle')
+    ax.axvspan(MAM_17_start, MAM_17_stop, alpha=0.3, color='thistle')
+    ax.axvspan(MAM_18_start, MAM_18_stop, alpha=0.3, color='thistle')
+
+    ax.axvspan(JJA_16_start, JJA_16_stop, alpha=0.3, color='palegoldenrod')
+    ax.axvspan(JJA_17_start, JJA_17_stop, alpha=0.3, color='palegoldenrod')
+    ax.axvspan(JJA_18_start, JJA_18_stop, alpha=0.3, color='palegoldenrod')
+
+    ax.axvspan(SON_16_start, SON_16_stop, alpha=0.3, color='indianred')
+    ax.axvspan(SON_17_start, SON_17_stop, alpha=0.3, color='indianred')
+    ax.axvspan(SON_18_start, SON_18_stop, alpha=0.3, color='indianred')
+
+
+
     plt.plot(days_list, np.array(file_exists_list11) * 11, linewidth=5, color='blue')
     plt.plot(days_list, np.array(file_exists_list12) * 12, linewidth=5, color='red')
     plt.plot(days_list, np.array(file_exists_list13) * 13, linewidth=5, color='green')
@@ -129,6 +180,7 @@ def plot_data_avail(days_list,
 # define inputs
 DOYstarti = 2016001
 DOYstopi = 2018366
+# DOYstopi = 2016266
 main_pathi = '//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_raw/data/'
 leveli = 'L1'
 samplei = '15min'

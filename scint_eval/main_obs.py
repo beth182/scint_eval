@@ -144,16 +144,23 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     # CHANGE HERE
     # sa_hours_avail = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]  # 142
-    sa_hours_avail = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]  # 111
+    # sa_hours_avail = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]  # 111
+    sa_hours_avail = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]  # 118
 
     time = []
     for hour in all_days_vars['time']:
         if hour.hour in sa_hours_avail:
-            time.append(hour)
+            new_time = hour.replace(minute=0, second=0, microsecond=0)
+            print(new_time)
+
+
+            time.append(new_time)
+
+    time = sorted(list(set(time)))
 
     # find source area raster
     sa_list = find_source_area.find_source_area(time=time,
-                                                in_dir='C:/Users/beths/Desktop/LANDING/fp_output/111/hourly/')  # CHANGE HERE
+                                                in_dir='C:/Users/beths/Desktop/LANDING/fp_output/118/hourly/')  # CHANGE HERE
 
     model_site_dict, percentage_vals_dict, percentage_covered_by_model = grid_percentages.prepare_model_grid_percentages(
         time=time,
@@ -225,11 +232,15 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
 ########################################################################################################################
 # c h o i c e s
+# CHANGE HERE
 # DOYstart_choice = 2016142
 # DOYstop_choice = 2016142
 
-DOYstart_choice = 2016111
-DOYstop_choice = 2016111
+# DOYstart_choice = 2016111
+# DOYstop_choice = 2016111
+
+DOYstart_choice = 2016118
+DOYstop_choice = 2016118
 
 sample = '1min'
 obs_level = 'L1'

@@ -625,9 +625,9 @@ def plots_vars_mod(all_days_vars, all_days_vars_10minsa,
     # 1 - WIND DIR
     # WD
     ax1.scatter(df_10minsa.index, df_10minsa['wind_direction'], marker='.', alpha=0.15, color='blue', s=10)
-    ax1.scatter(five_min_10minsa.index, five_min_10minsa['wind_direction'], marker='o', alpha=0.4, color='green', s=10)
-    ax1.scatter(ten_min_10minsa.index, ten_min_10minsa['wind_direction'], marker='^', alpha=0.7, color='red', s=10)
-    ax1.scatter(sixty_min.index, sixty_min['wind_direction'], marker='x', alpha=1.0, color='purple', s=10)
+    # ax1.scatter(five_min_10minsa.index, five_min_10minsa['wind_direction'], marker='o', alpha=0.4, color='green', s=10)
+    # ax1.scatter(ten_min_10minsa.index, ten_min_10minsa['wind_direction'], marker='^', alpha=0.7, color='red', s=10)
+    # ax1.scatter(sixty_min.index, sixty_min['wind_direction'], marker='x', alpha=1.0, color='purple', s=10)
     ax1.set_ylabel('Wind Direction ($^{\circ}$)')
     ax1.set_xticks([])
     ax1.set_title(title_string)

@@ -9,6 +9,7 @@ from scint_eval.functions import file_read
 
 from scint_eval.functions import array_retrieval
 from scint_eval.functions import sort_model
+from scint_eval.functions import sort_model_wind
 from scint_eval.functions import roughness
 from scint_eval.functions import find_source_area
 from scint_eval.functions import grid_percentages
@@ -45,29 +46,29 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
 
     ###########################
-    # DOY 142
-    files_obs_142 = file_read.finding_files(model_format, 'obs', 2016142, 2016142, obs_site, run, instrument, sample,
-                                        variable, obs_level,
-                                        obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
-                                        )
-
-    files_obs_10minsa_142 = file_read.finding_files(model_format, 'obs', 2016142, 2016142, obs_site, run, instrument, '1min_sa10min',
-                                        variable, obs_level,
-                                        obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
-                                        )
-
-    all_days_vars_142 = retrieve_var.retrive_var(files_obs_142,
-                                             ['QH', 'wind_direction', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
-                                              'sa_area_km2', 'stab_param'])
-
-    all_days_vars_10minsa_142 = retrieve_var.retrive_var(files_obs_10minsa_142,
-                                                     ['QH', 'wind_direction', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
-                                                      'sa_area_km2', 'stab_param'])
+    # # DOY 142
+    # files_obs_142 = file_read.finding_files(model_format, 'obs', 2016142, 2016142, obs_site, run, instrument, sample,
+    #                                     variable, obs_level,
+    #                                     obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
+    #                                     )
+    #
+    # files_obs_10minsa_142 = file_read.finding_files(model_format, 'obs', 2016142, 2016142, obs_site, run, instrument, '1min_sa10min',
+    #                                     variable, obs_level,
+    #                                     obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
+    #                                     )
+    #
+    # all_days_vars_142 = retrieve_var.retrive_var(files_obs_142,
+    #                                          ['QH', 'wind_direction', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
+    #                                           'sa_area_km2', 'stab_param'])
+    #
+    # all_days_vars_10minsa_142 = retrieve_var.retrive_var(files_obs_10minsa_142,
+    #                                                  ['QH', 'wind_direction', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
+    #                                                   'sa_area_km2', 'stab_param'])
 
     ###########################
     # deal with the stupid key system
-    all_days_vars_142 = all_days_vars_142['obs2016142']
-    all_days_vars_10minsa_142 = all_days_vars_10minsa_142['obs2016_sa']
+    # all_days_vars_142 = all_days_vars_142['obs2016142']
+    # all_days_vars_10minsa_142 = all_days_vars_10minsa_142['obs2016_sa']
     all_days_vars = all_days_vars['obs'+str(DOYstart)]
     all_days_vars_10minsa = all_days_vars_10minsa['obs2016_sa']
 
@@ -107,6 +108,45 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
                                                     look_up.obs_zd_macdonald[obs_site])
 
     ####################################################################################################################
+    # WIND
+    # finding UKV files
+    # file_read.py
+    file_dict_ukv_wind = file_read.finding_files(model_format,
+                                                 'ukv',
+                                                 DOYstart_mod,
+                                                 DOYstop_mod,
+                                                 'IMU',
+                                                 run,
+                                                 instrument,
+                                                 sample,
+                                                 'wind',
+                                                 obs_level,
+                                                 model_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/"
+                                                 )
+
+    # ordering UKV model files
+    # file_read.py
+    files_ukv_wind = file_read.order_model_stashes('ukv', file_dict_ukv_wind, 'wind')
+
+    ukv_wind = sort_model_wind.sort_models_wind('wind', 'ukv', files_ukv_wind, 145.0, z0zdlist, DOYstart, DOYstop,
+                                       'BCT', saveyn,
+                                       savepath, model_format, grid_choice='E')
+
+    # define dict for included models
+    included_models_ws = {}
+    group_ukv_ws = [ukv_wind[3], ukv_wind[4], ukv_wind[0], ukv_wind[1], ukv_wind[14]]
+
+    included_models_wd = {}
+    group_ukv_wd = [ukv_wind[3], ukv_wind[5], ukv_wind[0], ukv_wind[2], ukv_wind[14]]
+
+    # append to dict
+    included_models_ws['ukv'] = group_ukv_ws
+    included_models_wd['ukv'] = group_ukv_wd
+
+    mod_time_ws, mod_vals_ws = array_retrieval.retrive_arrays_model(included_models_ws, 'ukv')
+    mod_time_wd, mod_vals_wd = array_retrieval.retrive_arrays_model(included_models_wd, 'ukv')
+
+    ####################################################################################################################
     # KDOWN
     # finding UKV files
     # file_read.py
@@ -138,6 +178,7 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     included_models_kdown['ukv'] = group_ukv_kdown
 
     mod_time_kdown, mod_vals_kdown = array_retrieval.retrive_arrays_model(included_models_kdown, 'ukv')
+
     ####################################################################################################################
 
     # QH
@@ -193,11 +234,10 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
 
 
-
-
-
     plotting_funs.plots_vars_mod(all_days_vars, all_days_vars_10minsa,
                                  mod_time_kdown, mod_vals_kdown,
+                                 mod_time_ws, mod_vals_ws,
+                                 mod_time_wd, mod_vals_wd,
                                  mod_time_qh_wav, mod_vals_qh_wav,
                                  savepath)
 
@@ -236,11 +276,11 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 # DOYstart_choice = 2016142
 # DOYstop_choice = 2016142
 
-# DOYstart_choice = 2016111
-# DOYstop_choice = 2016111
+DOYstart_choice = 2016111
+DOYstop_choice = 2016111
 
-DOYstart_choice = 2016118
-DOYstop_choice = 2016118
+# DOYstart_choice = 2016118
+# DOYstop_choice = 2016118
 
 sample = '1min'
 obs_level = 'L1'

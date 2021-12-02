@@ -542,6 +542,8 @@ def plots_vars(all_days_vars, all_days_vars_10minsa):
 
 def plots_vars_mod(all_days_vars, all_days_vars_10minsa,
                    mod_kdown_time, mod_kdown_vals,
+                   mod_time_ws, mod_vals_ws,
+                   mod_time_wd, mod_vals_wd,
                    mod_time_qh_wav, mod_vals_qh_wav,
                    savepath):
     """
@@ -628,6 +630,9 @@ def plots_vars_mod(all_days_vars, all_days_vars_10minsa,
     # ax1.scatter(five_min_10minsa.index, five_min_10minsa['wind_direction'], marker='o', alpha=0.4, color='green', s=10)
     # ax1.scatter(ten_min_10minsa.index, ten_min_10minsa['wind_direction'], marker='^', alpha=0.7, color='red', s=10)
     # ax1.scatter(sixty_min.index, sixty_min['wind_direction'], marker='x', alpha=1.0, color='purple', s=10)
+
+    ax1.plot(mod_time_wd, mod_vals_wd, linewidth=1, color='blue')
+
     ax1.set_ylabel('Wind Direction ($^{\circ}$)')
     ax1.set_xticks([])
     ax1.set_title(title_string)
@@ -637,6 +642,9 @@ def plots_vars_mod(all_days_vars, all_days_vars_10minsa,
     ax3.scatter(five_min_10minsa.index, five_min_10minsa['wind_speed'], marker='o', alpha=0.4, color='green', s=10)
     ax3.scatter(ten_min_10minsa.index, ten_min_10minsa['wind_speed'], marker='^', alpha=0.7, color='red', s=10)
     ax3.scatter(sixty_min.index, sixty_min['wind_speed'], marker='x', alpha=1.0, color='purple', s=10)
+
+    ax3.plot(mod_time_ws, mod_vals_ws, linewidth=1, color='blue')
+
     ax3.set_ylabel('Wind Speed (m s$^{-1}$)')
     ax3.set_xticks([])
 

@@ -10,6 +10,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.dates as mdates
 import datetime as dt
 from scint_eval import look_up
+from scint_fp.functions import wx_u_v_components
 
 
 # function to group labels in the plots -- otherwise, the same label will appear multiple times
@@ -545,6 +546,7 @@ def plots_vars_mod(all_days_vars, all_days_vars_10minsa,
                    mod_time_ws, mod_vals_ws,
                    mod_time_wd, mod_vals_wd,
                    mod_time_qh_wav, mod_vals_qh_wav,
+                   heath_df,
                    savepath):
     """
     Makes stacked plot of retrieved vars
@@ -593,14 +595,31 @@ def plots_vars_mod(all_days_vars, all_days_vars_10minsa,
     # filter out any times which are NOT unstable
     df_10minsa.loc[df_10minsa.stab_param > -0.03] = np.nan
 
+
+    # convery wind speed and direction to u & v components, to average, then convert the averages back
+    component_df = wx_u_v_components.ws_wd_to_u_v(df['wind_speed'], df['wind_direction'])
+    df = pd.concat([df, component_df], axis=1)
+
     # average df
-    five_min = df.resample('5T', closed='right', label='right').mean()
-    ten_min = df.resample('10T', closed='right', label='right').mean()
     sixty_min = df.resample('60T', closed='right', label='right').mean()
+
+    # get ws and dir from averaged u& v comps
+    av_comp = wx_u_v_components.u_v_to_ws_wd(sixty_min['u_component'], sixty_min['v_component'])
+    sixty_min = pd.concat([sixty_min, av_comp], axis=1)
+
+    # do the same for the 10 min df
+    component_df_10minsa = wx_u_v_components.ws_wd_to_u_v(df_10minsa['wind_speed'], df_10minsa['wind_direction'])
+    df_10minsa = pd.concat([df_10minsa, component_df_10minsa], axis=1)
 
     five_min_10minsa = df_10minsa.resample('5T', closed='right', label='right').mean()
     ten_min_10minsa = df_10minsa.resample('10T', closed='right', label='right').mean()
-    sixty_min_10minsa = df_10minsa.resample('60T', closed='right', label='right').mean()
+
+    av_comp_10minsa_5 = wx_u_v_components.u_v_to_ws_wd(five_min_10minsa['u_component'], five_min_10minsa['v_component'])
+    five_min_10minsa = pd.concat([five_min_10minsa, av_comp_10minsa_5], axis=1)
+
+    av_comp_10minsa_10 = wx_u_v_components.u_v_to_ws_wd(ten_min_10minsa['u_component'], ten_min_10minsa['v_component'])
+    ten_min_10minsa = pd.concat([ten_min_10minsa, av_comp_10minsa_10], axis=1)
+
 
     # construct title
     doy = df.index[0].strftime('%j')
@@ -627,11 +646,16 @@ def plots_vars_mod(all_days_vars, all_days_vars_10minsa,
     # 1 - WIND DIR
     # WD
     ax1.scatter(df_10minsa.index, df_10minsa['wind_direction'], marker='.', alpha=0.15, color='blue', s=10)
-    # ax1.scatter(five_min_10minsa.index, five_min_10minsa['wind_direction'], marker='o', alpha=0.4, color='green', s=10)
-    # ax1.scatter(ten_min_10minsa.index, ten_min_10minsa['wind_direction'], marker='^', alpha=0.7, color='red', s=10)
-    # ax1.scatter(sixty_min.index, sixty_min['wind_direction'], marker='x', alpha=1.0, color='purple', s=10)
+    ax1.scatter(five_min_10minsa.index, five_min_10minsa['wind_direction_convert'], marker='o', alpha=0.4, color='green', s=10)
+    ax1.scatter(ten_min_10minsa.index, ten_min_10minsa['wind_direction_convert'], marker='^', alpha=0.7, color='red', s=10)
+    ax1.scatter(sixty_min.index, sixty_min['wind_direction_convert'], marker='x', alpha=1.0, color='purple', s=10)
+
+    # plot heathrow wind direction
+    ax1.scatter(heath_df.index, heath_df['WD'], color='magenta')
 
     ax1.plot(mod_time_wd, mod_vals_wd, linewidth=1, color='blue')
+
+    ax1.set_ylim(0, 360)
 
     ax1.set_ylabel('Wind Direction ($^{\circ}$)')
     ax1.set_xticks([])

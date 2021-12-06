@@ -2,10 +2,10 @@
 
 from calendar import isleap
 import os
+import sys
 from scint_eval.functions import retrieve_var
 from scint_eval.functions import plotting_funs
 from scint_eval.functions import file_read
-
 
 from scint_eval.functions import array_retrieval
 from scint_eval.functions import sort_model
@@ -14,8 +14,7 @@ from scint_eval.functions import roughness
 from scint_eval.functions import find_source_area
 from scint_eval.functions import grid_percentages
 from scint_eval import look_up
-
-
+from scint_eval.functions import read_ceda_heathrow
 
 
 def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrument, sample,
@@ -23,7 +22,6 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     """
     MAIN FUNCTION FOR NEW FILE FORMAT MODEL FILES.
     """
-
 
     ################################################################################################################
     # finding observation files
@@ -33,17 +31,19 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
                                         obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
                                         )
 
-    files_obs_10minsa = file_read.finding_files(model_format, 'obs', DOYstart, DOYstop, obs_site, run, instrument, '1min_sa10min',
-                                        variable, obs_level,
-                                        obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
-                                        )
+    files_obs_10minsa = file_read.finding_files(model_format, 'obs', DOYstart, DOYstop, obs_site, run, instrument,
+                                                '1min_sa10min',
+                                                variable, obs_level,
+                                                obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
+                                                )
 
-    all_days_vars = retrieve_var.retrive_var(files_obs, ['QH', 'wind_direction', 'wind_speed_adj', 'kdown', 'z_0', 'z_d', 'sa_area_km2', 'stab_param'])
-
-    all_days_vars_10minsa = retrieve_var.retrive_var(files_obs_10minsa,
+    all_days_vars = retrieve_var.retrive_var(files_obs,
                                              ['QH', 'wind_direction', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
                                               'sa_area_km2', 'stab_param'])
 
+    all_days_vars_10minsa = retrieve_var.retrive_var(files_obs_10minsa,
+                                                     ['QH', 'wind_direction', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
+                                                      'sa_area_km2', 'stab_param'])
 
     ###########################
     # # DOY 142
@@ -69,7 +69,7 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     # deal with the stupid key system
     # all_days_vars_142 = all_days_vars_142['obs2016142']
     # all_days_vars_10minsa_142 = all_days_vars_10minsa_142['obs2016_sa']
-    all_days_vars = all_days_vars['obs'+str(DOYstart)]
+    all_days_vars = all_days_vars['obs' + str(DOYstart)]
     all_days_vars_10minsa = all_days_vars_10minsa['obs2016_sa']
 
     ####################################################################################################################
@@ -129,8 +129,8 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     files_ukv_wind = file_read.order_model_stashes('ukv', file_dict_ukv_wind, 'wind')
 
     ukv_wind = sort_model_wind.sort_models_wind('wind', 'ukv', files_ukv_wind, 145.0, z0zdlist, DOYstart, DOYstop,
-                                       'BCT', saveyn,
-                                       savepath, model_format, grid_choice='E')
+                                                'BCT', saveyn,
+                                                savepath, model_format, grid_choice='E')
 
     # define dict for included models
     included_models_ws = {}
@@ -151,25 +151,25 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     # finding UKV files
     # file_read.py
     file_dict_ukv_kdown = file_read.finding_files(model_format,
-                                            'ukv',
-                                            DOYstart_mod,
-                                            DOYstop_mod,
-                                            'IMU',
-                                            run,
-                                            instrument,
-                                            sample,
-                                            'kdown',
-                                            obs_level,
-                                            model_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/"
-                                            )
+                                                  'ukv',
+                                                  DOYstart_mod,
+                                                  DOYstop_mod,
+                                                  'IMU',
+                                                  run,
+                                                  instrument,
+                                                  sample,
+                                                  'kdown',
+                                                  obs_level,
+                                                  model_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/"
+                                                  )
 
     # ordering UKV model files
     # file_read.py
     files_ukv_kdown = file_read.order_model_stashes('ukv', file_dict_ukv_kdown, 'kdown')
 
     ukv_kdown = sort_model.sort_models('kdown', 'ukv', files_ukv_kdown, 0, z0zdlist, DOYstart, DOYstop,
-                                 'IMU', saveyn,
-                                 savepath, model_format, grid_choice='E')
+                                       'IMU', saveyn,
+                                       savepath, model_format, grid_choice='E')
 
     # define dict for included models
     included_models_kdown = {}
@@ -183,10 +183,17 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     # QH
 
-    # CHANGE HERE
-    # sa_hours_avail = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]  # 142
-    # sa_hours_avail = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]  # 111
-    sa_hours_avail = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]  # 118
+    if DOYstart == 2016118:
+        sa_hours_avail = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]  # 11
+
+    elif DOYstart == 2016142:
+        sa_hours_avail = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]  # 142
+
+    elif DOYstart == 2016111:
+        sa_hours_avail = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+    else:
+        print('make a doy choice w/ sas')
+        sys.exit()
 
     time = []
     for hour in all_days_vars['time']:
@@ -194,14 +201,16 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
             new_time = hour.replace(minute=0, second=0, microsecond=0)
             print(new_time)
 
-
             time.append(new_time)
 
     time = sorted(list(set(time)))
 
     # find source area raster
+
+    sa_in_dir = 'C:/Users/beths/Desktop/LANDING/fp_output/' + str(DOYstart)[-3:] + '/hourly/'
+
     sa_list = find_source_area.find_source_area(time=time,
-                                                in_dir='C:/Users/beths/Desktop/LANDING/fp_output/118/hourly/')  # CHANGE HERE
+                                                in_dir=sa_in_dir)
 
     model_site_dict, percentage_vals_dict, percentage_covered_by_model = grid_percentages.prepare_model_grid_percentages(
         time=time,
@@ -228,20 +237,21 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
         model_grid_vals[grid_choice] = mod_vals
         model_grid_time[grid_choice] = mod_time
 
-
     mod_time_qh_wav = model_grid_time['WAverage']
     mod_vals_qh_wav = model_grid_vals['WAverage']
 
-
+    # get heathrow winds
+    heath_df = read_ceda_heathrow.read_ceda_heathrow(
+        'C:/Users/beths/OneDrive - University of Reading/Heathrow 16_18/Heathrow Mean Wind/station_data-201601010000-201612312359_w.csv',
+        DOYstart)
 
     plotting_funs.plots_vars_mod(all_days_vars, all_days_vars_10minsa,
                                  mod_time_kdown, mod_vals_kdown,
                                  mod_time_ws, mod_vals_ws,
                                  mod_time_wd, mod_vals_wd,
                                  mod_time_qh_wav, mod_vals_qh_wav,
+                                 heath_df,
                                  savepath)
-
-
 
     ###########################
     # plots
@@ -264,20 +274,17 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     # plotting_funs.qh_vs_zf_day_mean_both_days(all_days_vars_10minsa, all_days_vars_10minsa_142)
 
-
-
-
     print('END')
 
 
 ########################################################################################################################
 # c h o i c e s
 # CHANGE HERE
-# DOYstart_choice = 2016142
-# DOYstop_choice = 2016142
+DOYstart_choice = 2016142
+DOYstop_choice = 2016142
 
-DOYstart_choice = 2016111
-DOYstop_choice = 2016111
+# DOYstart_choice = 2016111
+# DOYstop_choice = 2016111
 
 # DOYstart_choice = 2016118
 # DOYstop_choice = 2016118

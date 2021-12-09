@@ -214,23 +214,21 @@ def detailed_time_series_kdown(obs_time, obs_vals,
 
     # per_covered = list_calculated_sum(model_grid_time, percentage_covered_by_model)
 
-    max_grid_vals_all, min_grid_vals_all, n_grids_all = variation_in_grids(model_grid_time_all, model_grid_vals_all, model_site_dict_all)
-    ax1.fill_between(model_grid_time_all[list(model_grid_time_all.keys())[0]], max_grid_vals_all, min_grid_vals_all, color='paleturquoise',
+    max_grid_vals_all, min_grid_vals_all, n_grids_all = variation_in_grids(model_grid_time_all, model_grid_vals_all,
+                                                                           model_site_dict_all)
+    ax1.fill_between(model_grid_time_all[list(model_grid_time_all.keys())[0]], max_grid_vals_all, min_grid_vals_all,
+                     color='paleturquoise',
                      alpha=0.6, label='Model grid range: All')
-
 
     max_grid_vals, min_grid_vals, n_grids = variation_in_grids(model_grid_time, model_grid_vals, model_site_dict)
     ax1.fill_between(model_grid_time[list(model_grid_time.keys())[0]], max_grid_vals, min_grid_vals, color='pink',
                      alpha=0.7, label='Model grid range: In SA')
-
-
 
     # ax1.plot(model_grid_time['Average'], model_grid_vals['Average'], label='Average', color='red', marker='.')
     ax1.plot(model_grid_time['WAverage'], model_grid_vals['WAverage'], label='WAverage @ surface', color='blue',
              marker='.')
     ax1.plot(model_grid_time[13], model_grid_vals[13], label='Grid @ KSSW', color='green',
              marker='.')
-
 
     # Plot obs
     ax1.plot(df.index, df['qh'], linestyle='None', marker='.', color='grey', alpha=0.5,
@@ -541,6 +539,153 @@ def plots_vars(all_days_vars, all_days_vars_10minsa):
     print('end')
 
 
+def plot_wind_eval(all_days_vars, all_days_vars_10minsa,
+                   mod_time_ws, mod_vals_ws, mod_vals_wd, mod_height,
+                   mod_vals_ws0, mod_vals_wd0, mod_height0,
+                   mod_vals_ws2, mod_vals_wd2, mod_height2,
+                   heath_df,
+                   savepath):
+    """
+
+    :param all_days_vars:
+    :param all_days_vars_10minsa:
+    :param mod_time_ws:
+    :param mod_vals_ws:
+    :param mod_vals_wd:
+    :param mod_vals_ws0:
+    :param mod_vals_wd0:
+    :param mod_vals_ws2:
+    :param mod_vals_wd2:
+    :param heath_df:
+    :param savepath:
+    :return:
+    """
+
+    var_dict = all_days_vars
+    time = var_dict['time']
+    wind_direction = var_dict['wind_direction']
+
+    wind_speed = var_dict['wind_speed_adj']
+    # wind_speed = var_dict['wind_speed']
+    # wind_speed_adj = var_dict['wind_speed_adj']
+
+    df_dict = {'time': time, 'wind_direction': wind_direction, 'wind_speed': wind_speed}
+    # df_dict = {'time': time, 'wind_direction': wind_direction, 'wind_speed': wind_speed, 'wind_speed_adj': wind_speed_adj}
+
+
+    df = pd.DataFrame(df_dict)
+    df = df.set_index('time')
+    df.index = df.index.round('1s')
+
+    # SA 10 min data
+    var_dict_10minsa = all_days_vars_10minsa
+    time_10minsa = var_dict_10minsa['time']
+
+    wind_direction_10minsa = var_dict_10minsa['wind_direction']
+
+    wind_speed_10minsa = var_dict_10minsa['wind_speed_adj']
+    # wind_speed_10minsa = var_dict_10minsa['wind_speed']
+    # wind_speed_10minsa_adj = var_dict_10minsa['wind_speed_adj']
+
+    df_dict_10minsa = {'time': time_10minsa, 'wind_direction': wind_direction_10minsa, 'wind_speed': wind_speed_10minsa}
+    # df_dict_10minsa = {'time': time_10minsa, 'wind_direction': wind_direction_10minsa, 'wind_speed': wind_speed_10minsa, 'wind_speed_adj': wind_speed_10minsa_adj}
+
+    df_10minsa = pd.DataFrame(df_dict_10minsa)
+    df_10minsa = df_10minsa.set_index('time')
+    df_10minsa.index = df_10minsa.index.round('1s')
+
+    # convery wind speed and direction to u & v components, to average, then convert the averages back
+    component_df = wx_u_v_components.ws_wd_to_u_v(df['wind_speed'], df['wind_direction'])
+    df = pd.concat([df, component_df], axis=1)
+
+    # average df
+    sixty_min = df.resample('60T', closed='right', label='right').mean()
+
+    # get ws and dir from averaged u& v comps
+    av_comp = wx_u_v_components.u_v_to_ws_wd(sixty_min['u_component'], sixty_min['v_component'])
+    sixty_min = pd.concat([sixty_min, av_comp], axis=1)
+
+    # do the same for the 10 min df
+    component_df_10minsa = wx_u_v_components.ws_wd_to_u_v(df_10minsa['wind_speed'], df_10minsa['wind_direction'])
+    df_10minsa = pd.concat([df_10minsa, component_df_10minsa], axis=1)
+
+    five_min_10minsa = df_10minsa.resample('5T', closed='right', label='right').mean()
+    ten_min_10minsa = df_10minsa.resample('10T', closed='right', label='right').mean()
+
+    av_comp_10minsa_5 = wx_u_v_components.u_v_to_ws_wd(five_min_10minsa['u_component'], five_min_10minsa['v_component'])
+    five_min_10minsa = pd.concat([five_min_10minsa, av_comp_10minsa_5], axis=1)
+
+    av_comp_10minsa_10 = wx_u_v_components.u_v_to_ws_wd(ten_min_10minsa['u_component'], ten_min_10minsa['v_component'])
+    ten_min_10minsa = pd.concat([ten_min_10minsa, av_comp_10minsa_10], axis=1)
+
+    # construct title
+    doy = df.index[0].strftime('%j')
+    year = df.index[0].strftime('%Y')
+    title_string = 'Year: ' + year + ', DOY: ' + doy
+
+    plt.figure(figsize=(10, 15))
+
+    spec = gridspec.GridSpec(ncols=1, nrows=2)
+
+    ax1 = plt.subplot(spec[0])
+    ax2 = plt.subplot(spec[1])
+
+    # 1 - WIND DIR
+    # WD
+    ax1.scatter(df_10minsa.index, df_10minsa['wind_direction'], marker='.', alpha=0.15, color='blue', s=10)
+    ax1.scatter(five_min_10minsa.index, five_min_10minsa['wind_direction_convert'], marker='o', alpha=0.4,
+                color='green', s=10)
+    ax1.scatter(ten_min_10minsa.index, ten_min_10minsa['wind_direction_convert'], marker='^', alpha=0.7, color='red',
+                s=10)
+    ax1.scatter(sixty_min.index, sixty_min['wind_direction_convert'], marker='x', alpha=1.0, color='purple', s=10)
+
+    # plot heathrow wind direction
+    ax1.scatter(heath_df.index, heath_df['WD'], color='magenta')
+
+    ax1.plot(mod_time_ws, mod_vals_wd, linewidth=1, color='blue', label=str(mod_height))
+    ax1.plot(mod_time_ws, mod_vals_wd0, linewidth=1, color='red', label=str(mod_height0))
+    ax1.plot(mod_time_ws, mod_vals_wd2, linewidth=1, color='green', label=str(mod_height2))
+
+    ax1.set_ylim(0, 360)
+
+    ax1.set_ylabel('Wind Direction ($^{\circ}$)')
+    ax1.set_xticks([])
+    ax1.set_title(title_string)
+
+    # 2 - WIND SPEED
+    ax2.scatter(df_10minsa.index, df_10minsa['wind_speed'], marker='.', alpha=0.15, color='blue', s=10)
+    ax2.scatter(five_min_10minsa.index, five_min_10minsa['wind_speed'], marker='o', alpha=0.4, color='green', s=10)
+    ax2.scatter(ten_min_10minsa.index, ten_min_10minsa['wind_speed'], marker='^', alpha=0.7, color='red', s=10)
+    ax2.scatter(sixty_min.index, sixty_min['wind_speed'], marker='x', alpha=1.0, color='purple', s=10)
+
+    ax2.plot(mod_time_ws, mod_vals_ws, linewidth=1, color='blue', label=str(mod_height))
+    ax2.plot(mod_time_ws, mod_vals_ws0, linewidth=1, color='red', label=str(mod_height0))
+    ax2.plot(mod_time_ws, mod_vals_ws2, linewidth=1, color='green', label=str(mod_height2))
+
+    ax2.set_ylabel('Wind Speed (m s$^{-1}$)')
+
+    plt.subplots_adjust(wspace=0, hspace=0)
+
+    plt.gcf().autofmt_xdate()
+    ax2.set_xlabel('Time (H)')
+
+    plt.gcf().autofmt_xdate(rotation=0)
+
+    ax1.set_xlim(min(df[~np.isnan(df['wind_speed'])].index), max(df[~np.isnan(df['wind_speed'])].index))
+    ax2.set_xlim(min(df[~np.isnan(df['wind_speed'])].index), max(df[~np.isnan(df['wind_speed'])].index))
+
+    # ax1.set_xlim(min(df[~np.isnan(df['wind_speed_adj'])].index), max(df[~np.isnan(df['wind_speed_adj'])].index))
+    # ax2.set_xlim(min(df[~np.isnan(df['wind_speed_adj'])].index), max(df[~np.isnan(df['wind_speed_adj'])].index))
+
+    ax2.xaxis.set_major_formatter(DateFormatter('%H'))
+
+    plt.legend()
+
+    plt.savefig(savepath + 'test_wind.png', bbox_inches='tight')
+
+    print('end')
+
+
 def plots_vars_mod(all_days_vars, all_days_vars_10minsa,
                    mod_kdown_time, mod_kdown_vals,
                    mod_time_ws, mod_vals_ws,
@@ -595,7 +740,6 @@ def plots_vars_mod(all_days_vars, all_days_vars_10minsa,
     # filter out any times which are NOT unstable
     df_10minsa.loc[df_10minsa.stab_param > -0.03] = np.nan
 
-
     # convery wind speed and direction to u & v components, to average, then convert the averages back
     component_df = wx_u_v_components.ws_wd_to_u_v(df['wind_speed'], df['wind_direction'])
     df = pd.concat([df, component_df], axis=1)
@@ -619,7 +763,6 @@ def plots_vars_mod(all_days_vars, all_days_vars_10minsa,
 
     av_comp_10minsa_10 = wx_u_v_components.u_v_to_ws_wd(ten_min_10minsa['u_component'], ten_min_10minsa['v_component'])
     ten_min_10minsa = pd.concat([ten_min_10minsa, av_comp_10minsa_10], axis=1)
-
 
     # construct title
     doy = df.index[0].strftime('%j')
@@ -646,8 +789,10 @@ def plots_vars_mod(all_days_vars, all_days_vars_10minsa,
     # 1 - WIND DIR
     # WD
     ax1.scatter(df_10minsa.index, df_10minsa['wind_direction'], marker='.', alpha=0.15, color='blue', s=10)
-    ax1.scatter(five_min_10minsa.index, five_min_10minsa['wind_direction_convert'], marker='o', alpha=0.4, color='green', s=10)
-    ax1.scatter(ten_min_10minsa.index, ten_min_10minsa['wind_direction_convert'], marker='^', alpha=0.7, color='red', s=10)
+    ax1.scatter(five_min_10minsa.index, five_min_10minsa['wind_direction_convert'], marker='o', alpha=0.4,
+                color='green', s=10)
+    ax1.scatter(ten_min_10minsa.index, ten_min_10minsa['wind_direction_convert'], marker='^', alpha=0.7, color='red',
+                s=10)
     ax1.scatter(sixty_min.index, sixty_min['wind_direction_convert'], marker='x', alpha=1.0, color='purple', s=10)
 
     # plot heathrow wind direction

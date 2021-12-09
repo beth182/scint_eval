@@ -301,6 +301,7 @@ def sort_models_wind(variable,
         # where model_options[model][2] is z0_index
         z0_index = look_up.model_options[model][2]
         heightindexlon = np.abs(modheightlistlon - (disheight + z0zd[z0_index])).argmin()
+        # heightindexlon = np.abs(modheightlistlon - disheight).argmin()
 
         # if 1D, won't have to unravel
         modheightvaluelon = modheightlistlon[heightindexlon]

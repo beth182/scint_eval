@@ -3,6 +3,7 @@
 from calendar import isleap
 import os
 import sys
+import numpy as np
 from scint_eval.functions import retrieve_var
 from scint_eval.functions import plotting_funs
 from scint_eval.functions import file_read
@@ -38,11 +39,11 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
                                                 )
 
     all_days_vars = retrieve_var.retrive_var(files_obs,
-                                             ['QH', 'wind_direction', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
+                                             ['QH', 'wind_direction', 'wind_speed', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
                                               'sa_area_km2', 'stab_param'])
 
     all_days_vars_10minsa = retrieve_var.retrive_var(files_obs_10minsa,
-                                                     ['QH', 'wind_direction', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
+                                                     ['QH', 'wind_direction', 'wind_speed', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
                                                       'sa_area_km2', 'stab_param'])
 
     ###########################
@@ -128,16 +129,24 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     # file_read.py
     files_ukv_wind = file_read.order_model_stashes('ukv', file_dict_ukv_wind, 'wind')
 
-    ukv_wind = sort_model_wind.sort_models_wind('wind', 'ukv', files_ukv_wind, 145.0, z0zdlist, DOYstart, DOYstop,
+    # calculate height and adjust for roughness length
+    av_10min_zf = np.nanmean(all_days_vars_10minsa['z_f'])
+    av_10min_z0 = np.nanmean(all_days_vars_10minsa['z_0'])
+    av_disheight = av_10min_zf - av_10min_z0
+
+
+    ukv_wind = sort_model_wind.sort_models_wind('wind', 'ukv', files_ukv_wind, av_disheight, z0zdlist, DOYstart, DOYstop,
                                                 'BCT', saveyn,
                                                 savepath, model_format, grid_choice='E')
 
     # define dict for included models
     included_models_ws = {}
-    group_ukv_ws = [ukv_wind[3], ukv_wind[4], ukv_wind[0], ukv_wind[1], ukv_wind[14]]
+    # stringtimelon, stringwindlon, lontimedict, lonwinddict, modheightvaluelon
+    group_ukv_ws = [ukv_wind[3], ukv_wind[4], ukv_wind[0], ukv_wind[1], ukv_wind[6]]
 
     included_models_wd = {}
-    group_ukv_wd = [ukv_wind[3], ukv_wind[5], ukv_wind[0], ukv_wind[2], ukv_wind[14]]
+    # stringtimelon, stringdirlon, lontimedict, londirdict, modheightvaluelon
+    group_ukv_wd = [ukv_wind[3], ukv_wind[5], ukv_wind[0], ukv_wind[2], ukv_wind[6]]
 
     # append to dict
     included_models_ws['ukv'] = group_ukv_ws
@@ -145,6 +154,32 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     mod_time_ws, mod_vals_ws = array_retrieval.retrive_arrays_model(included_models_ws, 'ukv')
     mod_time_wd, mod_vals_wd = array_retrieval.retrive_arrays_model(included_models_wd, 'ukv')
+
+    # level bellow
+    # stringtimelon, stringwindlon0, lontimedict, lonwinddict0, modheightvaluelon
+    group_ukv_ws0 = [ukv_wind[3], ukv_wind[10], ukv_wind[0], ukv_wind[18], ukv_wind[14]]
+    # stringtimelon, stringdirlon0, lontimedict, londirdict0, modheightvaluelon
+    group_ukv_wd0 = [ukv_wind[3], ukv_wind[11], ukv_wind[0], ukv_wind[19], ukv_wind[14]]
+
+    # append to dict
+    included_models_ws0 = {'ukv': group_ukv_ws0}
+    included_models_wd0 = {'ukv': group_ukv_wd0}
+
+    mod_time_ws0, mod_vals_ws0 = array_retrieval.retrive_arrays_model(included_models_ws0, 'ukv')
+    mod_time_wd0, mod_vals_wd0 = array_retrieval.retrive_arrays_model(included_models_wd0, 'ukv')
+
+    # level above
+    # stringtimelon, stringwindlon2, lontimedict, lonwinddict2, modheightvaluelon
+    group_ukv_ws2 = [ukv_wind[3], ukv_wind[12], ukv_wind[0], ukv_wind[20], ukv_wind[15]]
+    # stringtimelon, stringdirlon2, lontimedict, londirdict2, modheightvaluelon
+    group_ukv_wd2 = [ukv_wind[3], ukv_wind[13], ukv_wind[0], ukv_wind[21], ukv_wind[15]]
+
+    # append to dict
+    included_models_ws2 = {'ukv': group_ukv_ws2}
+    included_models_wd2 = {'ukv': group_ukv_wd2}
+
+    mod_time_ws2, mod_vals_ws2 = array_retrieval.retrive_arrays_model(included_models_ws2, 'ukv')
+    mod_time_wd2, mod_vals_wd2 = array_retrieval.retrive_arrays_model(included_models_wd2, 'ukv')
 
     ####################################################################################################################
     # KDOWN
@@ -173,11 +208,15 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     # define dict for included models
     included_models_kdown = {}
+
+    # stringtimelon, stringtemplon, lontimedict, lontempdict, modheightvaluelon
     group_ukv_kdown = [ukv_kdown[5], ukv_kdown[6], ukv_kdown[0], ukv_kdown[1], ukv_kdown[10]]
     # append to dict
     included_models_kdown['ukv'] = group_ukv_kdown
 
+
     mod_time_kdown, mod_vals_kdown = array_retrieval.retrive_arrays_model(included_models_kdown, 'ukv')
+
 
     ####################################################################################################################
 
@@ -245,13 +284,30 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
         'C:/Users/beths/OneDrive - University of Reading/Heathrow 16_18/Heathrow Mean Wind/station_data-201601010000-201612312359_w.csv',
         DOYstart)
 
-    plotting_funs.plots_vars_mod(all_days_vars, all_days_vars_10minsa,
-                                 mod_time_kdown, mod_vals_kdown,
-                                 mod_time_ws, mod_vals_ws,
-                                 mod_time_wd, mod_vals_wd,
-                                 mod_time_qh_wav, mod_vals_qh_wav,
+    # plotting_funs.plots_vars_mod(all_days_vars, all_days_vars_10minsa,
+    #                              mod_time_kdown, mod_vals_kdown,
+    #                              mod_time_ws, mod_vals_ws,
+    #                              mod_time_wd, mod_vals_wd,
+    #                              mod_time_qh_wav, mod_vals_qh_wav,
+    #                              heath_df,
+    #                              savepath)
+
+    # plot wind direction
+
+    assert mod_time_ws.all() == mod_time_wd.all() == mod_time_ws0.all() == mod_time_wd0.all() == mod_time_ws2.all() == mod_time_wd2.all()
+
+    plotting_funs.plot_wind_eval(all_days_vars, all_days_vars_10minsa,
+                                 mod_time_ws, mod_vals_ws, mod_vals_wd, ukv_wind[6],
+                                 mod_vals_ws0, mod_vals_wd0, ukv_wind[14],
+                                 mod_vals_ws2, mod_vals_wd2, ukv_wind[15],
                                  heath_df,
                                  savepath)
+
+    print('end')
+
+
+
+
 
     ###########################
     # plots

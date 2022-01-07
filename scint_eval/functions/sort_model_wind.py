@@ -20,12 +20,10 @@ from scint_eval.functions import plotting_funs
 def sort_models_wind(variable,
                      model,
                      files,
-                     disheight,
-                     z0zd,
+                     target_height,
                      DOYstart,
                      DOYstop,
                      sitechoice,
-                     saveyn,
                      savestring,
                      MO_format,
                      grid_choice=0,
@@ -296,12 +294,17 @@ def sort_models_wind(variable,
         # finds the closest value of model height to observation, and saves the index
         # if there is no observation files, disheight will be returned as an empty list. So this list is replaced by
         # 10 m, in order to still plot model files if they exist.
-        if disheight == []:
-            disheight = 10
+        if target_height == []:
+            target_height = 10
+
+        # why am I doing this in this funtion?
+        # should be removed and done outside
+
         # where model_options[model][2] is z0_index
-        z0_index = look_up.model_options[model][2]
-        heightindexlon = np.abs(modheightlistlon - (disheight + z0zd[z0_index])).argmin()
-        # heightindexlon = np.abs(modheightlistlon - disheight).argmin()
+        # z0_index = look_up.model_options[model][2]
+        # heightindexlon = np.abs(modheightlistlon - (disheight + z0zd[z0_index])).argmin()
+
+        heightindexlon = np.abs(modheightlistlon - target_height).argmin()
 
         # if 1D, won't have to unravel
         modheightvaluelon = modheightlistlon[heightindexlon]
@@ -955,11 +958,9 @@ def sort_models_wind(variable,
         plt.title(sitechoice + ': ' + date_for_title)
 
         plt.gcf().autofmt_xdate()
-        if saveyn == 0:
-            plt.show()
-        if saveyn == 1:
-            pylab.savefig(savestring + str(variable) + '_' + str(model) + '_' + sitechoice + '_' +
-                          str(DOYstart) + '_' + str(DOYstop) + '.png', bbox_inches='tight')
+
+        pylab.savefig(savestring + str(variable) + '_' + str(model) + '_' + sitechoice + '_' +
+                      str(DOYstart) + '_' + str(DOYstop) + '.png', bbox_inches='tight')
 
     except:
         print('WIND PLOTS NOT MADE!!!')

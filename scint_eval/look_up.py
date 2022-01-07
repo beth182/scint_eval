@@ -112,7 +112,8 @@ variables = {'Tair': 'm01s16i004',
              'RH_q': ['m01s16i004', 'm01s00i408', 'm01s00i010'],
              'H': 'm01s03i217',
              'LE': 'm01s03i234',
-             'BL_H': 'm01s03i216'}
+             'BL_H': 'm01s03i216',
+             'z0': 'm01s03i026'}
 
 # dict to help with adding new variables to Model Eval
 # still will have to make edits to sort_obs and sort_models when adding a new variable

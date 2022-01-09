@@ -135,9 +135,10 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     av_disheight = av_10min_zf - av_10min_z0
 
 
-    ukv_wind = sort_model_wind.sort_models_wind('wind', 'ukv', files_ukv_wind, av_disheight, z0zdlist, DOYstart, DOYstop,
-                                                'BCT', saveyn,
-                                                savepath, model_format, grid_choice='E')
+    ukv_wind = sort_model_wind.sort_models_wind('wind', 'ukv', files_ukv_wind, av_disheight, DOYstart, DOYstop,
+                                                'BCT', savepath, model_format, grid_choice='E')
+
+
 
     # define dict for included models
     included_models_ws = {}
@@ -181,6 +182,8 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     mod_time_ws2, mod_vals_ws2 = array_retrieval.retrive_arrays_model(included_models_ws2, 'ukv')
     mod_time_wd2, mod_vals_wd2 = array_retrieval.retrive_arrays_model(included_models_wd2, 'ukv')
 
+    """
+
     ####################################################################################################################
     # KDOWN
     # finding UKV files
@@ -202,9 +205,10 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     # file_read.py
     files_ukv_kdown = file_read.order_model_stashes('ukv', file_dict_ukv_kdown, 'kdown')
 
-    ukv_kdown = sort_model.sort_models('kdown', 'ukv', files_ukv_kdown, 0, z0zdlist, DOYstart, DOYstop,
-                                       'IMU', saveyn,
-                                       savepath, model_format, grid_choice='E')
+    ukv_kdown = sort_model.sort_models('kdown', 'ukv', files_ukv_kdown, 0, DOYstart, DOYstop,
+                                       'IMU', savepath, model_format, grid_choice='E')
+
+
 
     # define dict for included models
     included_models_kdown = {}
@@ -216,8 +220,10 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
 
     mod_time_kdown, mod_vals_kdown = array_retrieval.retrive_arrays_model(included_models_kdown, 'ukv')
+    """
 
 
+    """
     ####################################################################################################################
 
     # QH
@@ -278,11 +284,21 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     mod_time_qh_wav = model_grid_time['WAverage']
     mod_vals_qh_wav = model_grid_vals['WAverage']
+    
+    """
 
     # get heathrow winds
     heath_df = read_ceda_heathrow.read_ceda_heathrow(
-        'C:/Users/beths/OneDrive - University of Reading/Heathrow 16_18/Heathrow Mean Wind/station_data-201601010000-201612312359_w.csv',
+        'C:/Users/beths/OneDrive - University of Reading/London_2016_wind_obs/Heathrow Mean Wind/station_data-201601010000-201612312359_w.csv',
         DOYstart)
+
+    # get LC WD
+    LC_df = read_ceda_heathrow.read_NOAA_LCairport(
+        'C:/Users/beths/OneDrive - University of Reading/London_2016_wind_obs/London_city_2016_03768399999.csv',
+        DOYstart)
+
+    SWT_df = read_ceda_heathrow.read_SWT_sheet('C:/Users/beths/OneDrive - University of Reading/London_2016_wind_obs/SWT_Weather_Data_2016.csv',
+                   DOYstart)
 
     # plotting_funs.plots_vars_mod(all_days_vars, all_days_vars_10minsa,
     #                              mod_time_kdown, mod_vals_kdown,
@@ -300,7 +316,7 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
                                  mod_time_ws, mod_vals_ws, mod_vals_wd, ukv_wind[6],
                                  mod_vals_ws0, mod_vals_wd0, ukv_wind[14],
                                  mod_vals_ws2, mod_vals_wd2, ukv_wind[15],
-                                 heath_df,
+                                 heath_df, LC_df, SWT_df,
                                  savepath)
 
     print('end')
@@ -336,14 +352,14 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 ########################################################################################################################
 # c h o i c e s
 # CHANGE HERE
-DOYstart_choice = 2016142
-DOYstop_choice = 2016142
+# DOYstart_choice = 2016142
+# DOYstop_choice = 2016142
 
 # DOYstart_choice = 2016111
 # DOYstop_choice = 2016111
 
-# DOYstart_choice = 2016118
-# DOYstop_choice = 2016118
+DOYstart_choice = 2016118
+DOYstop_choice = 2016118
 
 sample = '1min'
 obs_level = 'L1'

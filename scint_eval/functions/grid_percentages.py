@@ -466,9 +466,8 @@ def determine_which_model_files(model_site_dict, DOYstart_mod, DOYstop_mod, run,
 
             # sort models
             # models.py
-            ukv = sort_model.sort_models(variable, 'ukv', files_ukv, disheight, z0zdlist, DOYstart_temp, DOYstop_temp,
-                                         site_item, saveyn,
-                                         savepath, model_format, grid_item)
+            ukv = sort_model.sort_models(variable, 'ukv', files_ukv, disheight, DOYstart_temp, DOYstop_temp,
+                                         site_item, savepath, model_format, grid_item)
 
             # appends outputs to lists
             combined_ukv0_list.append(ukv[0])

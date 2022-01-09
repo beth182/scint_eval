@@ -543,7 +543,7 @@ def plot_wind_eval(all_days_vars, all_days_vars_10minsa,
                    mod_time_ws, mod_vals_ws, mod_vals_wd, mod_height,
                    mod_vals_ws0, mod_vals_wd0, mod_height0,
                    mod_vals_ws2, mod_vals_wd2, mod_height2,
-                   heath_df,
+                   heath_df, LC_df, SWT_df,
                    savepath):
     """
 
@@ -623,6 +623,34 @@ def plot_wind_eval(all_days_vars, all_days_vars_10minsa,
     year = df.index[0].strftime('%Y')
     title_string = 'Year: ' + year + ', DOY: ' + doy
 
+    plt.figure(figsize=(7, 7))
+
+    plt.scatter(heath_df['WD'], sixty_min['wind_direction_convert'], color='magenta', label='heathrow ')
+    plt.scatter(LC_df['WD'], heath_df['WD'], color='orange', label='LC')
+    plt.scatter(SWT_df['WD'], heath_df['WD'], color='blue', label='SWT')
+
+    plt.ylabel('dir used for Scint')
+    plt.xlabel('dir from other sites (legend)')
+
+    plt.legend()
+
+    plt.title(title_string)
+
+    plt.xlim(0, 360)
+    plt.ylim(0, 360)
+
+    plt.savefig(savepath + 'wind_scatter.png', bbox_inches='tight')
+
+    print('end')
+
+
+
+
+
+
+
+    """
+
     plt.figure(figsize=(10, 15))
 
     spec = gridspec.GridSpec(ncols=1, nrows=2)
@@ -639,12 +667,14 @@ def plot_wind_eval(all_days_vars, all_days_vars_10minsa,
                 s=10)
     ax1.scatter(sixty_min.index, sixty_min['wind_direction_convert'], marker='x', alpha=1.0, color='purple', s=10)
 
-    # plot heathrow wind direction
-    ax1.scatter(heath_df.index, heath_df['WD'], color='magenta')
+    # plot heathrow and LC wind direction
+    ax1.scatter(heath_df.index, heath_df['WD'], color='magenta', label='heathrow')
+    ax1.scatter(LC_df.index, LC_df['WD'], color='orange', label='LC')
+    ax1.scatter(SWT_df.index, SWT_df['WD'], color='blue', label='SWT')
 
-    ax1.plot(mod_time_ws, mod_vals_wd, linewidth=1, color='blue', label=str(mod_height))
-    ax1.plot(mod_time_ws, mod_vals_wd0, linewidth=1, color='red', label=str(mod_height0))
-    ax1.plot(mod_time_ws, mod_vals_wd2, linewidth=1, color='green', label=str(mod_height2))
+    ax1.plot(mod_time_ws, mod_vals_wd, linewidth=1, color='blue')
+    ax1.plot(mod_time_ws, mod_vals_wd0, linewidth=1, color='red')
+    ax1.plot(mod_time_ws, mod_vals_wd2, linewidth=1, color='green')
 
     ax1.set_ylim(0, 360)
 
@@ -653,14 +683,19 @@ def plot_wind_eval(all_days_vars, all_days_vars_10minsa,
     ax1.set_title(title_string)
 
     # 2 - WIND SPEED
+
+    # plot heathrow wind speed
+    ax2.scatter(heath_df.index, heath_df['WS'], color='magenta', label='25 m asl')
+    ax2.scatter(SWT_df.index, SWT_df['WS'], color='blue', label='55 m asl')
+
     ax2.scatter(df_10minsa.index, df_10minsa['wind_speed'], marker='.', alpha=0.15, color='blue', s=10)
     ax2.scatter(five_min_10minsa.index, five_min_10minsa['wind_speed'], marker='o', alpha=0.4, color='green', s=10)
     ax2.scatter(ten_min_10minsa.index, ten_min_10minsa['wind_speed'], marker='^', alpha=0.7, color='red', s=10)
     ax2.scatter(sixty_min.index, sixty_min['wind_speed'], marker='x', alpha=1.0, color='purple', s=10)
 
-    ax2.plot(mod_time_ws, mod_vals_ws, linewidth=1, color='blue', label=str(mod_height))
-    ax2.plot(mod_time_ws, mod_vals_ws0, linewidth=1, color='red', label=str(mod_height0))
-    ax2.plot(mod_time_ws, mod_vals_ws2, linewidth=1, color='green', label=str(mod_height2))
+    ax2.plot(mod_time_ws, mod_vals_ws, linewidth=1, color='blue', label=str(mod_height)+' aml')
+    ax2.plot(mod_time_ws, mod_vals_ws0, linewidth=1, color='red', label=str(mod_height0)+' aml')
+    ax2.plot(mod_time_ws, mod_vals_ws2, linewidth=1, color='green', label=str(mod_height2)+' aml')
 
     ax2.set_ylabel('Wind Speed (m s$^{-1}$)')
 
@@ -679,9 +714,17 @@ def plot_wind_eval(all_days_vars, all_days_vars_10minsa,
 
     ax2.xaxis.set_major_formatter(DateFormatter('%H'))
 
-    plt.legend()
+    # plt.legend()
+
+    h1, l1 = ax1.get_legend_handles_labels()
+    h2, l2 = ax2.get_legend_handles_labels()
+    ax1.legend(h1, l1)
+    ax2.legend(h2, l2)
+
 
     plt.savefig(savepath + 'test_wind.png', bbox_inches='tight')
+    
+    """
 
     print('end')
 

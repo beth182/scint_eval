@@ -287,6 +287,8 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     
     """
 
+    print('here')
+
     # get heathrow winds
     heath_df = read_ceda_heathrow.read_ceda_heathrow(
         'C:/Users/beths/OneDrive - University of Reading/London_2016_wind_obs/Heathrow Mean Wind/station_data-201601010000-201612312359_w.csv',
@@ -299,6 +301,8 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     SWT_df = read_ceda_heathrow.read_SWT_sheet('C:/Users/beths/OneDrive - University of Reading/London_2016_wind_obs/SWT_Weather_Data_2016.csv',
                    DOYstart)
+
+    print('here here')
 
     # plotting_funs.plots_vars_mod(all_days_vars, all_days_vars_10minsa,
     #                              mod_time_kdown, mod_vals_kdown,
@@ -352,14 +356,14 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 ########################################################################################################################
 # c h o i c e s
 # CHANGE HERE
-# DOYstart_choice = 2016142
-# DOYstop_choice = 2016142
+DOYstart_choice = 2016142
+DOYstop_choice = 2016142
 
 # DOYstart_choice = 2016111
 # DOYstop_choice = 2016111
 
-DOYstart_choice = 2016118
-DOYstop_choice = 2016118
+# DOYstart_choice = 2016118
+# DOYstop_choice = 2016118
 
 sample = '1min'
 obs_level = 'L1'

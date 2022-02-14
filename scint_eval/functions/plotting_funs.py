@@ -11,6 +11,7 @@ import matplotlib.dates as mdates
 import datetime as dt
 from scint_eval import look_up
 from scint_fp.functions import wx_u_v_components
+# from scint_eval.functions import read_ceda_heathrow
 
 
 # function to group labels in the plots -- otherwise, the same label will appear multiple times
@@ -561,6 +562,7 @@ def plot_wind_eval(all_days_vars, all_days_vars_10minsa,
     :return:
     """
 
+
     var_dict = all_days_vars
     time = var_dict['time']
     wind_direction = var_dict['wind_direction']
@@ -623,6 +625,7 @@ def plot_wind_eval(all_days_vars, all_days_vars_10minsa,
     year = df.index[0].strftime('%Y')
     title_string = 'Year: ' + year + ', DOY: ' + doy
 
+    """
     plt.figure(figsize=(7, 7))
 
     plt.scatter(heath_df['WD'], sixty_min['wind_direction_convert'], color='magenta', label='heathrow ')
@@ -642,14 +645,17 @@ def plot_wind_eval(all_days_vars, all_days_vars_10minsa,
     plt.savefig(savepath + 'wind_scatter.png', bbox_inches='tight')
 
     print('end')
-
-
-
-
-
-
-
     """
+
+    # """
+
+
+    # temporary correction to the wind directions
+
+    df_10minsa = read_ceda_heathrow.temp_wd_adj(df_10minsa, 'wind_direction')
+    five_min_10minsa = read_ceda_heathrow.temp_wd_adj(five_min_10minsa, 'wind_direction_convert')
+    ten_min_10minsa = read_ceda_heathrow.temp_wd_adj(ten_min_10minsa, 'wind_direction_convert')
+    sixty_min = read_ceda_heathrow.temp_wd_adj(sixty_min, 'wind_direction_convert')
 
     plt.figure(figsize=(10, 15))
 
@@ -723,10 +729,11 @@ def plot_wind_eval(all_days_vars, all_days_vars_10minsa,
 
 
     plt.savefig(savepath + 'test_wind.png', bbox_inches='tight')
-    
-    """
 
     print('end')
+    
+    # """
+
 
 
 def plots_vars_mod(all_days_vars, all_days_vars_10minsa,

@@ -16,11 +16,6 @@ from scint_eval.functions import sort_model_wind
 from scint_eval.functions import array_retrieval
 from scint_eval.functions import file_read
 
-# choices
-# CHANGE HERE
-# DOY_choice = 2016142
-DOY_choice = 2016111
-
 
 def read_L1_davis_tier_raw(target_DOY, site, average_period, filepath_in):
     """
@@ -246,86 +241,107 @@ def get_model_data_out(DOY_target, files_ukv_wind_in):
     return return_dict
 
 
-# read the observations
-# CHANGE HERE
-# L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/Davis_teir_raw_L1/Davis_BCT_2016142_1min.nc')
-# L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/Davis_teir_raw_L1/Davis_BCT_2016111_1min.nc')
-# L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1,
-#                                "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_raw/data/")
-L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, '/storage/basic/micromet/Tier_raw/data/')
+def loop_over_days(DOY_list):
+    """
 
-# change the L1 wind direction back to the raw state (reset & undo the incorrect metadata system yaw adjustment)
-L1_to_raw_wd = return_L1_to_raw_wd(L1_df.wd_L1)
+    :param DOY_list:
+    :return:
+    """
 
-# correct the wind direction with the new correction
-corrected_wd = correct_obs_wd(L1_to_raw_wd)
+    for DOY in DOY_list:
+        print(' ')
+        print(DOY)
+        print(' ')
 
-# find the predominant wind direction
-predominant_wind = determine_predominant_wd(L1_df.ws_L1, corrected_wd)
-
-# CHANGE HERE
-# files_ukv_wind = [{'ukv2016141': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016052021Z_m01s00i002_LON_IMU.nc'},
-#                   {'ukv2016141': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016052021Z_m01s00i003_LON_IMU.nc'}]
-# files_ukv_wind = [{'ukv2016110': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016041921Z_m01s00i002_LON_IMU.nc'},
-#                   {'ukv2016110': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016041921Z_m01s00i003_LON_IMU.nc'}]
-
-# model_dict = get_model_data_out(DOY_choice, files_ukv_wind)
-
-# model_dict = get_model_data_out(DOY_choice,
-#                                 "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/")
-model_dict = get_model_data_out(DOY_choice, "/storage/basic/micromet/Tier_processing/rv006011/new_data_storage/")
+        catagorize_one_day(DOY)
 
 
-hour_ending_obs = corrected_wd[np.where(corrected_wd.index.minute == 0)[0]]
+def catagorize_one_day(DOY_choice):
+    """
 
-# combine model output with hour ending obs into a df
+    :return:
+    """
 
-UKV_dict_for_df = {'time': model_dict['mod_time_wd'], 'wd_UKV': model_dict['mod_vals_wd']}
+    # read the observations
+    # CHANGE HERE
+    # L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/Davis_teir_raw_L1/Davis_BCT_2016142_1min.nc')
+    # L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/Davis_teir_raw_L1/Davis_BCT_2016111_1min.nc')
+    # L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_raw/data/")
+    L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, '/storage/basic/micromet/Tier_raw/data/')
 
-UKV_df = pd.DataFrame.from_dict(UKV_dict_for_df)
-UKV_df = UKV_df.set_index('time')
+    # change the L1 wind direction back to the raw state (reset & undo the incorrect metadata system yaw adjustment)
+    L1_to_raw_wd = return_L1_to_raw_wd(L1_df.wd_L1)
 
-# combine hour ending obs with the UKV_df
-compare_df = pd.concat([UKV_df, hour_ending_obs], axis=1)
+    # correct the wind direction with the new correction
+    corrected_wd = correct_obs_wd(L1_to_raw_wd)
 
-# find the differences between model and hour ending obs
-compare_df['UKV_obs_diff'] = np.abs(compare_df['wd_UKV'] - compare_df['wd_L1'])
+    # find the predominant wind direction
+    predominant_wind = determine_predominant_wd(L1_df.ws_L1, corrected_wd)
 
-# find the number of hours where this difference is less than 10 degrees
-num_hours_wd_10 = len(np.where(compare_df['UKV_obs_diff'] <= 10)[0])
-num_hours_wd_20 = len(np.where(compare_df['UKV_obs_diff'] <= 20)[0])
-num_hours_wd_30 = len(np.where(compare_df['UKV_obs_diff'] <= 30)[0])
+    # CHANGE HERE
+    # files_ukv_wind = [{'ukv2016141': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016052021Z_m01s00i002_LON_IMU.nc'},
+    #                   {'ukv2016141': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016052021Z_m01s00i003_LON_IMU.nc'}]
+    # files_ukv_wind = [{'ukv2016110': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016041921Z_m01s00i002_LON_IMU.nc'},
+    #                   {'ukv2016110': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016041921Z_m01s00i003_LON_IMU.nc'}]
+    # model_dict = get_model_data_out(DOY_choice, files_ukv_wind)
 
-# return in a csv file
+    # model_dict = get_model_data_out(DOY_choice, "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/")
+    model_dict = get_model_data_out(DOY_choice, "/storage/basic/micromet/Tier_processing/rv006011/new_data_storage/")
 
-# create a dataframe with info that I want to retain
-df_return_dict = {'DOY': [DOY_choice], 'predominant_wind': [predominant_wind.wind_direction_convert[0]],
-                  'Model_wd_score_10': [num_hours_wd_10], 'Model_wd_score_20': [num_hours_wd_20],
-                  'Model_wd_score_30': [num_hours_wd_30]}
+    hour_ending_obs = corrected_wd[np.where(corrected_wd.index.minute == 0)[0]]
 
-df_return = pd.DataFrame.from_dict(df_return_dict)
-df_return = df_return.set_index('DOY')
+    # combine model output with hour ending obs into a df
+    UKV_dict_for_df = {'time': model_dict['mod_time_wd'], 'wd_UKV': model_dict['mod_vals_wd']}
+    UKV_df = pd.DataFrame.from_dict(UKV_dict_for_df)
+    UKV_df = UKV_df.set_index('time')
 
-# CHANGE HERE
-# csv_filepath = 'C:/Users/beths/Desktop/LANDING/categorize_days.csv'
-csv_filepath = '/storage/basic/micromet/Tier_processing/rv006011/temp/categorize_days.csv'
-# csv_filepath = '//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/temp/categorize_days.csv'
+    compare_df = pd.concat([UKV_df, hour_ending_obs], axis=1)
 
-# df_return.to_csv(csv_filepath)
+    # find the differences between model and hour ending obs
+    compare_df['UKV_obs_diff'] = np.abs(compare_df['wd_UKV'] - compare_df['wd_L1'])
+
+    # find the number of hours where this difference is less than 10 degrees
+    num_hours_wd_10 = len(np.where(compare_df['UKV_obs_diff'] <= 10)[0])
+    num_hours_wd_20 = len(np.where(compare_df['UKV_obs_diff'] <= 20)[0])
+    num_hours_wd_30 = len(np.where(compare_df['UKV_obs_diff'] <= 30)[0])
+
+    # create a dataframe with info that I want to retain
+    df_return_dict = {'DOY': [DOY_choice], 'predominant_wind': [predominant_wind.wind_direction_convert[0]],
+                      'Model_wd_score_10': [num_hours_wd_10], 'Model_wd_score_20': [num_hours_wd_20],
+                      'Model_wd_score_30': [num_hours_wd_30]}
+
+    df_return = pd.DataFrame.from_dict(df_return_dict)
+    df_return = df_return.set_index('DOY')
+
+    # CHANGE HERE
+    # csv_filepath = 'C:/Users/beths/Desktop/LANDING/categorize_days.csv'
+    csv_filepath = '/storage/basic/micromet/Tier_processing/rv006011/temp/categorize_days.csv'
+    # csv_filepath = '//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/temp/categorize_days.csv'
+
+    # df_return.to_csv(csv_filepath)
+
+    # open existing csv
+    existing_csv = pd.read_csv(csv_filepath)
+    existing_csv = existing_csv.set_index('DOY')
+
+    combine_df = pd.concat([existing_csv, df_return])
+    combine_df = combine_df[~combine_df.index.duplicated(keep='first')]
+
+    combine_df.to_csv(csv_filepath)
 
 
-# open existing csv
-existing_csv = pd.read_csv(csv_filepath)
-existing_csv = existing_csv.set_index('DOY')
+# choices
+DOY_start = 61
+DOY_stop = 65
+# DOY_stop = 152
 
-combine_df = pd.concat([existing_csv, df_return])
-combine_df = combine_df[~combine_df.index.duplicated(keep='first')]
+DOY_list_in = []
 
-combine_df.to_csv(csv_filepath)
+for i in range(DOY_start, DOY_stop + 1):
+    DOY_construct = int('2016' + str(i).zfill(3))
+    DOY_list_in.append(DOY_construct)
 
-
-
-print('end')
+loop_over_days(DOY_list_in)
 
 # plt.scatter(corrected_wd.index, corrected_wd, marker='.', alpha=0.5, color='grey', label='Corrected Obs')
 # plt.plot(model_dict['mod_time_wd'], model_dict['mod_vals_wd'], label='UKV IMU E', color='blue')

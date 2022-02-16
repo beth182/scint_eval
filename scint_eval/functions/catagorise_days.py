@@ -313,6 +313,20 @@ def catagorize_one_day(DOY_choice):
     df_return = pd.DataFrame.from_dict(df_return_dict)
     df_return = df_return.set_index('DOY')
 
+    plt.scatter(corrected_wd.index, corrected_wd, marker='.', alpha=0.5, color='grey', label='Corrected Obs')
+    plt.plot(model_dict['mod_time_wd'], model_dict['mod_vals_wd'], label='UKV IMU E', color='blue')
+    plt.scatter(hour_ending_obs.index, hour_ending_obs, color='green', marker='o', label='hour-ending obs')
+
+    plt.scatter(compare_df['wd_L1'][np.where(compare_df['UKV_obs_diff'] <= 10)[0]].index,
+                compare_df['wd_L1'][np.where(compare_df['UKV_obs_diff'] <= 10)[0]],
+                s=200, facecolors='none', edgecolors='red', label='w/in 10')
+
+    savefig_path = '/storage/basic/micromet/Tier_processing/rv006011/temp/' + str(DOY_choice) + '.csv'
+    # savefig_path = '//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/temp/' + str(DOY_choice) + '.csv'
+    # savefig_path = 'C:/Users/beths/Desktop/LANDING/' + str(DOY_choice) + '.csv'
+
+    plt.savefig(savefig_path)
+
     # CHANGE HERE
     # csv_filepath = 'C:/Users/beths/Desktop/LANDING/categorize_days.csv'
     csv_filepath = '/storage/basic/micromet/Tier_processing/rv006011/temp/categorize_days.csv'
@@ -330,6 +344,9 @@ def catagorize_one_day(DOY_choice):
     combine_df.to_csv(csv_filepath)
 
 
+
+
+
 # choices
 DOY_start = 61
 DOY_stop = 65
@@ -343,11 +360,4 @@ for i in range(DOY_start, DOY_stop + 1):
 
 loop_over_days(DOY_list_in)
 
-# plt.scatter(corrected_wd.index, corrected_wd, marker='.', alpha=0.5, color='grey', label='Corrected Obs')
-# plt.plot(model_dict['mod_time_wd'], model_dict['mod_vals_wd'], label='UKV IMU E', color='blue')
-# plt.scatter(hour_ending_obs.index, hour_ending_obs, color='green', marker='o', label='hour-ending obs')
-#
-# plt.scatter(compare_df['wd_L1'][np.where(compare_df['UKV_obs_diff'] <= 10)[0]].index,
-#             compare_df['wd_L1'][np.where(compare_df['UKV_obs_diff'] <= 10)[0]],
-#             s=200, facecolors='none', edgecolors='red', label='w/in 10')
-# plt.legend()
+

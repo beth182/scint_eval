@@ -284,7 +284,6 @@ def catagorize_one_day(DOY_choice):
     # files_ukv_wind = [{'ukv2016110': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016041921Z_m01s00i002_LON_IMU.nc'},
     #                   {'ukv2016110': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016041921Z_m01s00i003_LON_IMU.nc'}]
     # model_dict = get_model_data_out(DOY_choice, files_ukv_wind)
-
     # model_dict = get_model_data_out(DOY_choice, "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/")
     model_dict = get_model_data_out(DOY_choice, "/storage/basic/micromet/Tier_processing/rv006011/new_data_storage/")
 
@@ -322,6 +321,9 @@ def catagorize_one_day(DOY_choice):
                 compare_df['wd_L1'][np.where(compare_df['UKV_obs_diff'] <= 10)[0]],
                 s=200, facecolors='none', edgecolors='red', label='w/in 10')
 
+    plt.xlim(min(corrected_wd.index), max(corrected_wd.index))
+
+    # CHANGE HERE
     savefig_path = '/storage/basic/micromet/Tier_processing/rv006011/temp/' + str(DOY_choice) + '.png'
     # savefig_path = '//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/temp/' + str(DOY_choice) + '.png'
     # savefig_path = 'C:/Users/beths/Desktop/LANDING/' + str(DOY_choice) + '.png'
@@ -349,8 +351,8 @@ def catagorize_one_day(DOY_choice):
 
 
 # choices
-DOY_start = 61
-DOY_stop = 65
+DOY_start = 142
+DOY_stop = 142
 # DOY_stop = 152
 
 DOY_list_in = []

@@ -18,8 +18,8 @@ from scint_eval.functions import file_read
 
 # choices
 # CHANGE HERE
-DOY_choice = 2016142
-# DOY_choice = 2016111
+# DOY_choice = 2016142
+DOY_choice = 2016111
 
 
 def read_L1_davis_tier_raw(target_DOY, site, average_period, filepath_in):
@@ -250,9 +250,9 @@ def get_model_data_out(DOY_target, files_ukv_wind_in):
 # CHANGE HERE
 # L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/Davis_teir_raw_L1/Davis_BCT_2016142_1min.nc')
 # L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/Davis_teir_raw_L1/Davis_BCT_2016111_1min.nc')
-L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1,
-                               "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_raw/data/")
-# L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, '/storage/basic/micromet/Tier_raw/data/')
+# L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1,
+#                                "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_raw/data/")
+L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, '/storage/basic/micromet/Tier_raw/data/')
 
 # change the L1 wind direction back to the raw state (reset & undo the incorrect metadata system yaw adjustment)
 L1_to_raw_wd = return_L1_to_raw_wd(L1_df.wd_L1)
@@ -271,9 +271,9 @@ predominant_wind = determine_predominant_wd(L1_df.ws_L1, corrected_wd)
 
 # model_dict = get_model_data_out(DOY_choice, files_ukv_wind)
 
-model_dict = get_model_data_out(DOY_choice,
-                                "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/")
-# model_dict = get_model_data_out(DOY_choice, "/storage/basic/micromet/Tier_processing/rv006011/new_data_storage/")
+# model_dict = get_model_data_out(DOY_choice,
+#                                 "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/")
+model_dict = get_model_data_out(DOY_choice, "/storage/basic/micromet/Tier_processing/rv006011/new_data_storage/")
 
 
 hour_ending_obs = corrected_wd[np.where(corrected_wd.index.minute == 0)[0]]
@@ -306,9 +306,9 @@ df_return_dict = {'DOY': [DOY_choice], 'predominant_wind': [predominant_wind.win
 df_return = pd.DataFrame.from_dict(df_return_dict)
 df_return = df_return.set_index('DOY')
 
-
-csv_filepath = 'C:/Users/beths/Desktop/LANDING/categorize_days.csv'
-# csv_filepath = '/storage/basic/micromet/Tier_processing/rv006011/temp/categorize_days.csv'
+# CHANGE HERE
+# csv_filepath = 'C:/Users/beths/Desktop/LANDING/categorize_days.csv'
+csv_filepath = '/storage/basic/micromet/Tier_processing/rv006011/temp/categorize_days.csv'
 # csv_filepath = '//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/temp/categorize_days.csv'
 
 # df_return.to_csv(csv_filepath)
@@ -318,7 +318,8 @@ csv_filepath = 'C:/Users/beths/Desktop/LANDING/categorize_days.csv'
 existing_csv = pd.read_csv(csv_filepath)
 existing_csv = existing_csv.set_index('DOY')
 
-combine_df = pd.concat([existing_csv, df_return]).drop_duplicates()
+combine_df = pd.concat([existing_csv, df_return])
+combine_df = combine_df[~combine_df.index.duplicated(keep='first')]
 
 combine_df.to_csv(csv_filepath)
 

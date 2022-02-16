@@ -342,7 +342,7 @@ def catagorize_one_day(DOY_choice):
     existing_csv = existing_csv.set_index('DOY')
 
     combine_df = pd.concat([existing_csv, df_return])
-    combine_df = combine_df[~combine_df.index.duplicated(keep='first')]
+    combine_df = combine_df[~combine_df.index.duplicated(keep='last')]
 
     combine_df.to_csv(csv_filepath)
 
@@ -351,7 +351,7 @@ def catagorize_one_day(DOY_choice):
 
 
 # choices
-DOY_start = 152
+DOY_start = 61
 DOY_stop = 152
 
 DOY_list_in = []

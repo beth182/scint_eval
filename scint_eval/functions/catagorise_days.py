@@ -313,6 +313,7 @@ def catagorize_one_day(DOY_choice):
     df_return = pd.DataFrame.from_dict(df_return_dict)
     df_return = df_return.set_index('DOY')
 
+    plt.figure(figsize=(14, 10))
     plt.scatter(corrected_wd.index, corrected_wd, marker='.', alpha=0.5, color='grey', label='Corrected Obs')
     plt.plot(model_dict['mod_time_wd'], model_dict['mod_vals_wd'], label='UKV IMU E', color='blue')
     plt.scatter(hour_ending_obs.index, hour_ending_obs, color='green', marker='o', label='hour-ending obs')

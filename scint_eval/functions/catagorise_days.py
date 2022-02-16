@@ -300,9 +300,9 @@ def catagorize_one_day(DOY_choice):
     compare_df['UKV_obs_diff'] = np.abs(compare_df['wd_UKV'] - compare_df['wd_L1'])
 
     # find the number of hours where this difference is less than 10 degrees
-    num_hours_wd_10 = len(np.where(compare_df['UKV_obs_diff'] <= 10)[0])
-    num_hours_wd_20 = len(np.where(compare_df['UKV_obs_diff'] <= 20)[0])
-    num_hours_wd_30 = len(np.where(compare_df['UKV_obs_diff'] <= 30)[0])
+    num_hours_wd_10 = len(np.where((compare_df['UKV_obs_diff'] >= 350) | (compare_df['UKV_obs_diff'] <= 10))[0])
+    num_hours_wd_20 = len(np.where((compare_df['UKV_obs_diff'] >= 340) | (compare_df['UKV_obs_diff'] <= 20))[0])
+    num_hours_wd_30 = len(np.where((compare_df['UKV_obs_diff'] >= 330) | (compare_df['UKV_obs_diff'] <= 30))[0])
 
     # create a dataframe with info that I want to retain
     df_return_dict = {'DOY': [DOY_choice], 'predominant_wind': [predominant_wind.wind_direction_convert[0]],
@@ -317,8 +317,8 @@ def catagorize_one_day(DOY_choice):
     plt.plot(model_dict['mod_time_wd'], model_dict['mod_vals_wd'], label='UKV IMU E', color='blue')
     plt.scatter(hour_ending_obs.index, hour_ending_obs, color='green', marker='o', label='hour-ending obs')
 
-    plt.scatter(compare_df['wd_L1'][np.where(compare_df['UKV_obs_diff'] <= 10)[0]].index,
-                compare_df['wd_L1'][np.where(compare_df['UKV_obs_diff'] <= 10)[0]],
+    plt.scatter(compare_df['wd_L1'][np.where((compare_df['UKV_obs_diff'] >= 350) | (compare_df['UKV_obs_diff'] <= 10))[0]].index,
+                compare_df['wd_L1'][np.where((compare_df['UKV_obs_diff'] >= 350) | (compare_df['UKV_obs_diff'] <= 10))[0]],
                 s=200, facecolors='none', edgecolors='red', label='w/in 10')
 
     plt.xlim(min(corrected_wd.index), max(corrected_wd.index))
@@ -351,9 +351,8 @@ def catagorize_one_day(DOY_choice):
 
 
 # choices
-DOY_start = 142
-DOY_stop = 142
-# DOY_stop = 152
+DOY_start = 152
+DOY_stop = 152
 
 DOY_list_in = []
 

@@ -321,9 +321,9 @@ def catagorize_one_day(DOY_choice):
                 compare_df['wd_L1'][np.where(compare_df['UKV_obs_diff'] <= 10)[0]],
                 s=200, facecolors='none', edgecolors='red', label='w/in 10')
 
-    savefig_path = '/storage/basic/micromet/Tier_processing/rv006011/temp/' + str(DOY_choice) + '.csv'
-    # savefig_path = '//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/temp/' + str(DOY_choice) + '.csv'
-    # savefig_path = 'C:/Users/beths/Desktop/LANDING/' + str(DOY_choice) + '.csv'
+    savefig_path = '/storage/basic/micromet/Tier_processing/rv006011/temp/' + str(DOY_choice) + '.png'
+    # savefig_path = '//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/temp/' + str(DOY_choice) + '.png'
+    # savefig_path = 'C:/Users/beths/Desktop/LANDING/' + str(DOY_choice) + '.png'
 
     plt.savefig(savefig_path)
 

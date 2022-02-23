@@ -12,7 +12,6 @@ from scint_eval import look_up
 from scint_eval.functions import tools
 from scint_eval.functions import plotting_funs
 
-plt.switch_backend('agg')
 
 
 # ----------------------------------------------------------------------------------------------------------------------

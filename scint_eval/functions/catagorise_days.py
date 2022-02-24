@@ -428,8 +428,8 @@ def catagorize_one_day(DOY_choice):
     compare_df['obs_tau'] = compare_df.kdn_L1_15 / compare_df.solar_radiation
 
     # CHANGE HERE
-    savefig_path = '/storage/basic/micromet/Tier_processing/rv006011/temp/' + str(DOY_choice) + '.png'
-    # savefig_path = '//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/temp/' + str(DOY_choice) + '.png'
+    savefig_path = '/storage/basic/micromet/Tier_processing/rv006011/temp/'
+    # savefig_path = '//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/temp/'
     # savefig_path = 'C:/Users/beths/Desktop/LANDING/'
 
     # csv_filepath = 'C:/Users/beths/Desktop/LANDING/categorize_days.csv'
@@ -460,6 +460,7 @@ def catagorize_one_day(DOY_choice):
     plt.ylabel('$K_{\downarrow}$')
     plt.xlabel('Time (H)')
     plt.legend()
+    plt.xlim(min(compare_df.index), max(compare_df.index))
     plt.savefig(savefig_path + str(DOY_choice) + '_kdown.png')
 
     # WD eval figure
@@ -472,7 +473,7 @@ def catagorize_one_day(DOY_choice):
                 compare_df['corrected_wd_1'][
                     np.where((compare_df['UKV_obs_wd_diff'] >= 350) | (compare_df['UKV_obs_wd_diff'] <= 10))[0]],
                 s=200, facecolors='none', edgecolors='red', label='w/in 10')
-    plt.xlim(min(corrected_wd.index), max(corrected_wd.index))
+    plt.xlim(min(compare_df.index), max(compare_df.index))
     plt.legend()
     plt.xlabel('Time (H)')
     plt.ylabel('Wind Direction ($^\circ$)')
@@ -495,8 +496,8 @@ def catagorize_one_day(DOY_choice):
 
 # CHANGE HERE
 # choices
-DOY_start = 111
-DOY_stop = 111
+DOY_start = 139
+DOY_stop = 152
 # DOY_start = 142
 # DOY_stop = 142
 

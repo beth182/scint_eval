@@ -22,7 +22,7 @@ from scint_eval.functions import array_retrieval
 from scint_eval.functions import file_read
 
 
-def read_L1_davis_tier_raw(target_DOY, site, average_period, filepath_in):
+def read_L1_davis_tier_raw(target_DOY, site, average_period, filepath_in, level='L1'):
     """
     Read L1 nc files from the Davis stations (data located on tier raw & processed automatically)
     :return:
@@ -30,9 +30,9 @@ def read_L1_davis_tier_raw(target_DOY, site, average_period, filepath_in):
 
     DOY_selected = dt.datetime.strptime(str(target_DOY), '%Y%j')
 
-    if filepath_in == "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_raw/data/" or filepath_in == '/storage/basic/micromet/Tier_raw/data/':
+    if filepath_in == "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_raw/data/" or filepath_in == '/storage/basic/micromet/Tier_raw/data/' or filepath_in == '//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_scint/data/':
         filedir = filepath_in + DOY_selected.strftime('%Y') + \
-                  "/London/L1/" + site + "/DAY/" + DOY_selected.strftime('%j') + "/"
+                  "/London/" + level + "/" + site + "/DAY/" + DOY_selected.strftime('%j') + "/"
 
         filename = 'Davis_' + site + '_' + DOY_selected.strftime('%Y') + DOY_selected.strftime('%j') + '_' + str(
             average_period) + 'min.nc'
@@ -76,6 +76,20 @@ def return_L1_to_raw_wd(L1_wd):
     """
 
     correction_values = L1_wd - 305
+    correction_values[np.where(correction_values < 0)[0]] = correction_values[np.where(correction_values < 0)[0]] + 360
+
+    return correction_values
+
+
+def return_L2_TP_to_L1_TR(L2_wd):
+    """
+    Return the L2 data on tier processing back to the L1 processed data on tier raw, i.e. remove my incorrect wind
+    adjustment done by the "Filtering" repo.
+    Currently only works for the second half of 2016 (after 2016061) -- which added 118 degrees.
+    :return:
+    """
+
+    correction_values = L2_wd - 118
     correction_values[np.where(correction_values < 0)[0]] = correction_values[np.where(correction_values < 0)[0]] + 360
 
     return correction_values
@@ -293,8 +307,19 @@ def catagorize_one_day(DOY_choice):
     # CHANGE HERE
     # L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/Davis_teir_raw_L1/Davis_BCT_2016142_1min.nc')
     # L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/Davis_teir_raw_L1/Davis_BCT_2016111_1min.nc')
-    # L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_raw/data/")
-    L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, '/storage/basic/micromet/Tier_raw/data/')
+    L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_raw/data/")
+    # L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, '/storage/basic/micromet/Tier_raw/data/')
+
+
+    # L2_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1,
+    #                                "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_scint/data/",
+    #                                level='L2')
+    # L2_to_L1_wd = return_L2_TP_to_L1_TR(L2_df.wd_L1)
+    # # change the L2_to_L1 back to 'raw'
+    # L2_to_L1_to_raw_wd = return_L1_to_raw_wd(L2_to_L1_wd)
+    # # correct L2_to_L1_to_raw_wd
+    # L2_corrected = correct_obs_wd(L2_to_L1_to_raw_wd)
+
 
     # change the L1 wind direction back to the raw state (reset & undo the incorrect metadata system yaw adjustment)
     L1_to_raw_wd = return_L1_to_raw_wd(L1_df.wd_L1)
@@ -305,6 +330,10 @@ def catagorize_one_day(DOY_choice):
     # correct the wind direction with the new correction
     corrected_wd = correct_obs_wd(obs_df.wd_undo_yaw)
     corrected_wd = corrected_wd.rename('corrected_wd')
+
+
+
+
 
     # put corrected wind back into the observation dataframe
     obs_df = pd.concat([obs_df, corrected_wd], axis=1)
@@ -339,22 +368,22 @@ def catagorize_one_day(DOY_choice):
     # files_ukv_wind = [
     #     {'ukv2016141': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016052021Z_m01s00i002_LON_IMU.nc'},
     #     {'ukv2016141': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016052021Z_m01s00i003_LON_IMU.nc'}]
-    # files_ukv_wind = [
-    #     {'ukv2016110': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016041921Z_m01s00i002_LON_IMU.nc'},
-    #     {'ukv2016110': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016041921Z_m01s00i003_LON_IMU.nc'}]
+    files_ukv_wind = [
+        {'ukv2016110': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016041921Z_m01s00i002_LON_IMU.nc'},
+        {'ukv2016110': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016041921Z_m01s00i003_LON_IMU.nc'}]
 
     # files_ukv_kdown = {
     #     'ukv2016141': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016052021Z_m01s01i235_LON_IMU.nc'}
-    # files_ukv_kdown = {
-    #     'ukv2016110': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016041921Z_m01s01i235_LON_IMU.nc'}
+    files_ukv_kdown = {
+        'ukv2016110': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016041921Z_m01s01i235_LON_IMU.nc'}
 
-    # model_dict_wind = get_model_data_out(DOY_choice, files_ukv_wind, 'wind')
+    model_dict_wind = get_model_data_out(DOY_choice, files_ukv_wind, 'wind')
     # model_dict_wind = get_model_data_out(DOY_choice, "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/", 'wind')
-    model_dict_wind = get_model_data_out(DOY_choice, "/storage/basic/micromet/Tier_processing/rv006011/new_data_storage/", 'wind')
+    # model_dict_wind = get_model_data_out(DOY_choice, "/storage/basic/micromet/Tier_processing/rv006011/new_data_storage/", 'wind')
 
-    # model_dict_kdown = get_model_data_out(DOY_choice, files_ukv_kdown, 'kdown')
+    model_dict_kdown = get_model_data_out(DOY_choice, files_ukv_kdown, 'kdown')
     # model_dict_kdown = get_model_data_out(DOY_choice, "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/", 'kdown')
-    model_dict_kdown = get_model_data_out(DOY_choice, "/storage/basic/micromet/Tier_processing/rv006011/new_data_storage/", 'kdown')
+    # model_dict_kdown = get_model_data_out(DOY_choice, "/storage/basic/micromet/Tier_processing/rv006011/new_data_storage/", 'kdown')
 
     # check if times are the same between kdown and wind model
     assert model_dict_kdown['time'].all() == model_dict_wind['mod_time_wd'].all()
@@ -428,9 +457,9 @@ def catagorize_one_day(DOY_choice):
     compare_df['obs_tau'] = compare_df.kdn_L1_15 / compare_df.solar_radiation
 
     # CHANGE HERE
-    savefig_path = '/storage/basic/micromet/Tier_processing/rv006011/temp/'
+    # savefig_path = '/storage/basic/micromet/Tier_processing/rv006011/temp/'
     # savefig_path = '//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/temp/'
-    # savefig_path = 'C:/Users/beths/Desktop/LANDING/'
+    savefig_path = 'C:/Users/beths/Desktop/LANDING/'
 
     # csv_filepath = 'C:/Users/beths/Desktop/LANDING/categorize_days.csv'
     csv_filepath = '/storage/basic/micromet/Tier_processing/rv006011/temp/categorize_days.csv'
@@ -496,8 +525,8 @@ def catagorize_one_day(DOY_choice):
 
 # CHANGE HERE
 # choices
-DOY_start = 139
-DOY_stop = 152
+DOY_start = 111
+DOY_stop = 111
 # DOY_start = 142
 # DOY_stop = 142
 

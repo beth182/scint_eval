@@ -226,7 +226,7 @@ def sort_models(variable,
                         continue
 
                 # surface level variables
-                elif variable == 'kdown' or variable == 'kup' or variable == 'ldown' or variable == 'lup' or variable == 'netallwave' or variable == 'H' or variable == 'LE':
+                elif variable == 'kdown' or variable == 'kup' or variable == 'ldown' or variable == 'lup' or variable == 'netallwave' or variable == 'H' or variable == 'LE' or variable == 'lstar':
                     modheightlon = np.zeros(70)
                     modheightlistlon = modheightlon[:] + altitude
 
@@ -574,6 +574,20 @@ def sort_models(variable,
                 print("LUP ISN'T POSSIBLE YET FOR NEW MO FORMAT!")
                 sys.exit()
 
+        elif variable == 'lstar':
+            if MO_format == 'old':
+                print(' ')
+                print("LSTAR ISN'T POSSIBLE FOR OLD MO FORMAT!")
+                sys.exit()
+
+            elif MO_format == 'new':
+                modtemplon = modlon_ncfile.variables['surface_net_longwave_flux_in_air']
+                modtempvalueslon = modtemplon[index_lat, index_lon, index_to_start:index_to_start + hoursbeforerepeat]
+
+                # taking the next closest heights
+                modtempvalueslon0 = modtemplon[index_lat, index_lon, index_to_start:index_to_start + hoursbeforerepeat]
+                modtempvalueslon2 = modtemplon[index_lat, index_lon, index_to_start:index_to_start + hoursbeforerepeat]
+
         elif variable == 'netallwave':
             if MO_format == 'old':
                 # calculates net allwave radiation
@@ -755,7 +769,7 @@ def sort_models(variable,
                     print('MO_format not an option.')
                     sys.exit()
 
-            elif variable == 'kdown' or variable == 'kup' or variable == 'ldown' or variable == 'lup':
+            elif variable == 'kdown' or variable == 'kup' or variable == 'ldown' or variable == 'lup' or variable == 'lstar':
                 if MO_format == 'old':
                     modtempvalueslonmean = np.mean(modtemplon[0, i, :, :])
                 elif MO_format == 'new':

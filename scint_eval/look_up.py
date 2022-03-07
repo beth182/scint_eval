@@ -109,6 +109,7 @@ variables = {'Tair': 'm01s16i004',
              'kdown': 'm01s01i235',
              'ldown': 'm01s02i207',
              'kup': ['m01s01i235', 'm01s01i201'],
+             'lstar': 'm01s02i201',
              'RH_q': ['m01s16i004', 'm01s00i408', 'm01s00i010'],
              'H': 'm01s03i217',
              'LE': 'm01s03i234',
@@ -141,6 +142,8 @@ variable_info = {'Tair': ['Air Temperature ($^{\circ}$C)', 'levels', '$^{\circ}$
                            [0, 400]],
 
                  'ldown': ['Incoming Longwave Radiation (W m$^{-2}$)', 'surface', 'W m$^{-2}$', [0.5, 1.0], 2.0, []],
+
+                 'lstar': ['Net Longwave Radiation (W m$^{-2}$)', 'surface', 'W m$^{-2}$', [0.5, 1.0], 2.0, []],
 
                  'lup': ['Outgoing Longwave Radiation (W m$^{-2}$)', 'surface', 'W m$^{-2}$', [0.5, 1.0], 2.0, []],
 

@@ -67,49 +67,13 @@ def read_L1_davis_tier_raw(target_DOY, site, average_period, filepath_in, level=
     return df
 
 
-def return_L1_to_raw_wd(L1_wd):
-    """
-    Return the L1 data on tier raw back to "raw" observed wind direction, i.e. remove the automatic processing
-    yaw adjustment (which was 305 clockwise from north)
-    :param L1_wd:
-    :return:
-    """
-
-    correction_values = L1_wd - 305
-    correction_values[np.where(correction_values < 0)[0]] = correction_values[np.where(correction_values < 0)[0]] + 360
-
-    return correction_values
 
 
-def return_L2_TP_to_L1_TR(L2_wd):
-    """
-    Return the L2 data on tier processing back to the L1 processed data on tier raw, i.e. remove my incorrect wind
-    adjustment done by the "Filtering" repo.
-    Currently only works for the second half of 2016 (after 2016061) -- which added 118 degrees.
-    :return:
-    """
-
-    correction_values = L2_wd - 118
-    correction_values[np.where(correction_values < 0)[0]] = correction_values[np.where(correction_values < 0)[0]] + 360
-
-    return correction_values
 
 
-def correct_obs_wd(wd_df):
-    """
-    Correct the observed wind direction at BCT
-    :param wd_df:
-    :return:
-    """
 
-    gradient_corr = 1.0127371278374382
-    intercept_corr = -26.154468937819814
 
-    # apply adjust
-    # y = mx + c  ->  x = (y - c)/m, where x will be BCT adjusted, y will be BCT raw
-    bct_adj = (wd_df - intercept_corr) / gradient_corr
 
-    return bct_adj
 
 
 def determine_predominant_wd(wind_speed, wind_dir):

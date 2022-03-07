@@ -29,21 +29,23 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     # file_read.py
     files_obs = file_read.finding_files(model_format, 'obs', DOYstart, DOYstop, obs_site, run, instrument, sample,
                                         variable, obs_level,
-                                        obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
+                                        obs_path='C:/Users/beths/Desktop/LANDING/data_wifi_problems/data/',
+                                        # obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
                                         )
 
     files_obs_10minsa = file_read.finding_files(model_format, 'obs', DOYstart, DOYstop, obs_site, run, instrument,
                                                 '1min_sa10min',
                                                 variable, obs_level,
-                                                obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
+                                                obs_path='C:/Users/beths/Desktop/LANDING/data_wifi_problems/data/',
+                                                # obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
                                                 )
 
     all_days_vars = retrieve_var.retrive_var(files_obs,
-                                             ['QH', 'wind_direction', 'wind_speed', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
+                                             ['QH', 'wind_direction_corrected', 'wind_speed', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
                                               'sa_area_km2', 'stab_param'])
 
     all_days_vars_10minsa = retrieve_var.retrive_var(files_obs_10minsa,
-                                                     ['QH', 'wind_direction', 'wind_speed', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
+                                                     ['QH', 'wind_direction_corrected', 'wind_speed', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
                                                       'sa_area_km2', 'stab_param'])
 
     ###########################
@@ -182,7 +184,7 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     mod_time_ws2, mod_vals_ws2 = array_retrieval.retrive_arrays_model(included_models_ws2, 'ukv')
     mod_time_wd2, mod_vals_wd2 = array_retrieval.retrive_arrays_model(included_models_wd2, 'ukv')
 
-    """
+    # """
 
     ####################################################################################################################
     # KDOWN
@@ -220,10 +222,10 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
 
     mod_time_kdown, mod_vals_kdown = array_retrieval.retrive_arrays_model(included_models_kdown, 'ukv')
-    """
+    # """
 
 
-    """
+    # """
     ####################################################################################################################
 
     # QH
@@ -236,6 +238,10 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     elif DOYstart == 2016111:
         sa_hours_avail = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+    elif DOYstart == 2016126:
+        sa_hours_avail = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]  # 126
+    elif DOYstart == 2016123:
+        sa_hours_avail = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]  # 123
     else:
         print('make a doy choice w/ sas')
         sys.exit()
@@ -285,7 +291,7 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     mod_time_qh_wav = model_grid_time['WAverage']
     mod_vals_qh_wav = model_grid_vals['WAverage']
     
-    """
+    # """
 
     print('here')
 
@@ -304,13 +310,29 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     print('here here')
 
-    # plotting_funs.plots_vars_mod(all_days_vars, all_days_vars_10minsa,
-    #                              mod_time_kdown, mod_vals_kdown,
-    #                              mod_time_ws, mod_vals_ws,
-    #                              mod_time_wd, mod_vals_wd,
-    #                              mod_time_qh_wav, mod_vals_qh_wav,
-    #                              heath_df,
-    #                              savepath)
+    plotting_funs.plots_vars_mod(all_days_vars, all_days_vars_10minsa,
+                                 mod_time_kdown, mod_vals_kdown,
+                                 mod_time_ws, mod_vals_ws,
+                                 mod_time_wd, mod_vals_wd,
+                                 mod_time_qh_wav, mod_vals_qh_wav,
+                                 heath_df,
+                                 savepath)
+
+    plotting_funs.QH_over_Kdn(all_days_vars, all_days_vars_10minsa,
+                                 mod_time_kdown, mod_vals_kdown,
+                                 mod_time_ws, mod_vals_ws,
+                                 mod_time_wd, mod_vals_wd,
+                                 mod_time_qh_wav, mod_vals_qh_wav,
+                                 heath_df,
+                                 savepath)
+
+
+    print('end')
+
+
+
+
+
 
     # plot wind direction
 
@@ -356,8 +378,12 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 ########################################################################################################################
 # c h o i c e s
 # CHANGE HERE
-DOYstart_choice = 2016142
-DOYstop_choice = 2016142
+
+DOYstart_choice = 2016126
+DOYstop_choice = 2016126
+
+# DOYstart_choice = 2016142
+# DOYstop_choice = 2016142
 
 # DOYstart_choice = 2016111
 # DOYstop_choice = 2016111

@@ -734,6 +734,85 @@ def plot_wind_eval(all_days_vars, all_days_vars_10minsa,
     
     # """
 
+def QH_over_Kdn(all_days_vars, all_days_vars_10minsa,
+                   mod_kdown_time, mod_kdown_vals,
+                   mod_time_ws, mod_vals_ws,
+                   mod_time_wd, mod_vals_wd,
+                   mod_time_qh_wav, mod_vals_qh_wav,
+                   heath_df,
+                   savepath):
+    """
+
+    :param all_days_vars:
+    :param all_days_vars_10minsa:
+    :param mod_kdown_time:
+    :param mod_kdown_vals:
+    :param mod_time_ws:
+    :param mod_vals_ws:
+    :param mod_time_wd:
+    :param mod_vals_wd:
+    :param mod_time_qh_wav:
+    :param mod_vals_qh_wav:
+    :param heath_df:
+    :param savepath:
+    :return:
+    """
+
+    # SA 10 min data
+    var_dict_10minsa = all_days_vars_10minsa
+    time_10minsa = var_dict_10minsa['time']
+    stab_param_10minsa = var_dict_10minsa['stab_param']
+    wind_direction_10minsa = var_dict_10minsa['wind_direction_corrected']
+    wind_speed_10minsa = var_dict_10minsa['wind_speed_adj']
+    kdown_10minsa = var_dict_10minsa['kdown']
+    QH_10minsa = var_dict_10minsa['QH']
+    area_10minsa = var_dict_10minsa['sa_area_km2']
+    z_0_10minsa = var_dict_10minsa['z_0']
+    z_d_10minsa = var_dict_10minsa['z_d']
+    z_f_10minsa = var_dict_10minsa['z_f']
+    df_dict_10minsa = {'time': time_10minsa, 'QH': QH_10minsa, 'z_f': z_f_10minsa,
+                       'wind_direction': wind_direction_10minsa, 'wind_speed': wind_speed_10minsa,
+                       'kdown': kdown_10minsa, 'z_0': z_0_10minsa, 'z_d': z_d_10minsa, 'area': area_10minsa,
+                       'stab_param': stab_param_10minsa}
+    df_10minsa = pd.DataFrame(df_dict_10minsa)
+    df_10minsa = df_10minsa.set_index('time')
+    df_10minsa.index = df_10minsa.index.round('1s')
+    # filter out any times which are NOT unstable
+    df_10minsa.loc[df_10minsa.stab_param > -0.03] = np.nan
+
+    # average df
+    av_df = df_10minsa.resample('15T', closed='right', label='right').mean()
+
+    plt.plot(av_df.index, av_df.QH / av_df.kdown)
+    plt.plot()
+
+    # make a model df
+
+    model_df_dict_kdown = {'time': mod_kdown_time, 'kdown': mod_kdown_vals}
+    model_df_dict_qh = {'time': mod_time_qh_wav, 'QH': mod_vals_qh_wav}
+
+    df_UKV_kdown = pd.DataFrame.from_dict(model_df_dict_kdown)
+    df_UKV_kdown = df_UKV_kdown.set_index('time')
+
+    df_UKV_QH = pd.DataFrame.from_dict(model_df_dict_qh)
+    df_UKV_QH = df_UKV_QH.set_index('time')
+
+    df_UKV = pd.concat([df_UKV_kdown, df_UKV_QH], axis=1)
+
+    plt.figure(figsize=(10,10))
+    plt.plot(df_UKV.index, df_UKV.QH / df_UKV.kdown, marker='.', label='UKV', color='blue')
+    plt.plot(av_df.index, av_df.QH / av_df.kdown, marker='.', label='15 min av obs', color='orange')
+
+    plt.gca().xaxis.set_major_formatter(DateFormatter('%H'))
+
+    plt.legend()
+
+    plt.ylabel('$Q_{H}$ / $K_{\downarrow}$')
+    plt.xlabel('Time (H)')
+
+    plt.show()
+
+    print('end')
 
 
 def plots_vars_mod(all_days_vars, all_days_vars_10minsa,
@@ -752,7 +831,7 @@ def plots_vars_mod(all_days_vars, all_days_vars_10minsa,
     var_dict = all_days_vars
     time = var_dict['time']
     stab_param = var_dict['stab_param']
-    wind_direction = var_dict['wind_direction']
+    wind_direction = var_dict['wind_direction_corrected']
     wind_speed = var_dict['wind_speed_adj']
     kdown = var_dict['kdown']
     QH = var_dict['QH']
@@ -772,7 +851,7 @@ def plots_vars_mod(all_days_vars, all_days_vars_10minsa,
     var_dict_10minsa = all_days_vars_10minsa
     time_10minsa = var_dict_10minsa['time']
     stab_param_10minsa = var_dict_10minsa['stab_param']
-    wind_direction_10minsa = var_dict_10minsa['wind_direction']
+    wind_direction_10minsa = var_dict_10minsa['wind_direction_corrected']
     wind_speed_10minsa = var_dict_10minsa['wind_speed_adj']
     kdown_10minsa = var_dict_10minsa['kdown']
     QH_10minsa = var_dict_10minsa['QH']

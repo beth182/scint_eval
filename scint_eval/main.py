@@ -55,7 +55,8 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     # file_read.py
     files_obs = file_read.finding_files(model_format, 'obs', DOYstart, DOYstop, obs_site, run, instrument, sample,
                                         variable, obs_level,
-                                        obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
+                                        obs_path = 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/data/',
+                                        # obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
                                         )
 
     # define roughness and displacemet
@@ -105,6 +106,14 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     elif DOYstart == 2016142:
         sa_hours_avail = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]  # 142
         in_dir_sa_list = 'C:/Users/beths/Desktop/LANDING/fp_output/142/hourly/'
+    elif DOYstart == 2016126:
+        sa_hours_avail = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]  # 126
+        in_dir_sa_list = 'C:/Users/beths/Desktop/LANDING/fp_output/126/hourly/'
+    elif DOYstart == 2016123:
+        sa_hours_avail = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]  # 123
+        in_dir_sa_list = 'C:/Users/beths/Desktop/LANDING/fp_output/123/hourly/'
+
+
     else:
         print('DOY NOT A CHOICE')
 
@@ -166,14 +175,13 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
                                                                                 model_grid_time['WAverage'],
                                                                                 model_grid_vals['WAverage'])
 
-    return time_eval, obs_vals_eval, mod_vals_eval
+    plotting_funs.detailed_time_series(obs_time, obs_vals,
+                                       model_grid_time, model_grid_vals,
+                                       variable, savepath, DOYstart, DOYstop,
+                                       model_site_dict,
+                                       percentage_covered_by_model)
 
-    # plotting_funs.detailed_time_series(obs_time, obs_vals,
-    #                                    time_eval, obs_vals_eval,
-    #                                    model_grid_time, model_grid_vals,
-    #                                    variable, zeff, savepath, DOYstart, DOYstop,
-    #                                    model_site_dict,
-    #                                    percentage_covered_by_model)
+    return time_eval, obs_vals_eval, mod_vals_eval
 
 
 
@@ -224,8 +232,11 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 # DOYstart_choice = 2016111
 # DOYstop_choice = 2016111
 
-DOYstart_choice = 2016142
-DOYstop_choice = 2016142
+# DOYstart_choice = 2016142
+# DOYstop_choice = 2016142
+
+DOYstart_choice = 2016123
+DOYstop_choice = 2016123
 
 sample = '1min_sa10min'
 obs_level = 'L1'
@@ -280,16 +291,18 @@ if __name__ == "__main__":
     if not os.path.exists(save_folder):
         os.mkdir(save_folder)
 
-    time_eval_142, obs_vals_eval_142, mod_vals_eval_142 = main(obs_site, DOYstart_choice, DOYstop_choice, variable, save_folder, 1, run,
+    time_eval, obs_vals_eval, mod_vals_eval = main(obs_site, DOYstart_choice, DOYstop_choice, variable, save_folder, 1, run,
          instrument, sample, model_format, obs_level, scint_path)
 
-    time_eval_111, obs_vals_eval_111, mod_vals_eval_111 = main(obs_site, 2016111, 2016111, variable,
-                                                               save_folder, 1, run,
-                                                               instrument, sample, model_format, obs_level, scint_path)
-
-    eval_functions.plot_difference(mod_vals_eval_142, obs_vals_eval_142, time_eval_142,
-                                   mod_vals_eval_111, obs_vals_eval_111, time_eval_111,
-                                   save_folder)
+    # time_eval_142, obs_vals_eval_142, mod_vals_eval_142 = main(obs_site, DOYstart_choice, DOYstop_choice, variable, save_folder, 1, run,
+    #      instrument, sample, model_format, obs_level, scint_path)
+    # time_eval_111, obs_vals_eval_111, mod_vals_eval_111 = main(obs_site, 2016111, 2016111, variable,
+    #                                                            save_folder, 1, run,
+    #                                                            instrument, sample, model_format, obs_level, scint_path)
+    #
+    # eval_functions.plot_difference(mod_vals_eval_142, obs_vals_eval_142, time_eval_142,
+    #                                mod_vals_eval_111, obs_vals_eval_111, time_eval_111,
+    #                                save_folder)
 
 print(' ')
 print(' ')

@@ -11,7 +11,7 @@ import numpy as np
 from scint_eval import look_up
 from scint_eval.functions import plotting_funs
 
-mpl.rcParams.update({'font.size': 20})  # updating the matplotlib fontsize
+# mpl.rcParams.update({'font.size': 20})  # updating the matplotlib fontsize
 
 
 # ----------------------------------------------------------------------------------------------------------------------

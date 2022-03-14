@@ -869,6 +869,10 @@ def plots_vars_mod(all_days_vars, all_days_vars_10minsa,
     # filter out any times which are NOT unstable
     df_10minsa.loc[df_10minsa.stab_param > -0.03] = np.nan
 
+    # set wind direction column to nan when there are no wind speed data (which will only be there for unstable periods,
+    # as they have gone through a correction process dependent on stability)
+    df_10minsa['wind_direction'].iloc[np.where(np.isnan(df_10minsa['wind_speed']))] = np.nan
+
     # convery wind speed and direction to u & v components, to average, then convert the averages back
     component_df = wx_u_v_components.ws_wd_to_u_v(df['wind_speed'], df['wind_direction'])
     df = pd.concat([df, component_df], axis=1)
@@ -925,7 +929,7 @@ def plots_vars_mod(all_days_vars, all_days_vars_10minsa,
     ax1.scatter(sixty_min.index, sixty_min['wind_direction_convert'], marker='x', alpha=1.0, color='purple', s=10)
 
     # plot heathrow wind direction
-    ax1.scatter(heath_df.index, heath_df['WD'], color='magenta')
+    # ax1.scatter(heath_df.index, heath_df['WD'], color='magenta')
 
     ax1.plot(mod_time_wd, mod_vals_wd, linewidth=1, color='blue')
 
@@ -1011,14 +1015,15 @@ def plots_vars_mod(all_days_vars, all_days_vars_10minsa,
     plt.gcf().autofmt_xdate(rotation=0)
     ax8.xaxis.set_major_formatter(DateFormatter('%H'))
     ax7.xaxis.set_major_formatter(DateFormatter('%H'))
-    ax1.set_xlim(min(df[~np.isnan(df['QH'])].index), max(df[~np.isnan(df['QH'])].index))
-    ax2.set_xlim(min(df[~np.isnan(df['QH'])].index), max(df[~np.isnan(df['QH'])].index))
-    ax3.set_xlim(min(df[~np.isnan(df['QH'])].index), max(df[~np.isnan(df['QH'])].index))
-    ax4.set_xlim(min(df[~np.isnan(df['QH'])].index), max(df[~np.isnan(df['QH'])].index))
-    ax5.set_xlim(min(df[~np.isnan(df['QH'])].index), max(df[~np.isnan(df['QH'])].index))
-    ax6.set_xlim(min(df[~np.isnan(df['QH'])].index), max(df[~np.isnan(df['QH'])].index))
-    ax7.set_xlim(min(df[~np.isnan(df['QH'])].index), max(df[~np.isnan(df['QH'])].index))
-    ax8.set_xlim(min(df[~np.isnan(df['QH'])].index), max(df[~np.isnan(df['QH'])].index))
+
+    ax1.set_xlim(min(df_10minsa[~np.isnan(df_10minsa['QH'])].index), max(df[~np.isnan(df_10minsa['QH'])].index))
+    ax2.set_xlim(min(df_10minsa[~np.isnan(df_10minsa['QH'])].index), max(df[~np.isnan(df_10minsa['QH'])].index))
+    ax3.set_xlim(min(df_10minsa[~np.isnan(df_10minsa['QH'])].index), max(df[~np.isnan(df_10minsa['QH'])].index))
+    ax4.set_xlim(min(df_10minsa[~np.isnan(df_10minsa['QH'])].index), max(df[~np.isnan(df_10minsa['QH'])].index))
+    ax5.set_xlim(min(df_10minsa[~np.isnan(df_10minsa['QH'])].index), max(df[~np.isnan(df_10minsa['QH'])].index))
+    ax6.set_xlim(min(df_10minsa[~np.isnan(df_10minsa['QH'])].index), max(df[~np.isnan(df_10minsa['QH'])].index))
+    ax7.set_xlim(min(df_10minsa[~np.isnan(df_10minsa['QH'])].index), max(df[~np.isnan(df_10minsa['QH'])].index))
+    ax8.set_xlim(min(df_10minsa[~np.isnan(df_10minsa['QH'])].index), max(df[~np.isnan(df_10minsa['QH'])].index))
 
     # plt.gcf().autofmt_xdate(rotation=0)
     # ax8.xaxis.set_major_formatter(DateFormatter('%H:%M'))

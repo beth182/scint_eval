@@ -142,7 +142,7 @@ def detailed_time_series(obs_time, obs_vals,
 
     plt.gcf().autofmt_xdate()
 
-    date_for_title = 'DOY ' + str(DOYstart) + ' - ' + str(DOYstop)
+    date_for_title = 'DOY ' + str(DOYstart)[-3:]
     ax1.set_title(date_for_title)
 
     # ax1.legend(bbox_to_anchor=(1, 0.5), fontsize=15, loc='center left')
@@ -257,7 +257,7 @@ def detailed_time_series_kdown(obs_time, obs_vals,
 
     plt.gcf().autofmt_xdate()
 
-    date_for_title = 'DOY ' + str(DOYstart) + ' - ' + str(DOYstop)
+    date_for_title = 'DOY ' + str(DOYstart)[-3:]
     ax1.set_title(date_for_title)
 
     # ax1.legend(bbox_to_anchor=(1, 0.5), fontsize=15, loc='center left')

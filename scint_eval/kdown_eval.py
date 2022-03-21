@@ -95,12 +95,28 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     # Take only hours with SA made
     # list of hours with SA made
-    # CHANGE HERE
     # sa_hours_avail = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     # sa_hours_avail = [1]
     # sa_hours_avail = [1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23, 0]
-    sa_hours_avail = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]  # 142
+    # sa_hours_avail = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]  # 142
     # sa_hours_avail = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]  # 111
+
+    if DOYstart == 2016111:
+        sa_hours_avail = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]  # 111
+        in_dir_sa_list = 'C:/Users/beths/Desktop/LANDING/fp_output/111/hourly/'
+    elif DOYstart == 2016142:
+        sa_hours_avail = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]  # 142
+        in_dir_sa_list = 'C:/Users/beths/Desktop/LANDING/fp_output/142/hourly/'
+    elif DOYstart == 2016126:
+        sa_hours_avail = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]  # 126
+        in_dir_sa_list = 'C:/Users/beths/Desktop/LANDING/fp_output/126/hourly/'
+    elif DOYstart == 2016123:
+        sa_hours_avail = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]  # 123
+        in_dir_sa_list = 'C:/Users/beths/Desktop/LANDING/fp_output/123/hourly/'
+
+
+    else:
+        print('DOY NOT A CHOICE')
 
     time = []
     vals = []
@@ -111,7 +127,7 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     # find source area raster
     sa_list = find_source_area.find_source_area(time=time,
-                                                in_dir='C:/Users/beths/Desktop/LANDING/fp_output/142/hourly/')  # CHANGE HERE
+                                                in_dir=in_dir_sa_list)
 
     model_site_dict, percentage_vals_dict, percentage_covered_by_model = grid_percentages.prepare_model_grid_percentages(
         time=time,
@@ -197,8 +213,14 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 # DOYstart_choice = 2016111
 # DOYstop_choice = 2016111
 
-DOYstart_choice = 2016142
-DOYstop_choice = 2016142
+# DOYstart_choice = 2016142
+# DOYstop_choice = 2016142
+
+# DOYstart_choice = 2016126
+# DOYstop_choice = 2016126
+
+DOYstart_choice = 2016123
+DOYstop_choice = 2016123
 
 sample = '1min_sa10min'
 obs_level = 'L1'

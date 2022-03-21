@@ -127,7 +127,7 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     # find source area raster
     sa_list = find_source_area.find_source_area(time=time,
-                                                in_dir=in_dir_sa_list)  # CHANGE HERE
+                                                in_dir=in_dir_sa_list)
 
     model_site_dict, percentage_vals_dict, percentage_covered_by_model = grid_percentages.prepare_model_grid_percentages(
         time=time,
@@ -235,8 +235,8 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 # DOYstart_choice = 2016142
 # DOYstop_choice = 2016142
 
-DOYstart_choice = 2016123
-DOYstop_choice = 2016123
+DOYstart_choice = 2016126
+DOYstop_choice = 2016126
 
 sample = '1min_sa10min'
 obs_level = 'L1'

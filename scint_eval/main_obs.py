@@ -52,30 +52,30 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     ###########################
     # DOY 142
-    files_obs_123 = file_read.finding_files(model_format, 'obs', 2016123, 2016123, obs_site, run, instrument, sample,
-                                            variable, obs_level,
-                                            obs_path='C:/Users/beths/Desktop/LANDING/data_wifi_problems/data/',
-                                            # obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
-                                            )
-
-    files_obs_10minsa_123 = file_read.finding_files(model_format, 'obs', 2016123, 2016123, obs_site, run, instrument, '1min_sa10min',
-                                        variable, obs_level,
-                                                    obs_path='C:/Users/beths/Desktop/LANDING/data_wifi_problems/data/',
-                                        # obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
-                                        )
-
-    all_days_vars_123 = retrieve_var.retrive_var(files_obs_123,
-                                             ['QH', 'wind_direction_corrected', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
-                                              'sa_area_km2', 'stab_param'])
-
-    all_days_vars_10minsa_123 = retrieve_var.retrive_var(files_obs_10minsa_123,
-                                                     ['QH', 'wind_direction_corrected', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
-                                                      'sa_area_km2', 'stab_param'])
+    # files_obs_123 = file_read.finding_files(model_format, 'obs', 2016123, 2016123, obs_site, run, instrument, sample,
+    #                                         variable, obs_level,
+    #                                         obs_path='C:/Users/beths/Desktop/LANDING/data_wifi_problems/data/',
+    #                                         # obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
+    #                                         )
+    #
+    # files_obs_10minsa_123 = file_read.finding_files(model_format, 'obs', 2016123, 2016123, obs_site, run, instrument, '1min_sa10min',
+    #                                     variable, obs_level,
+    #                                                 obs_path='C:/Users/beths/Desktop/LANDING/data_wifi_problems/data/',
+    #                                     # obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
+    #                                     )
+    #
+    # all_days_vars_123 = retrieve_var.retrive_var(files_obs_123,
+    #                                          ['QH', 'wind_direction_corrected', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
+    #                                           'sa_area_km2', 'stab_param'])
+    #
+    # all_days_vars_10minsa_123 = retrieve_var.retrive_var(files_obs_10minsa_123,
+    #                                                  ['QH', 'wind_direction_corrected', 'wind_speed_adj', 'kdown', 'z_0', 'z_d',
+    #                                                   'sa_area_km2', 'stab_param'])
 
     ###########################
     # deal with the stupid key system
-    all_days_vars_123 = all_days_vars_123['obs2016123']
-    all_days_vars_10minsa_123 = all_days_vars_10minsa_123['obs2016_sa']
+    # all_days_vars_123 = all_days_vars_123['obs2016123']
+    # all_days_vars_10minsa_123 = all_days_vars_10minsa_123['obs2016_sa']
 
     all_days_vars = all_days_vars['obs' + str(DOYstart)]
     all_days_vars_10minsa = all_days_vars_10minsa['obs2016_sa']
@@ -349,8 +349,6 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     # plotting_funs.qh_vs_zf(all_days_vars, all_days_vars_10minsa)
 
-    plotting_funs.qh_vs_zf_both_days(all_days_vars, all_days_vars_10minsa, all_days_vars_123, all_days_vars_10minsa_123)
-
     # plotting_funs.find_mean_zf(all_days_vars_10minsa)
 
     # plotting_funs.find_mean_zf_both_days(all_days_vars_10minsa, all_days_vars_10minsa_142)
@@ -359,7 +357,9 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     # plotting_funs.qh_vs_zf_day_mean(all_days_vars_10minsa)
 
-    plotting_funs.qh_vs_zf_day_mean_both_days(all_days_vars_10minsa, all_days_vars_10minsa_123)
+    # plotting_funs.qh_vs_zf_both_days(all_days_vars, all_days_vars_10minsa, all_days_vars_123, all_days_vars_10minsa_123)
+
+    # plotting_funs.qh_vs_zf_day_mean_both_days(all_days_vars_10minsa, all_days_vars_10minsa_123)
 
     print('END')
 

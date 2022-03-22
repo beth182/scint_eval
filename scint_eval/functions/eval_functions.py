@@ -17,8 +17,8 @@ def plot_difference(mod_142, obs_142, time_142,
     plt.figure(figsize=(10, 8))
     ax = plt.subplot(1, 1, 1)
 
-    plt.plot([t.hour for t in time_142], (mod_142 - obs_142)/np.abs(obs_142), marker='o', label='142')
-    plt.plot([t.hour for t in time_111], (mod_111 - obs_111)/np.abs(obs_111), marker='o', label='111')
+    plt.plot([t.hour for t in time_142], (mod_142 - obs_142)/np.abs(obs_142), marker='o', label='123')
+    plt.plot([t.hour for t in time_111], (mod_111 - obs_111)/np.abs(obs_111), marker='o', label='126')
 
     # plt.plot([t.hour for t in time_142], (obs_142 - mod_142)/np.abs(mod_142), marker='o', label='142')
     # plt.plot([t.hour for t in time_111], (obs_111 - mod_111)/np.abs(mod_111), marker='o', label='111')

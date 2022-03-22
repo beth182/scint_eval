@@ -565,7 +565,7 @@ def plot_wind_eval(all_days_vars, all_days_vars_10minsa,
 
     var_dict = all_days_vars
     time = var_dict['time']
-    wind_direction = var_dict['wind_direction']
+    wind_direction = var_dict['wind_direction_corrected']
 
     wind_speed = var_dict['wind_speed_adj']
     # wind_speed = var_dict['wind_speed']
@@ -583,7 +583,7 @@ def plot_wind_eval(all_days_vars, all_days_vars_10minsa,
     var_dict_10minsa = all_days_vars_10minsa
     time_10minsa = var_dict_10minsa['time']
 
-    wind_direction_10minsa = var_dict_10minsa['wind_direction']
+    wind_direction_10minsa = var_dict_10minsa['wind_direction_corrected']
 
     wind_speed_10minsa = var_dict_10minsa['wind_speed_adj']
     # wind_speed_10minsa = var_dict_10minsa['wind_speed']
@@ -625,37 +625,6 @@ def plot_wind_eval(all_days_vars, all_days_vars_10minsa,
     year = df.index[0].strftime('%Y')
     title_string = 'Year: ' + year + ', DOY: ' + doy
 
-    """
-    plt.figure(figsize=(7, 7))
-
-    plt.scatter(heath_df['WD'], sixty_min['wind_direction_convert'], color='magenta', label='heathrow ')
-    plt.scatter(LC_df['WD'], heath_df['WD'], color='orange', label='LC')
-    plt.scatter(SWT_df['WD'], heath_df['WD'], color='blue', label='SWT')
-
-    plt.ylabel('dir used for Scint')
-    plt.xlabel('dir from other sites (legend)')
-
-    plt.legend()
-
-    plt.title(title_string)
-
-    plt.xlim(0, 360)
-    plt.ylim(0, 360)
-
-    plt.savefig(savepath + 'wind_scatter.png', bbox_inches='tight')
-
-    print('end')
-    """
-
-    # """
-
-
-    # temporary correction to the wind directions
-
-    df_10minsa = read_ceda_heathrow.temp_wd_adj(df_10minsa, 'wind_direction')
-    five_min_10minsa = read_ceda_heathrow.temp_wd_adj(five_min_10minsa, 'wind_direction_convert')
-    ten_min_10minsa = read_ceda_heathrow.temp_wd_adj(ten_min_10minsa, 'wind_direction_convert')
-    sixty_min = read_ceda_heathrow.temp_wd_adj(sixty_min, 'wind_direction_convert')
 
     plt.figure(figsize=(10, 15))
 
@@ -731,8 +700,7 @@ def plot_wind_eval(all_days_vars, all_days_vars_10minsa,
     plt.savefig(savepath + 'test_wind.png', bbox_inches='tight')
 
     print('end')
-    
-    # """
+
 
 def QH_over_Kdn(all_days_vars, all_days_vars_10minsa,
                    mod_kdown_time, mod_kdown_vals,
@@ -1337,12 +1305,12 @@ def qh_vs_zf_both_days(all_days_vars, all_days_vars_10minsa, all_days_vars_142, 
     # 111
     s = ax.scatter((combine_df['z_f_111_10min'] - combine_df['z_f_111_hour']) / combine_df['z_f_111_hour'],
                    (combine_df['QH_111_10min'] - combine_df['QH_111_hour']) / combine_df['QH_111_hour'],
-                   marker='+', c=mdates.date2num(combine_df.index), label='111', cmap=plt.cm.rainbow, s=20)
+                   marker='+', c=mdates.date2num(combine_df.index), label='126', cmap=plt.cm.rainbow, s=20)
 
     # 142
     s2 = ax.scatter((combine_df['z_f_142_10min'] - combine_df['z_f_142_hour']) / combine_df['z_f_142_hour'],
                     (combine_df['QH_142_10min'] - combine_df['QH_142_hour']) / combine_df['QH_142_hour'],
-                    marker='x', c=mdates.date2num(combine_df.index), label='142', cmap=plt.cm.rainbow, s=20)
+                    marker='x', c=mdates.date2num(combine_df.index), label='123', cmap=plt.cm.rainbow, s=20)
 
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.1)
@@ -1718,12 +1686,12 @@ def qh_vs_zf_day_mean_both_days(all_days_vars_10minsa, all_days_vars_10minsa_142
     s = ax.scatter(
         (combine_df['z_f_111'] - day_mean_zf) / day_mean_zf,
         ((combine_df['QH_111'] - day_mean_qh) / day_mean_qh) / combine_df['kdown_111'],
-        marker='+', c=mdates.date2num(combine_df.index), label='111', cmap=plt.cm.rainbow, s=20)
+        marker='+', c=mdates.date2num(combine_df.index), label='126', cmap=plt.cm.rainbow, s=20)
 
     s2 = ax.scatter(
         (combine_df['z_f_142'] - day_mean_zf_142) / day_mean_zf_142,
         ((combine_df['QH_142'] - day_mean_qh_142) / day_mean_qh_142) / combine_df['kdown_142'],
-        marker='x', c=mdates.date2num(combine_df.index), label='142', cmap=plt.cm.rainbow, s=20)
+        marker='x', c=mdates.date2num(combine_df.index), label='123', cmap=plt.cm.rainbow, s=20)
 
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.1)

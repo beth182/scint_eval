@@ -9,6 +9,11 @@ import pandas as pd
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.dates as mdates
 import datetime as dt
+from matplotlib import cm
+import matplotlib as mpl
+
+mpl.rcParams.update({'font.size': 15})
+
 from scint_eval import look_up
 from scint_fp.functions import wx_u_v_components
 # from scint_eval.functions import read_ceda_heathrow
@@ -778,7 +783,7 @@ def QH_over_Kdn(all_days_vars, all_days_vars_10minsa,
     plt.ylabel('$Q_{H}$ / $K_{\downarrow}$')
     plt.xlabel('Time (H)')
 
-    plt.show()
+    # plt.show()
 
     print('end')
 
@@ -1206,6 +1211,8 @@ def qh_vs_zf_both_days(all_days_vars, all_days_vars_10minsa, all_days_vars_142, 
     :return:
     """
 
+    plt.close('all')
+
     var_dict = all_days_vars
     var_dict_10minsa = all_days_vars_10minsa
     time = var_dict['time']
@@ -1273,6 +1280,165 @@ def qh_vs_zf_both_days(all_days_vars, all_days_vars_10minsa, all_days_vars_142, 
 
     combine_df = pd.concat([combine_df_111, combine_df_142], axis=1)
 
+
+    time_grouper = pd.Grouper(freq='10T', closed='left', label='left', offset='1min')
+    time_groups = combine_df.groupby(time_grouper)
+
+
+
+    start_times_111 = []
+    x_vals_111 = []
+    y_vals_111 = []
+    IQR25_vals_111 = []
+    IQR75_vals_111 = []
+    mean_flux_111 = []
+
+
+    for start_time, time_group in time_groups:
+
+        time_group['x_axis_vals'] = (time_group['z_f_111_10min'] - time_group['z_f_111_hour']) / time_group['z_f_111_hour']
+        x_axis_vals = time_group['x_axis_vals']
+        x_axis_vals = x_axis_vals.dropna()
+
+        # check that all 10 min zf vals in the column are the same
+        if len(x_axis_vals) == 0:
+            continue
+        else:
+            assert (x_axis_vals[0] == x_axis_vals).all()
+
+        x_axis_val = x_axis_vals[0]
+
+        time_group['y_axis_vals'] = (time_group['QH_111_10min'] - time_group['QH_111_hour']) / time_group['QH_111_hour']
+        y_axis_vals = time_group['y_axis_vals']
+
+        median = y_axis_vals.median()
+
+        IQR_25 = y_axis_vals.quantile(.25)
+        IQR_75 = y_axis_vals.quantile(.75)
+
+        mean_flux = np.nanmean(time_group['QH_111_10min'])
+
+        start_times_111.append(start_time)
+        x_vals_111.append(x_axis_val)
+        y_vals_111.append(median)
+        IQR25_vals_111.append(IQR_25)
+        IQR75_vals_111.append(IQR_75)
+        mean_flux_111.append(mean_flux)
+
+
+
+    ##########################
+    start_times_142 = []
+    x_vals_142 = []
+    y_vals_142 = []
+    IQR25_vals_142 = []
+    IQR75_vals_142 = []
+    mean_flux_142 = []
+
+    for start_time, time_group in time_groups:
+
+        time_group['x_axis_vals'] = (time_group['z_f_142_10min'] - time_group['z_f_142_hour']) / time_group[
+            'z_f_142_hour']
+        x_axis_vals = time_group['x_axis_vals']
+        x_axis_vals = x_axis_vals.dropna()
+
+        # check that all 10 min zf vals in the column are the same
+        if len(x_axis_vals) == 0:
+            continue
+        else:
+            assert (x_axis_vals[0] == x_axis_vals).all()
+
+        x_axis_val = x_axis_vals[0]
+
+        time_group['y_axis_vals'] = (time_group['QH_142_10min'] - time_group['QH_142_hour']) / time_group['QH_142_hour']
+        y_axis_vals = time_group['y_axis_vals']
+
+        median = y_axis_vals.median()
+
+        IQR_25 = y_axis_vals.quantile(.25)
+        IQR_75 = y_axis_vals.quantile(.75)
+
+        mean_flux = np.nanmean(time_group['QH_142_10min'])
+
+        start_times_142.append(start_time)
+        x_vals_142.append(x_axis_val)
+        y_vals_142.append(median)
+        IQR25_vals_142.append(IQR_25)
+        IQR75_vals_142.append(IQR_75)
+        mean_flux_142.append(mean_flux)
+
+
+    fig, ax = plt.subplots(figsize=(12, 12))
+
+    # identity line
+    plt.plot((combine_df['z_f_111_10min'] - combine_df['z_f_111_hour']) / combine_df['z_f_111_hour'],
+             (combine_df['z_f_111_10min'] - combine_df['z_f_111_hour']) / combine_df['z_f_111_hour'], color='k',
+             linewidth='0.5')
+    plt.axhline(y=0, color='grey', linestyle=':', linewidth=0.5)
+    plt.axvline(x=0, color='grey', linestyle=':', linewidth=0.5)
+
+
+    bellow_50_142_index = np.where(np.asarray(mean_flux_142) < 75)[0]
+    bellow_50_111_index = np.where(np.asarray(mean_flux_111) < 75)[0]
+
+    circ_142 = ax.scatter(np.asarray(x_vals_142)[bellow_50_142_index], np.asarray(y_vals_142)[bellow_50_142_index],
+                          marker='o', facecolors='none', s=80, edgecolors='k', alpha=0.5, label='$\overline{Q_{H}^{10 min}}$ < 75 $W$ $m^{-2}$')
+
+    circ_111 = ax.scatter(np.asarray(x_vals_111)[bellow_50_111_index], np.asarray(y_vals_111)[bellow_50_111_index],
+                          marker='o', facecolors='none', s=80, edgecolors='k', alpha=0.5)
+
+
+    cmap = cm.get_cmap('rainbow')
+
+    earliest_time = min([start_times_142[0], start_times_111[0]])
+    latest_time = max([start_times_142[-1], start_times_111[-1]])
+
+    bounds = np.linspace(mdates.date2num(earliest_time), mdates.date2num(latest_time), len(start_times_142)+1)
+    norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
+
+    smap = mpl.cm.ScalarMappable(norm=norm, cmap=cmap)
+    list_of_rgba_111 = smap.to_rgba(mdates.date2num(start_times_111))
+    list_of_rgba_142 = smap.to_rgba(mdates.date2num(start_times_142))
+
+    for i in range(0, len(start_times_142)):
+        ax.vlines(x_vals_142[i], IQR25_vals_142[i], IQR75_vals_142[i], color=list_of_rgba_142[i])
+
+    for i in range(0, len(start_times_111)):
+        ax.vlines(x_vals_111[i], IQR25_vals_111[i], IQR75_vals_111[i], color=list_of_rgba_111[i])
+
+
+    s = ax.scatter(x_vals_142, y_vals_142, c=mdates.date2num(start_times_142), marker='x', cmap=cmap, norm=norm, edgecolor='None', label='Cloudy')
+    s2 = ax.scatter(x_vals_111, y_vals_111, c=mdates.date2num(start_times_111), marker='o', cmap=cmap, norm=norm, edgecolor='None', label='Clear')
+
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.1)
+
+    cbar = fig.colorbar(mappable=s2, cax=cax, orientation="vertical")
+
+    cbar.set_ticks(mdates.date2num(combine_df.index[np.where(combine_df.index.minute == 0)]))
+
+    cbar.ax.set_yticklabels(
+        [mdates.num2date(i).strftime('%H') for i in cbar.get_ticks()])  # set ticks of your format
+    cbar.set_label('Time (H)')
+
+    ax.set_ylabel('($Q_{H}^{10min}$ - $Q_{H}^{hour}$) / $Q_{H}^{hour}$')
+    ax.set_xlabel('($z_{f}^{10min}$ - $z_{f}^{hour}$) / $z_{f}^{hour}$')
+
+    ax.legend(frameon=False)
+
+    plt.savefig('C:/Users/beths/Desktop/LANDING/yeet.png', bbox_inches='tight')
+
+    print('end')
+
+
+
+
+
+
+
+
+    """
+
     fig, ax = plt.subplots(figsize=(7, 7))
 
     # identity line
@@ -1302,6 +1468,7 @@ def qh_vs_zf_both_days(all_days_vars, all_days_vars_10minsa, all_days_vars_142, 
         combine_df['QH_142_hour'][bellow_50_142_index],
         marker='o', facecolors='none', s=80, edgecolors='k', alpha=0.5, label='$Q_{H}^{hour}$ < 50 $W$ $m^{-2}$')
 
+
     # 111
     s = ax.scatter((combine_df['z_f_111_10min'] - combine_df['z_f_111_hour']) / combine_df['z_f_111_hour'],
                    (combine_df['QH_111_10min'] - combine_df['QH_111_hour']) / combine_df['QH_111_hour'],
@@ -1329,6 +1496,8 @@ def qh_vs_zf_both_days(all_days_vars, all_days_vars_10minsa, all_days_vars_142, 
     ax.legend(frameon=False)
 
     plt.show()
+    
+    """
 
     print('end')
 

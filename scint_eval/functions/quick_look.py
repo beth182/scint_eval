@@ -17,54 +17,61 @@ mpl.rcParams.update({'font.size': 15})
 # looking at the nc files for the days
 """
 
-path_111 = '//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/2016/London/L1/IMU/DAY/111/LASMkII_Fast_IMU_2016111_1min_sa10min.nc'
-path_142 = '//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/2016/London/L1/IMU/DAY/142/LASMkII_Fast_IMU_2016142_1min_sa10min.nc'
+# path_111 = '//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/2016/London/L1/IMU/DAY/111/LASMkII_Fast_IMU_2016111_1min_sa10min.nc'
+# path_142 = '//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/2016/London/L1/IMU/DAY/142/LASMkII_Fast_IMU_2016142_1min_sa10min.nc'
+
+path_123 = 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/data/2016/London/L1/IMU/DAY/123/LASMkII_Fast_IMU_2016123_1min_sa10min.nc'
+path_126 = 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/data/2016/London/L1/IMU/DAY/126/LASMkII_Fast_IMU_2016126_1min_sa10min.nc'
 
 # read in files
-nc_111 = nc.Dataset(path_111)
-nc_142 = nc.Dataset(path_142)
+nc_123 = nc.Dataset(path_123)
+nc_126 = nc.Dataset(path_126)
 
-file_time_111 = nc_111.variables['time']
-time_dt_111 = nc.num2date(file_time_111[:], file_time_111.units)
+file_time_123 = nc_123.variables['time']
+time_dt_123 = nc.num2date(file_time_123[:], file_time_123.units)
 
-file_time_142 = nc_142.variables['time']
-time_dt_142 = nc.num2date(file_time_142[:], file_time_142.units)
+file_time_126 = nc_126.variables['time']
+time_dt_126 = nc.num2date(file_time_126[:], file_time_126.units)
 
 
-extent_111 = nc_111.variables['sa_area_km2'][:]
-extent_142 = nc_142.variables['sa_area_km2'][:]
+extent_123 = nc_123.variables['sa_area_km2'][:]
+extent_126 = nc_126.variables['sa_area_km2'][:]
 
 # get max vals
-max_extent_111 = np.nanmax(extent_111)
-max_extent_142 = np.nanmax(extent_142)
+max_extent_123 = np.nanmax(extent_123)
+max_extent_126 = np.nanmax(extent_126)
 
-min_extent_111 = np.nanmin(extent_111)
-min_extent_142 = np.nanmin(extent_142)
+min_extent_123 = np.nanmin(extent_123)
+min_extent_126 = np.nanmin(extent_126)
 
-max_extent_time_111 = time_dt_111[np.where(extent_111==max_extent_111)[0]]
-max_extent_time_142 = time_dt_142[np.where(extent_142==max_extent_142)[0]]
+max_extent_time_123 = time_dt_123[np.where(extent_123==max_extent_123)[0]]
+max_extent_time_126 = time_dt_126[np.where(extent_126==max_extent_126)[0]]
 
-min_extent_time_111 = time_dt_111[np.where(extent_111==min_extent_111)[0]]
-min_extent_time_142 = time_dt_142[np.where(extent_142==min_extent_142)[0]]
+min_extent_time_123 = time_dt_123[np.where(extent_123==min_extent_123)[0]]
+min_extent_time_126 = time_dt_126[np.where(extent_126==min_extent_126)[0]]
 
-av_111 = np.nanmean(extent_111)
-av_142 = np.nanmean(extent_142)
+av_123 = np.nanmean(extent_123)
+av_126 = np.nanmean(extent_126)
+
+print('end')
 
 """
 
 # Looking at the csv files for fractions for the days
-"""
+# """
 
-csv_111 = 'C:/Users/beths/OneDrive - University of Reading/Working Folder/mask_tests/111_10mins.csv'
-csv_142 = 'C:/Users/beths/OneDrive - University of Reading/Working Folder/mask_tests/142_10mins.csv'
+csv_123 = 'C:/Users/beths/Desktop/LANDING/mask_tests/123_10_mins.csv'
+csv_126 = 'C:/Users/beths/Desktop/LANDING/mask_tests/126_10_mins.csv'
 
-df_111 = pd.read_csv(csv_111)
-df_142 = pd.read_csv(csv_142)
+df_123 = pd.read_csv(csv_123)
+df_126 = pd.read_csv(csv_126)
 
-max_water_111 = np.nanmax(df_111['Water'])
-max_water_time = df_111['Unnamed: 0'][np.where(df_111['Water'] == max_water_111)[0]]
+max_water_123 = np.nanmax(df_123['Water'])
+max_water_time = df_123['Unnamed: 0'][np.where(df_123['Water'] == max_water_123)[0]]
 
-"""
+print('end')
+
+# """
 
 
 # Looking at a quick plot of normalised QH with land cover fraction for 1 day
@@ -238,6 +245,7 @@ outputs_df_126['Urban'] = outputs_df_126['Building'] + outputs_df_126['Imperviou
 df_123 = nc_df_123.merge(outputs_df_123, how='inner', left_index=True, right_index=True)
 df_126 = nc_df_126.merge(outputs_df_126, how='inner', left_index=True, right_index=True)
 
+"""
 df_123 = df_123.dropna()
 df_126 = df_126.dropna()
 
@@ -252,7 +260,6 @@ df_123['trendline'] = p_123(df_123.loc[:, 'Urban'])
 df_126['trendline'] = p_126(df_126.loc[:, 'Urban'])
 
 
-"""
 # QH/Kdn vs Urban fraction, coloured by magnitude of kdown
 fig, ax = plt.subplots(figsize=(10,10))
 
@@ -335,7 +342,7 @@ print('end')
 
 
 
-# """
+"""
 
 fig, ax = plt.subplots(figsize=(10,10))
 cmap = cm.get_cmap('plasma')
@@ -406,30 +413,58 @@ plt.show()
 
 
 print('end')
-# """
-
+"""
 
 
 """
+# stats of the fluxes
+
+df_123 = df_123.dropna()
+df_126 = df_126.dropna()
+
+df_123_std = df_123.resample('10T', closed='right', label='right').std()
+df_126_std = df_126.resample('10T', closed='right', label='right').std()
+
+max_val_123 = df_123_std.QH.max()
+max_val_123_time = df_123_std.index[np.where(df_123_std.QH == max_val_123)[0]]
+
+max_val_126 = df_126_std.QH.max()
+max_val_126_time = df_126_std.index[np.where(df_126_std.QH == max_val_126)[0]]
+
+min_val_123 = df_123_std.QH.min()
+min_val_123_time = df_123_std.index[np.where(df_123_std.QH == min_val_123)[0]]
+
+min_val_126 = df_126_std.QH.min()
+min_val_126_time = df_126_std.index[np.where(df_126_std.QH == min_val_126)[0]]
+
+mean_std_126 = df_126_std.QH.mean()
+mean_std_123 = df_123_std.QH.mean()
+"""
+
+# """
 fig = plt.figure(figsize=(10, 8))
 ax = plt.subplot(1, 1, 1)
 
-ax.plot(df.index, df['QH'], label='$Q_{H}$', linewidth=1)
-ax.plot(df.index, df['kdown'], label='$K_{\downarrow}$', linewidth=1)
+df = df_123
+
+ax.plot(df['QH'], label='$Q_{H}$', linewidth=1)
+ax.plot(df['kdown'], label='$K_{\downarrow}$', linewidth=1)
 
 ax.set_xlabel('Time (hh:mm)')
 ax.set_ylabel('Flux (W $m^{-2}$)')
 
 ax.set_xlim(df.index[0] - dt.timedelta(minutes=10), df.index[-1] + dt.timedelta(minutes=10))
+ax.set_ylim(0, 1000)
 
 plt.legend()
 
 plt.gcf().autofmt_xdate()
 ax.xaxis.set_major_formatter(DateFormatter('%H:%M'))
+
 plt.title('DOY: ' + df.index[0].strftime('%j'))
 
 plt.show()
-"""
+# """
 
 print('end')
 

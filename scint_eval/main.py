@@ -228,8 +228,8 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 # DOYstart_choice = 2016142
 # DOYstop_choice = 2016142
 
-DOYstart_choice = 2016123
-DOYstop_choice = 2016123
+DOYstart_choice = 2016126
+DOYstop_choice = 2016126
 
 sample = '1min_sa10min'
 obs_level = 'L1'
@@ -284,20 +284,20 @@ if __name__ == "__main__":
     if not os.path.exists(save_folder):
         os.mkdir(save_folder)
 
-    # time_eval, obs_vals_eval, mod_vals_eval = main(obs_site, DOYstart_choice, DOYstop_choice, variable, save_folder, 1, run,
-    #      instrument, sample, model_format, obs_level, scint_path)
+    time_eval, obs_vals_eval, mod_vals_eval = main(obs_site, DOYstart_choice, DOYstop_choice, variable, save_folder, 1, run,
+         instrument, sample, model_format, obs_level, scint_path)
 
-    time_eval_126, obs_vals_eval_126, mod_vals_eval_126 = main(obs_site, 2016126, 2016126, variable, save_folder, 1,
-                                                               run,
-                                                               instrument, sample, model_format, obs_level, scint_path)
+    # time_eval_126, obs_vals_eval_126, mod_vals_eval_126 = main(obs_site, 2016126, 2016126, variable, save_folder, 1,
+    #                                                            run,
+    #                                                            instrument, sample, model_format, obs_level, scint_path)
+    #
+    # time_eval_123, obs_vals_eval_123, mod_vals_eval_123 = main(obs_site, 2016123, 2016123, variable, save_folder, 1,
+    #                                                            run,
+    #                                                            instrument, sample, model_format, obs_level, scint_path)
 
-    time_eval_123, obs_vals_eval_123, mod_vals_eval_123 = main(obs_site, 2016123, 2016123, variable, save_folder, 1,
-                                                               run,
-                                                               instrument, sample, model_format, obs_level, scint_path)
-
-    eval_functions.plot_difference(mod_vals_eval_123, obs_vals_eval_123, time_eval_123,
-                                   mod_vals_eval_126, obs_vals_eval_126, time_eval_126,
-                                   save_folder)
+    # eval_functions.plot_difference(mod_vals_eval_123, obs_vals_eval_123, time_eval_123,
+    #                                mod_vals_eval_126, obs_vals_eval_126, time_eval_126,
+    #                                save_folder)
 
 print(' ')
 print(' ')

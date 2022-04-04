@@ -237,7 +237,8 @@ def determine_which_model_files(model_site_dict, DOYstart_mod, DOYstop_mod, run,
                                                     sample,
                                                     variable,
                                                     obs_level,
-                                                    model_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/"
+                                                    # model_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/"
+                                                    model_path='C:/Users/beths/Desktop/LANDING/data_wifi_problems/data/'
                                                     )
 
             # append the keys to key_list

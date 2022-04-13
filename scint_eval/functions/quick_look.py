@@ -12,6 +12,8 @@ from matplotlib.dates import DateFormatter
 import matplotlib.dates as mdates
 import math
 
+from scint_eval.functions import ukv_landuse
+
 mpl.rcParams.update({'font.size': 15})
 
 
@@ -372,11 +374,78 @@ def urb_frac_vs_QH_norm_time(df_dict):
     print('end')
 
 
-def urb_frac_vs_QH_norm_kdown(df_dict):
+def urb_frac_vs_QH_norm_kdown(df_dict, mod_time_123, mod_vals_123, mod_time_126, mod_vals_126, lc_df_123, lc_df_126):
     """
     Urban faction (x) vs. QH normalised by kdown (y) with the colourbar as kdown
     :return:
     """
+
+    # get model kdown for both days
+    mod_kdown_time_123, mod_kdown_vals_123 = ukv_landuse.get_ukv_KSSW_kdown(2016122)
+    mod_kdown_time_126, mod_kdown_vals_126 = ukv_landuse.get_ukv_KSSW_kdown(2016125)
+
+    # combine model results into a dataframe
+
+    mod_dict_kdown_123 = {'time': mod_kdown_time_123, 'kdown': mod_kdown_vals_123}
+    mod_kdown_df_123 = pd.DataFrame.from_dict(mod_dict_kdown_123)
+    mod_kdown_df_123 = mod_kdown_df_123.set_index('time')
+
+    mod_dict_kdown_126 = {'time': mod_kdown_time_126, 'kdown': mod_kdown_vals_126}
+    mod_kdown_df_126 = pd.DataFrame.from_dict(mod_dict_kdown_126)
+    mod_kdown_df_126 = mod_kdown_df_126.set_index('time')
+
+    mod_dict_QH_123 = {'time': mod_time_123, 'QH': mod_vals_123}
+    mod_QH_df_123 = pd.DataFrame.from_dict(mod_dict_QH_123)
+    mod_QH_df_123 = mod_QH_df_123.set_index('time')
+
+    mod_dict_QH_126 = {'time': mod_time_126, 'QH': mod_vals_126}
+    mod_QH_df_126 = pd.DataFrame.from_dict(mod_dict_QH_126)
+    mod_QH_df_126 = mod_QH_df_126.set_index('time')
+
+    mod_df_123 = pd.concat([mod_kdown_df_123, mod_QH_df_123], axis=1)
+    mod_df_126 = pd.concat([mod_kdown_df_126, mod_QH_df_126], axis=1)
+
+    mod_df_123 = mod_df_123.dropna()
+    mod_df_126 = mod_df_126.dropna()
+
+    lc_df_123.index = pd.to_datetime(lc_df_123.index, format='%y%m%d%H')
+    lc_df_126.index = pd.to_datetime(lc_df_126.index, format='%y%m%d%H')
+
+    lc_df_123['Urban'] = lc_df_123['roof'] + lc_df_123['canyon']
+    lc_df_126['Urban'] = lc_df_126['roof'] + lc_df_126['canyon']
+
+    mod_df_123['Urban'] = lc_df_123['Urban']
+    mod_df_126['Urban'] = lc_df_126['Urban']
+
+
+    # fig, ax = plt.subplots(figsize=(10, 10))
+    #
+    # cmap = cm.get_cmap('rainbow')
+    #
+    # smallest_kdown = min(mod_df_123.kdown.min(), mod_df_126.kdown.min())
+    # largest_kdown = max(mod_df_123.kdown.max(), mod_df_126.kdown.max())
+    #
+    # bounds = np.linspace(smallest_kdown, largest_kdown, len(mod_df_126) + 1)
+    # norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
+    #
+    # s123 = ax.scatter(mod_df_123.Urban * 100, mod_df_123.QH / mod_df_123.kdown, c=mod_df_123.kdown, marker='x', cmap=cmap, norm=norm,
+    #                    edgecolor='None', label='Cloudy')
+    #
+    # s126 = ax.scatter(mod_df_126.Urban * 100, mod_df_126.QH / mod_df_126.kdown, c=mod_df_126.kdown, marker='o', cmap=cmap, norm=norm,
+    #                    edgecolor='None', label='Clear')
+    #
+    # plt.legend()
+    #
+    # divider = make_axes_locatable(ax)
+    # cax = divider.append_axes("right", size="5%", pad=0.1)
+    # cbar = fig.colorbar(mappable=s123, cax=cax, orientation="vertical")
+    # cax.set_ylabel('$K_{\downarrow}$', rotation=270, labelpad=20)
+    #
+    # ax.set_xlabel('Built Fraction (%)')
+    # ax.set_ylabel('$Q_{H}$ / $K_{\downarrow}$')
+    #
+    # plt.show()
+
 
     df_123 = df_dict['123']
     df_126 = df_dict['126']
@@ -398,11 +467,13 @@ def urb_frac_vs_QH_norm_kdown(df_dict):
     df_123.index = index_list_123
     df_126.index = index_list_126
 
-    df_123_select = df_123[['kdown', 'Building', 'QH_norm']]
-    df_123_select.rename({'kdown': 'kdown_123', 'Building': 'Urban_123', 'QH_norm': 'QH_norm_123'}, axis=1, inplace=True)
+    df_123_select = df_123[['kdown', 'Urban', 'QH_norm']]
+    df_123_select.rename({'kdown': 'kdown_123', 'Urban': 'Urban_123', 'QH_norm': 'QH_norm_123'}, axis=1,
+                         inplace=True)
 
-    df_126_select = df_126[['kdown', 'Building', 'QH_norm']]
-    df_126_select.rename({'kdown': 'kdown_126', 'Building': 'Urban_126', 'QH_norm': 'QH_norm_126'}, axis=1, inplace=True)
+    df_126_select = df_126[['kdown', 'Urban', 'QH_norm']]
+    df_126_select.rename({'kdown': 'kdown_126', 'Urban': 'Urban_126', 'QH_norm': 'QH_norm_126'}, axis=1,
+                         inplace=True)
 
     combine_df = pd.concat([df_123_select, df_126_select], axis=1)
 
@@ -496,6 +567,11 @@ def urb_frac_vs_QH_norm_kdown(df_dict):
     where_index_123 = np.where((start_times_123 >= start_dt) & (start_times_123 <= end_dt))[0]
     where_index_126 = np.where((start_times_126 >= start_dt) & (start_times_126 <= end_dt))[0]
 
+    where_index_mod_123 = np.where((mod_df_123.index.hour >= start_dt.hour) & (mod_df_123.index.hour <= end_dt.hour))[0]
+    where_index_mod_126 = np.where((mod_df_126.index.hour >= start_dt.hour) & (mod_df_126.index.hour <= end_dt.hour))[0]
+    mod_select_126 = mod_df_126.iloc[where_index_mod_126]
+    mod_select_123 = mod_df_123.iloc[where_index_mod_123]
+
     start_times_123_select = np.asarray(start_times_123)[where_index_123]
     start_times_126_select = np.asarray(start_times_126)[where_index_126]
 
@@ -514,13 +590,17 @@ def urb_frac_vs_QH_norm_kdown(df_dict):
     mean_kdown_123_select = np.asarray(mean_kdown_123)[where_index_123]
     mean_kdown_126_select = np.asarray(mean_kdown_126)[where_index_126]
 
+
+
+
+
     fig, ax = plt.subplots(figsize=(10, 10))
     cmap = cm.get_cmap('rainbow')
 
-    smallest_kdown = min(min(mean_kdown_123_select), min(mean_kdown_123_select))
-    largest_kdown = max(max(mean_kdown_126_select), max(mean_kdown_126_select))
+    smallest_kdown = min(min(mean_kdown_123_select), min(mean_kdown_123_select), mod_select_123.kdown.min(), mod_select_126.kdown.min())
+    largest_kdown = max(max(mean_kdown_126_select), max(mean_kdown_126_select), mod_select_123.kdown.max(), mod_select_126.kdown.max())
 
-    bounds = np.linspace(smallest_kdown, largest_kdown, len(start_times_123_select)+1)
+    bounds = np.linspace(smallest_kdown, largest_kdown, len(start_times_123_select) + 1)
     norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
 
     smap = mpl.cm.ScalarMappable(norm=norm, cmap=cmap)
@@ -533,8 +613,17 @@ def urb_frac_vs_QH_norm_kdown(df_dict):
     for i in range(0, len(mean_kdown_126_select)):
         ax.vlines(x_vals_126_select[i], IQR25_vals_126_select[i], IQR75_vals_126_select[i], color=list_of_rgba_126[i])
 
-    s_123 = ax.scatter(x_vals_123_select, y_vals_123_select, c=mean_kdown_123_select, marker='x', cmap=cmap, norm=norm, edgecolor='None', label='Cloudy')
-    s_126 = ax.scatter(x_vals_126_select, y_vals_126_select, c=mean_kdown_126_select, marker='o', cmap=cmap, norm=norm, edgecolor='None', label='Clear')
+    s_123 = ax.scatter(x_vals_123_select, y_vals_123_select, c=mean_kdown_123_select, marker='x', cmap=cmap, norm=norm,
+                       edgecolor='None', label='Cloudy')
+    s_126 = ax.scatter(x_vals_126_select, y_vals_126_select, c=mean_kdown_126_select, marker='o', cmap=cmap, norm=norm,
+                       edgecolor='None', label='Clear')
+
+
+    ax.scatter(mod_select_126.Urban * 100, mod_select_126.QH / mod_select_126.kdown, c=mod_select_126.kdown, marker='^', cmap=cmap, norm=norm,
+                       edgecolor='k', label='Clear UKV', s=80)
+    ax.scatter(mod_select_123.Urban * 100, mod_select_123.QH / mod_select_123.kdown, c=mod_select_123.kdown, marker='s', cmap=cmap, norm=norm,
+                       edgecolor='k', label='Cloudy UKV', s=80)
+
 
     plt.legend()
 
@@ -543,33 +632,29 @@ def urb_frac_vs_QH_norm_kdown(df_dict):
     cbar = fig.colorbar(mappable=s_123, cax=cax, orientation="vertical")
     cax.set_ylabel('$K_{\downarrow}$', rotation=270, labelpad=20)
 
-    ax.set_xlabel('Building Fraction (%)')
+    ax.set_xlabel('Built Fraction (%)')
     ax.set_ylabel('$Q_{H}$ / $K_{\downarrow}$')
 
+
+
     # plt.show()
+
+
 
     plt.savefig('C:/Users/beths/Desktop/LANDING/yayeet.png', bbox_inches='tight')
 
     print('end')
 
 
-path_123 = 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/data/2016/London/L1/IMU/DAY/123/LASMkII_Fast_IMU_2016123_1min_sa10min.nc'
-path_126 = 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/data/2016/London/L1/IMU/DAY/126/LASMkII_Fast_IMU_2016126_1min_sa10min.nc'
-
-csv_123 = 'C:/Users/beths/Desktop/LANDING/mask_tests/123_10_mins.csv'
-csv_126 = 'C:/Users/beths/Desktop/LANDING/mask_tests/126_10_mins.csv'
-
-# test = stats_of_extent(path_123, path_126)
-# test = stats_of_water(csv_123, csv_126)
-
-df_dict = df_from_nc_and_csv(path_123, path_126, csv_123, csv_126)
-
-# test2 = stats_of_the_fluxes(df_dict)
-
-# times_series_line_QH_KDOWN(df_dict['126'])
-
-# urb_frac_vs_QH_norm_time(df_dict)
-
-urb_frac_vs_QH_norm_kdown(df_dict)
-
-print('end')
+def run_quick_look(mod_time_123, mod_vals_123, mod_time_126, mod_vals_126, lc_df_123, lc_df_126,
+                   path_123='C:/Users/beths/Desktop/LANDING/data_wifi_problems/data/2016/London/L1/IMU/DAY/123/LASMkII_Fast_IMU_2016123_1min_sa10min.nc',
+                   path_126='C:/Users/beths/Desktop/LANDING/data_wifi_problems/data/2016/London/L1/IMU/DAY/126/LASMkII_Fast_IMU_2016126_1min_sa10min.nc',
+                   csv_123='C:/Users/beths/Desktop/LANDING/mask_tests/123_10_mins.csv',
+                   csv_126='C:/Users/beths/Desktop/LANDING/mask_tests/126_10_mins.csv'):
+    # test = stats_of_extent(path_123, path_126)
+    # test = stats_of_water(csv_123, csv_126)
+    df_dict = df_from_nc_and_csv(path_123, path_126, csv_123, csv_126)
+    # test2 = stats_of_the_fluxes(df_dict)
+    # times_series_line_QH_KDOWN(df_dict['126'])
+    # urb_frac_vs_QH_norm_time(df_dict)
+    urb_frac_vs_QH_norm_kdown(df_dict, mod_time_123, mod_vals_123, mod_time_126, mod_vals_126, lc_df_123, lc_df_126)

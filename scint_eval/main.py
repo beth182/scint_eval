@@ -161,6 +161,12 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 
     # time average the observations
     obs_time_av, obs_vals_av = array_retrieval.time_average_values(obs_vals, obs_time, 10)
+    obs_time_av, obs_vals_av = array_retrieval.rm_nans(obs_time_av, obs_vals_av)
+    obs_time_av_5, obs_vals_av_5 = array_retrieval.time_average_values(obs_vals, obs_time, 5)
+    obs_time_av_5, obs_vals_av_5 = array_retrieval.rm_nans(obs_time_av_5, obs_vals_av_5)
+    obs_time_av_60, obs_vals_av_60 = array_retrieval.time_average_values(obs_vals, obs_time, 60)
+    obs_time_av_60, obs_vals_av_60 = array_retrieval.rm_nans(obs_time_av_60, obs_vals_av_60)
+
 
     model_grid_vals = {}
     model_grid_time = {}
@@ -171,58 +177,115 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
         model_grid_vals[grid_choice] = mod_vals
         model_grid_time[grid_choice] = mod_time
 
-    time_eval, obs_vals_eval, mod_vals_eval = array_retrieval.take_common_times(obs_time_av, obs_vals_av,
+    time_eval_10, obs_vals_eval_10, mod_vals_eval_10 = array_retrieval.take_common_times(obs_time_av, obs_vals_av,
                                                                                 model_grid_time['WAverage'],
                                                                                 model_grid_vals['WAverage'])
+    time_eval_5, obs_vals_eval_5, mod_vals_eval_5 = array_retrieval.take_common_times(obs_time_av_5, obs_vals_av_5,
+                                                                                model_grid_time['WAverage'],
+                                                                                model_grid_vals['WAverage'])
+    time_eval_60, obs_vals_eval_60, mod_vals_eval_60 = array_retrieval.take_common_times(obs_time_av_60, obs_vals_av_60,
+                                                                                model_grid_time['WAverage'],
+                                                                                model_grid_vals['WAverage'])
+    time_eval_1, obs_vals_eval_1, mod_vals_eval_1 = array_retrieval.take_common_times(obs_time, obs_vals,
+                                                                                model_grid_time['WAverage'],
+                                                                                model_grid_vals['WAverage'])
+
+
+
+    # import matplotlib.pyplot as plt
+    # plt.figure()
+    # plt.plot(time_eval_5, mod_vals_eval_5)
+    # plt.scatter(time_eval_5, mod_vals_eval_5)
+    # plt.scatter(time_eval, obs_vals_eval, label=10)
+    # plt.scatter(time_eval_5, obs_vals_eval_5, label=5)
+    # plt.scatter(time_eval_60, obs_vals_eval_60, label=60)
+    # plt.scatter(time_eval_1, obs_vals_eval_1, label=1)
+    # plt.legend()
+    #
+    # diff_1 = obs_vals_eval_1 - mod_vals_eval_1
+    # diff_5 = obs_vals_eval_5 - mod_vals_eval_5
+    # diff_10 = obs_vals_eval - mod_vals_eval
+    # diff_60 = obs_vals_eval_60 - mod_vals_eval_60
+    #
+    # import numpy as np
+    # print(np.max(diff_1))
+    # print(np.max(diff_5))
+    # print(np.max(diff_10))
+    # print(np.max(diff_60))
+
+
+
+
+
+    # plotting_funs.detailed_time_series(obs_time, obs_vals,
+    #                                    model_grid_time, model_grid_vals,
+    #                                    variable, savepath, DOYstart, DOYstop,
+    #                                    model_site_dict,
+    #                                    percentage_covered_by_model)
+
+
+
+    # PLOT BL STASH CODE
+    file_dict_ukv_13 = file_read.finding_files(model_format,
+                                               'ukv',
+                                               DOYstart_mod,
+                                               DOYstop_mod,
+                                               'IMU',
+                                               run,
+                                               instrument,
+                                               sample,
+                                               'BL_H',
+                                               obs_level,
+                                               # model_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/"
+                                               model_path='C:/Users/beths/Desktop/LANDING/data_wifi_problems/data/'
+                                               )
+
+    files_ukv_13 = file_read.order_model_stashes('ukv', file_dict_ukv_13, 'BL_H')
+
+    # from scint_eval.functions import stats_of_BL_H
+    # stats_of_BL_H.stats_BL_flux(files_ukv_13)
+
+    ukv_13 = sort_model.sort_models('BL_H', 'ukv', files_ukv_13, disheight, DOYstart_mod, DOYstop_mod,
+                                    'IMU',
+                                    savepath, model_format, 'E')
+
+    BL_H_13_list = [ukv_13[5], ukv_13[6], ukv_13[0], ukv_13[1], ukv_13[10]]
+    included_BL_H = {'BL_H_13': BL_H_13_list}
+    mod_time_13, mod_vals_13 = array_retrieval.retrive_arrays_model(included_BL_H, 'BL_H_13')
+    model_grid_vals['BL_H_13'] = mod_vals_13
+    model_grid_time['BL_H_13'] = mod_time_13
+
+    time_eval_BL, obs_vals_eval_BL, mod_vals_eval_BL = array_retrieval.take_common_times(obs_time_av, obs_vals_av,
+                                                                                model_grid_time['BL_H_13'],
+                                                                                model_grid_vals['BL_H_13'])
+
+    time_eval_surf13, obs_vals_eval_surf13, mod_vals_eval_surf13 = array_retrieval.take_common_times(obs_time_av, obs_vals_av,
+                                                                                         model_grid_time[13],
+                                                                                         model_grid_vals[13])
+
 
     plotting_funs.detailed_time_series(obs_time, obs_vals,
                                        model_grid_time, model_grid_vals,
                                        variable, savepath, DOYstart, DOYstop,
                                        model_site_dict,
-                                       percentage_covered_by_model)
+                                       percentage_covered_by_model, BL_H_z=ukv_13[10])
 
-    return time_eval, obs_vals_eval, mod_vals_eval, lc_df
-
-    # # PLOT BL STASH CODE
-    # file_dict_ukv_13 = file_read.finding_files(model_format,
-    #                                            'ukv',
-    #                                            DOYstart_mod,
-    #                                            DOYstop_mod,
-    #                                            'IMU',
-    #                                            run,
-    #                                            instrument,
-    #                                            sample,
-    #                                            'BL_H',
-    #                                            obs_level,
-    #                                            model_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/"
-    #                                            )
-    #
-    # files_ukv_13 = file_read.order_model_stashes('ukv', file_dict_ukv_13, 'BL_H')
-    #
-    # from scint_eval.functions import stats_of_BL_H
-    #
-    # stats_of_BL_H.stats_BL_flux(files_ukv_13)
-    #
-    # ukv_13 = sort_model.sort_models('BL_H', 'ukv', files_ukv_13, disheight, z0zdlist, DOYstart_mod, DOYstop_mod,
-    #                                 'IMU', saveyn,
-    #                                 savepath, model_format, 'E')
-    #
-    # BL_H_13_list = [ukv_13[5], ukv_13[6], ukv_13[0], ukv_13[1], ukv_13[10]]
-    # included_BL_H = {'BL_H_13': BL_H_13_list}
-    # mod_time_13, mod_vals_13 = array_retrieval.retrive_arrays_model(included_BL_H, 'BL_H_13')
-    # model_grid_vals['BL_H_13'] = mod_vals_13
-    # model_grid_time['BL_H_13'] = mod_time_13
-    #
-    # plotting_funs.detailed_time_series(obs_time, obs_vals,
-    #                                    model_grid_time, model_grid_vals,
-    #                                    variable, savepath, DOYstart, DOYstop,
-    #                                    model_site_dict,
-    #                                    percentage_covered_by_model, BL_H_z=ukv_13[10])
-
-    # 3 arrays to be used for eval:
-    # time_eval, obs_vals_eval, mod_vals_eval
 
     print('END')
+
+    dict_to_return = {'time_eval_10': time_eval_10, 'obs_vals_eval_10': obs_vals_eval_10, 'mod_vals_eval_10': mod_vals_eval_10,
+                      'time_eval_5': time_eval_5, 'obs_vals_eval_5': obs_vals_eval_5, 'mod_vals_eval_5': mod_vals_eval_5,
+                      'time_eval_60': time_eval_60, 'obs_vals_eval_60': obs_vals_eval_60, 'mod_vals_eval_60': mod_vals_eval_60,
+                      'time_eval_1': time_eval_1, 'obs_vals_eval_1': obs_vals_eval_1, 'mod_vals_eval_1': mod_vals_eval_1, 'lc_df': lc_df,
+                      'time_eval_BL': time_eval_BL, 'obs_vals_eval_BL': obs_vals_eval_BL, 'mod_vals_eval_BL': mod_vals_eval_BL,
+                      'time_eval_surf13': time_eval_surf13, 'obs_vals_eval_surf13': obs_vals_eval_surf13, 'mod_vals_eval_surf13': mod_vals_eval_surf13}
+
+
+
+
+    return dict_to_return
+
+
 
 
 ########################################################################################################################
@@ -289,24 +352,80 @@ if __name__ == "__main__":
     if not os.path.exists(save_folder):
         os.mkdir(save_folder)
 
-    # time_eval, obs_vals_eval, mod_vals_eval = main(obs_site, DOYstart_choice, DOYstop_choice, variable, save_folder, 1, run,
+    # return_dict = main(obs_site, DOYstart_choice, DOYstop_choice, variable, save_folder, 1, run,
     #      instrument, sample, model_format, obs_level, scint_path)
 
-    time_eval_126, obs_vals_eval_126, mod_vals_eval_126, lc_df_126 = main(obs_site, 2016126, 2016126, variable, save_folder, 1,
+    return_dict_126 = main(obs_site, 2016126, 2016126, variable, save_folder, 1,
                                                                run,
                                                                instrument, sample, model_format, obs_level, scint_path)
 
-    time_eval_123, obs_vals_eval_123, mod_vals_eval_123, lc_df_123 = main(obs_site, 2016123, 2016123, variable, save_folder, 1,
+    return_dict_123 = main(obs_site, 2016123, 2016123, variable, save_folder, 1,
                                                                run,
                                                                instrument, sample, model_format, obs_level, scint_path)
 
-    quick_look.run_quick_look(time_eval_123, mod_vals_eval_123, time_eval_126, mod_vals_eval_126, lc_df_123, lc_df_126)
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+    # difference between surf wav and BL flux
+
+    # diff_ukv_123 = return_dict_123['mod_vals_eval_10'] - return_dict_123['mod_vals_eval_BL'][:-1]
+    # diff_ukv_126 = return_dict_126['mod_vals_eval_10'] - return_dict_126['mod_vals_eval_BL']
+    # print(' ')
+    # print('Cloud')
+    # print(max(diff_ukv_123))
+    # print(return_dict_123['time_eval_surf13'][np.where(diff_ukv_123 == max(np.abs(diff_ukv_123)))[0]])
+    # print(min(np.abs(diff_ukv_123)))
+    # print(return_dict_123['time_eval_surf13'][np.where(diff_ukv_123 == -min(np.abs(diff_ukv_123)))[0]])
+    # print(np.average(np.abs(diff_ukv_123)))
+    # print(' ')
+    # print('Clear')
+    # print(max(diff_ukv_126))
+    # print(return_dict_126['time_eval_surf13'][np.where(diff_ukv_126 == max(np.abs(diff_ukv_126)))[0]])
+    # print(min(np.abs(diff_ukv_126)))
+    # print(return_dict_126['time_eval_surf13'][np.where(diff_ukv_126 == -min(np.abs(diff_ukv_126)))[0]])
+    # print(np.average(np.abs(diff_ukv_126)))
+    # print('end')
+
+
+    # # difference between surf wav and surf 13
+
+    diff_ukv_123 = return_dict_123['mod_vals_eval_10'] - return_dict_123['mod_vals_eval_surf13'][:-1]
+    diff_ukv_126 = return_dict_126['mod_vals_eval_10'] - return_dict_126['mod_vals_eval_surf13']
+    print(' ')
+    print('Cloud')
+    print(max(diff_ukv_123))
+    print(return_dict_123['time_eval_surf13'][np.where(diff_ukv_123 == -max(np.abs(diff_ukv_123)))[0]])
+    print(min(np.abs(diff_ukv_123)))
+    print(return_dict_123['time_eval_surf13'][np.where(diff_ukv_123 == min(np.abs(diff_ukv_123)))[0]])
+    print(np.average(np.abs(diff_ukv_123)))
+    print(' ')
+    print('Clear')
+    print(max(diff_ukv_126))
+    print(return_dict_126['time_eval_surf13'][np.where(diff_ukv_126 == -max(np.abs(diff_ukv_126)))[0]])
+    print(min(np.abs(diff_ukv_126)))
+    print(return_dict_126['time_eval_surf13'][np.where(diff_ukv_126 == -min(np.abs(diff_ukv_126)))[0]])
+    print(np.average(np.abs(diff_ukv_126)))
+    print('end')
+
+    plt.figure()
+    plt.plot(return_dict_126['time_eval_surf13'], return_dict_126['obs_vals_eval_surf13'], label='obs')
+    plt.plot(return_dict_126['time_eval_BL'], return_dict_126['mod_vals_eval_BL'], label='BL')
+    plt.plot(return_dict_126['time_eval_10'], return_dict_126['mod_vals_eval_10'], label='WAV')
+    plt.plot(return_dict_126['time_eval_surf13'], return_dict_126['mod_vals_eval_surf13'], label='13')
+    plt.legend()
+
+
+
+
+    eval_functions.plot_difference(return_dict_123,
+                                   return_dict_126,
+                                   save_folder)
+
+    # quick_look.run_quick_look(time_eval_123, mod_vals_eval_123, time_eval_126, mod_vals_eval_126, lc_df_123, lc_df_126)
 
     print('end')
 
-    # eval_functions.plot_difference(mod_vals_eval_123, obs_vals_eval_123, time_eval_123,
-    #                                mod_vals_eval_126, obs_vals_eval_126, time_eval_126,
-    #                                save_folder)
+
 
 print(' ')
 print(' ')

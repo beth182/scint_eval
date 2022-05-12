@@ -414,8 +414,11 @@ def urb_frac_vs_QH_norm_kdown(df_dict, mod_time_123, mod_vals_123, mod_time_126,
     lc_df_123['Urban'] = lc_df_123['roof'] + lc_df_123['canyon']
     lc_df_126['Urban'] = lc_df_126['roof'] + lc_df_126['canyon']
 
-    mod_df_123['Urban'] = lc_df_123['Urban']
-    mod_df_126['Urban'] = lc_df_126['Urban']
+    # swap for build fraction vs building fraction
+    # mod_df_123['Urban'] = lc_df_123['Urban']
+    # mod_df_126['Urban'] = lc_df_126['Urban']
+    mod_df_123['Urban'] = lc_df_123['roof']
+    mod_df_126['Urban'] = lc_df_126['roof']
 
 
     # fig, ax = plt.subplots(figsize=(10, 10))
@@ -466,13 +469,22 @@ def urb_frac_vs_QH_norm_kdown(df_dict, mod_time_123, mod_vals_123, mod_time_126,
 
     df_123.index = index_list_123
     df_126.index = index_list_126
+    # swap for build vs building fractions
+    # df_123_select = df_123[['kdown', 'Urban', 'QH_norm']]
+    # df_123_select.rename({'kdown': 'kdown_123', 'Urban': 'Urban_123', 'QH_norm': 'QH_norm_123'}, axis=1,
+    #                      inplace=True)
+    #
+    # df_126_select = df_126[['kdown', 'Urban', 'QH_norm']]
+    # df_126_select.rename({'kdown': 'kdown_126', 'Urban': 'Urban_126', 'QH_norm': 'QH_norm_126'}, axis=1,
+    #                      inplace=True)
 
-    df_123_select = df_123[['kdown', 'Urban', 'QH_norm']]
-    df_123_select.rename({'kdown': 'kdown_123', 'Urban': 'Urban_123', 'QH_norm': 'QH_norm_123'}, axis=1,
+
+    df_123_select = df_123[['kdown', 'Building', 'QH_norm']]
+    df_123_select.rename({'kdown': 'kdown_123', 'Building': 'Urban_123', 'QH_norm': 'QH_norm_123'}, axis=1,
                          inplace=True)
 
-    df_126_select = df_126[['kdown', 'Urban', 'QH_norm']]
-    df_126_select.rename({'kdown': 'kdown_126', 'Urban': 'Urban_126', 'QH_norm': 'QH_norm_126'}, axis=1,
+    df_126_select = df_126[['kdown', 'Building', 'QH_norm']]
+    df_126_select.rename({'kdown': 'kdown_126', 'Building': 'Urban_126', 'QH_norm': 'QH_norm_126'}, axis=1,
                          inplace=True)
 
     combine_df = pd.concat([df_123_select, df_126_select], axis=1)

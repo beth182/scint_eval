@@ -11,6 +11,7 @@ import matplotlib.dates as mdates
 import datetime as dt
 from matplotlib import cm
 import matplotlib as mpl
+from scipy import stats
 
 mpl.rcParams.update({'font.size': 15})
 
@@ -83,6 +84,8 @@ def detailed_time_series(obs_time, obs_vals,
     spec = gridspec.GridSpec(ncols=1, nrows=2,
                              height_ratios=[4, 1])
 
+    mpl.rcParams.update({'font.size': 22})
+
     ax1 = fig.add_subplot(spec[0])
     ax2 = fig.add_subplot(spec[1])
 
@@ -111,14 +114,18 @@ def detailed_time_series(obs_time, obs_vals,
     # ax1.plot(model_grid_time['Average'], model_grid_vals['Average'], label='Average', color='red', marker='.')
     ax1.plot(model_grid_time['WAverage'], model_grid_vals['WAverage'], label='WAverage @ surface', color='blue',
              marker='.')
-    ax1.plot(model_grid_time[13], model_grid_vals[13], label='13 @ surface', color='green',
+
+    first_index = np.where(model_grid_time[13] == model_grid_time['Average'][0])[0][0]
+    last_index = np.where(model_grid_time[13] == model_grid_time['Average'][-1])[0][0] + 1
+    ax1.plot(model_grid_time[13][first_index:last_index], model_grid_vals[13][first_index:last_index], label='13 @ surface', color='green',
              marker='.')
+
     # if I am including the BL_H grid
     try:
         first_index = np.where(model_grid_time['BL_H_13'] == model_grid_time['Average'][0])[0][0]
         last_index = np.where(model_grid_time['BL_H_13'] == model_grid_time['Average'][-1])[0][0] + 1
         ax1.plot(model_grid_time['BL_H_13'][first_index:last_index], model_grid_vals['BL_H_13'][first_index:last_index],
-                 label='BL Flux @ ' + str(BL_H_z) + ' m', color='green', marker='.')
+                 label='BL Flux @ ' + str(BL_H_z) + ' m', color='red', marker='.')
     except KeyError:
         pass
 
@@ -148,7 +155,7 @@ def detailed_time_series(obs_time, obs_vals,
     plt.gcf().autofmt_xdate()
 
     date_for_title = 'DOY ' + str(DOYstart)[-3:]
-    ax1.set_title(date_for_title)
+    # ax1.set_title(date_for_title)
 
     # ax1.legend(bbox_to_anchor=(1, 0.5), fontsize=15, loc='center left')
     ax1.legend(fontsize=15)
@@ -257,13 +264,21 @@ def detailed_time_series_kdown(obs_time, obs_vals,
     ax1.xaxis.set_major_formatter(DateFormatter('%H'))
     ax1.set_xlabel('Time (h)')
 
-    ax1.set_xlim([obs_time[0] - dt.timedelta(minutes=15), obs_time[-1] + dt.timedelta(minutes=15)])
-    # ax2.set_xlim([obs_time[0] - dt.timedelta(minutes=15), obs_time[-1] + dt.timedelta(minutes=15)])
+
+    # 126
+    # dt.datetime(2016, 5, 5, 5, 41)
+    # dt.datetime(2016, 5, 5, 18, 0)
+    # ax1.set_xlim([dt.datetime(2016, 5, 5, 5, 41) - dt.timedelta(minutes=15), dt.datetime(2016, 5, 5, 18, 0) + dt.timedelta(minutes=15)])
+
+    # 123
+    # dt.datetime(2016, 5, 2, 5, 25)
+    # dt.datetime(2016, 5, 2, 18, 40)
+    ax1.set_xlim([dt.datetime(2016, 5, 2, 5, 25) - dt.timedelta(minutes=15), dt.datetime(2016, 5, 2, 18, 40) + dt.timedelta(minutes=15)])
 
     plt.gcf().autofmt_xdate()
 
     date_for_title = 'DOY ' + str(DOYstart)[-3:]
-    ax1.set_title(date_for_title)
+    # ax1.set_title(date_for_title)
 
     # ax1.legend(bbox_to_anchor=(1, 0.5), fontsize=15, loc='center left')
     ax1.legend(fontsize=15)
@@ -282,6 +297,7 @@ def detailed_time_series_kdown(obs_time, obs_vals,
     # ax3.xaxis.set_major_formatter(DateFormatter('%H'))
     # ax3.yaxis.label.set_color('green')
     # ax3.tick_params(axis='y', colors='green')
+
 
     plt.tight_layout()
 
@@ -870,6 +886,10 @@ def plots_vars_mod(all_days_vars, all_days_vars_10minsa,
     av_comp_10minsa_10 = wx_u_v_components.u_v_to_ws_wd(ten_min_10minsa['u_component'], ten_min_10minsa['v_component'])
     ten_min_10minsa = pd.concat([ten_min_10minsa, av_comp_10minsa_10], axis=1)
 
+    wind_av_whole_day_df = pd.DataFrame.from_dict(
+        {'u_component': [df_10minsa.mean()['u_component']], 'v_component': [df_10minsa.mean()['v_component']]})
+    wind_av_whole_day_comp = wx_u_v_components.u_v_to_ws_wd(wind_av_whole_day_df['u_component'], wind_av_whole_day_df['v_component'])
+
     # construct title
     doy = df.index[0].strftime('%j')
     year = df.index[0].strftime('%Y')
@@ -1410,6 +1430,18 @@ def qh_vs_zf_both_days(all_days_vars, all_days_vars_10minsa, all_days_vars_142, 
     s = ax.scatter(x_vals_142, y_vals_142, c=mdates.date2num(start_times_142), marker='x', cmap=cmap, norm=norm, edgecolor='None', label='Cloudy')
     s2 = ax.scatter(x_vals_111, y_vals_111, c=mdates.date2num(start_times_111), marker='o', cmap=cmap, norm=norm, edgecolor='None', label='Clear')
 
+    x_vals_both = x_vals_142 + x_vals_111
+    y_vals_both = y_vals_142 + y_vals_111
+    gradient, intercept, r_value, p_value, std_err = stats.linregress(x_vals_both, y_vals_both)
+
+    string_for_label = 'm = ' + '%s' % float('%.5g' % gradient) + '\n c = ' + '%s' % float('%.5g' % intercept)
+    mn = np.min(x_vals_both)
+    mx = np.max(x_vals_both)
+    x1 = np.linspace(mn, mx, 500)
+    y1 = gradient * x1 + intercept
+    plt.plot(x1, y1, '--r', label=string_for_label)
+
+
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.1)
 
@@ -1424,7 +1456,12 @@ def qh_vs_zf_both_days(all_days_vars, all_days_vars_10minsa, all_days_vars_142, 
     ax.set_ylabel('($Q_{H}^{10min}$ - $Q_{H}^{hour}$) / $Q_{H}^{hour}$')
     ax.set_xlabel('($z_{f}^{10min}$ - $z_{f}^{hour}$) / $z_{f}^{hour}$')
 
-    ax.legend(frameon=False)
+    leg = ax.legend(frameon=False, fontsize = 'medium')
+
+    t1, t2, t3, t4 = leg.get_texts()
+    # here we create the distinct instance
+    t1._fontproperties = t2._fontproperties.copy()
+    t1.set_size('small')
 
     plt.savefig('C:/Users/beths/Desktop/LANDING/yeet.png', bbox_inches='tight')
 

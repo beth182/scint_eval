@@ -106,7 +106,7 @@ def take_common_times(time_a, vals_a, time_b, vals_b):
     return time_a_common, vals_a_common, vals_b_common
 
 
-def time_average_values(vals, time, minute_resolution):
+def time_average_values(vals, time, minute_resolution, base):
     """
     Time average a variable
     :param vals:
@@ -125,7 +125,10 @@ def time_average_values(vals, time, minute_resolution):
     freq_string = str(minute_resolution) + 'T'
 
     # resample to minute_resolution
-    resample_df = df.resample(freq_string, on='time', closed='right', label='right').mean()
+    if base == 0:
+        resample_df = df.resample(freq_string, on='time', closed='right', label='right').mean()
+    else:
+        resample_df = df.resample(freq_string, on='time', closed='right', label='right', base=15).mean()
 
     resample_df = resample_df.reset_index()
 

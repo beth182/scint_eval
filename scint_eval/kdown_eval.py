@@ -52,7 +52,8 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     # file_read.py
     files_obs = file_read.finding_files(model_format, 'obs', DOYstart, DOYstop, obs_site, run, instrument, sample,
                                         variable, obs_level,
-                                        obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
+                                        obs_path='C:/Users/beths/Desktop/LANDING/data_wifi_problems/data/'
+                                        # obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
                                         )
 
     # define roughness and displacemet
@@ -157,6 +158,62 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
         # push kdown vals forward by 15 mins - as model output is 15 min average time starting
         model_grid_time_kdown[grid_choice] = mod_time + dt.timedelta(minutes=15)
 
+
+
+    print('end')
+
+    # time average the observations
+    obs_time_av, obs_vals_av = array_retrieval.time_average_values(obs_vals, obs_time, 10, base=15)
+    obs_time_av, obs_vals_av = array_retrieval.rm_nans(obs_time_av, obs_vals_av)
+    obs_time_av_5, obs_vals_av_5 = array_retrieval.time_average_values(obs_vals, obs_time, 5, base=15)
+    obs_time_av_5, obs_vals_av_5 = array_retrieval.rm_nans(obs_time_av_5, obs_vals_av_5)
+    obs_time_av_60, obs_vals_av_60 = array_retrieval.time_average_values(obs_vals, obs_time, 60, base=15)
+    obs_time_av_60, obs_vals_av_60 = array_retrieval.rm_nans(obs_time_av_60, obs_vals_av_60)
+
+    time_eval_10, obs_vals_eval_10, mod_vals_eval_10 = array_retrieval.take_common_times(obs_time_av, obs_vals_av,
+                                                                                model_grid_time_kdown['WAverage'],
+                                                                                model_grid_vals_kdown['WAverage'])
+    time_eval_5, obs_vals_eval_5, mod_vals_eval_5 = array_retrieval.take_common_times(obs_time_av_5, obs_vals_av_5,
+                                                                                model_grid_time_kdown['WAverage'],
+                                                                                model_grid_vals_kdown['WAverage'])
+    time_eval_60, obs_vals_eval_60, mod_vals_eval_60 = array_retrieval.take_common_times(obs_time_av_60, obs_vals_av_60,
+                                                                                model_grid_time_kdown['WAverage'],
+                                                                                model_grid_vals_kdown['WAverage'])
+    time_eval_1, obs_vals_eval_1, mod_vals_eval_1 = array_retrieval.take_common_times(obs_time, obs_vals,
+                                                                                model_grid_time_kdown['WAverage'],
+                                                                                model_grid_vals_kdown['WAverage'])
+
+
+    import numpy as np
+    diff_1 = obs_vals_eval_1 - mod_vals_eval_1
+    diff_5 = obs_vals_eval_5 - mod_vals_eval_5
+    diff_10 = obs_vals_eval_10 - mod_vals_eval_10
+    diff_60 = obs_vals_eval_60 - mod_vals_eval_60
+
+    av_diff_1 = np.average(np.abs(diff_1))
+    av_diff_5 = np.average(np.abs(diff_5))
+    av_diff_10 = np.average(np.abs(diff_10))
+    av_diff_60 = np.average(np.abs(diff_60))
+
+    print(av_diff_1)
+    print(av_diff_5)
+    print(av_diff_10)
+    print(av_diff_60)
+
+    import matplotlib.pyplot as plt
+    plt.figure()
+    plt.plot(time_eval_10, obs_vals_eval_10, label='10')
+    plt.plot(time_eval_1, obs_vals_eval_1, label='1')
+    plt.plot(time_eval_5, obs_vals_eval_5, label='5')
+    plt.plot(time_eval_60, obs_vals_eval_60, label='60')
+    plt.plot(time_eval_60, mod_vals_eval_60, label='mod')
+    plt.legend()
+
+
+
+
+
+    print('end')
     ####################################################################################################################
     # ALL GRIDS
 
@@ -190,6 +247,7 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
         model_grid_vals_kdown_all[grid_choice] = mod_vals
         # push kdown vals forward by 15 mins - as model output is 15 min average time starting
         model_grid_time_kdown_all[grid_choice] = mod_time + dt.timedelta(minutes=15)
+
 
     ####################################################################################################################
 

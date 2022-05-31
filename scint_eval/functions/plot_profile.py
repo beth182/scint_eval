@@ -2,15 +2,10 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import datetime as dt
-from matplotlib.dates import DateFormatter
 import netCDF4 as nc
-import pylab
-from matplotlib import pyplot
-import sys
 
 from scint_eval import look_up
 from scint_eval.functions import tools
-from scint_eval.functions import plotting_funs
 
 mpl.use('TkAgg')
 
@@ -22,9 +17,6 @@ def plot_model_profile(variable,
                        savepath,
                        obs_file,
                        surface_file):
-
-
-
     # choices dependent on variable choice
     label_string = look_up.variable_info[variable][0]
 
@@ -159,7 +151,6 @@ def plot_model_profile(variable,
         qh_at_1_time = var_grid[i, :]
 
         plt.plot(qh_at_1_time, modheightlon, label=str(i), color=colour_list[i], marker='.')
-
 
     # read observation file
     obs_ncfile = nc.Dataset(obs_file)

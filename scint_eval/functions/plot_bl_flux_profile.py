@@ -5,18 +5,13 @@ from scint_eval import look_up
 from scint_eval.functions import file_read
 from scint_eval.functions import roughness
 from scint_eval.functions import observations_new_scint
-from scint_eval.functions import observations
-from scint_eval.functions import find_source_area
-from scint_eval.functions import grid_percentages
 from scint_eval.functions import manipulate_time_objects
-from scint_eval.functions import times_series
-from scint_eval.functions import plotting_funs
 from scint_eval.functions import array_retrieval
 from scint_eval.functions import plot_profile
 
 
 def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrument, sample,
-         model_format, obs_level, scint_path):
+         model_format, obs_level):
     """
     MAIN FUNCTION FOR NEW FILE FORMAT MODEL FILES.
     """
@@ -95,7 +90,6 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     # find model at centre grid (13)
     site_options = look_up.grid_dict[13]
 
-
     # FIND BL FLUX
     file_dict_ukv = file_read.finding_files(model_format,
                                             'ukv',
@@ -111,23 +105,20 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
                                             )
     files_ukv = file_read.order_model_stashes('ukv', file_dict_ukv, variable)
 
-
     # FIND SURFACE FLUX
     file_dict_ukv_surf = file_read.finding_files(model_format,
-                                            'ukv',
-                                            DOYstart_mod,
-                                            DOYstop_mod,
-                                            site_options[0].split(' ')[0],
-                                            run,
-                                            instrument,
-                                            sample,
-                                            'H',
-                                            obs_level,
-                                            model_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/"
-                                            )
+                                                 'ukv',
+                                                 DOYstart_mod,
+                                                 DOYstop_mod,
+                                                 site_options[0].split(' ')[0],
+                                                 run,
+                                                 instrument,
+                                                 sample,
+                                                 'H',
+                                                 obs_level,
+                                                 model_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/"
+                                                 )
     files_ukv_surf = file_read.order_model_stashes('ukv', file_dict_ukv_surf, 'H')
-
-
 
     sort_mod = plot_profile.plot_model_profile(variable,
                                                [(k, v) for k, v in files_ukv.items()][0][1],
@@ -199,7 +190,7 @@ if __name__ == "__main__":
         os.mkdir(save_folder)
 
     main(obs_site, DOYstart_choice, DOYstop_choice, variable, save_folder, 1, run,
-         instrument, sample, model_format, obs_level, scint_path)
+         instrument, sample, model_format, obs_level)
 
 print(' ')
 print(' ')

@@ -6,6 +6,9 @@ import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
 import scintools as sct
 
+# Beth Saunders 12/05/2022
+# file to look at avail files for scintillometer paths
+
 
 # path 11 - BTT -> BCT
 
@@ -76,6 +79,7 @@ def retrieve_data_avail(file_paths):
         if os.path.exists(file_path):
 
             # open file
+            print(file_path)
             nc_file = nc.Dataset(file_path)
             QH = nc_file.variables['Q_H']
 
@@ -178,9 +182,13 @@ def plot_data_avail(days_list,
 
 
 # define inputs
-DOYstarti = 2016001
-DOYstopi = 2018366
-# DOYstopi = 2016266
+# DOYstarti = 2016001
+# DOYstopi = 2018366
+
+# Autumn 2017
+DOYstarti = 2017060
+DOYstopi = 2017151
+
 main_pathi = '//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_raw/data/'
 leveli = 'L1'
 samplei = '15min'
@@ -256,7 +264,6 @@ file_paths14 = construct_file_path(days_list,
                                    rx_site14,
                                    'BLS',
                                    samplei)
-
 file_paths15 = construct_file_path(days_list,
                                    main_pathi,
                                    leveli,
@@ -269,6 +276,8 @@ file_exists_list12 = retrieve_data_avail(file_paths12)
 file_exists_list13 = retrieve_data_avail(file_paths13)
 file_exists_list14 = retrieve_data_avail(file_paths14)
 file_exists_list15 = retrieve_data_avail(file_paths15)
+
+
 
 plot_data_avail(days_list,
                 file_exists_list11,

@@ -49,7 +49,8 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
     # file_read.py
     files_obs = file_read.finding_files(model_format, 'obs', DOYstart, DOYstop, obs_site, run, instrument, sample,
                                         variable, obs_level,
-                                        obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
+                                        obs_path='C:/Users/beths/Desktop/LANDING/data_wifi_problems/data/'
+                                        # obs_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/scint_data_testing/data/"
                                         )
 
     # define roughness and displacemet
@@ -101,7 +102,8 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
                                             sample,
                                             variable,
                                             obs_level,
-                                            model_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/"
+                                            model_path='C:/Users/beths/Desktop/LANDING/data_wifi_problems/data/'
+                                            # model_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/"
                                             )
     files_ukv = file_read.order_model_stashes('ukv', file_dict_ukv, variable)
 
@@ -116,7 +118,8 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
                                                  sample,
                                                  'H',
                                                  obs_level,
-                                                 model_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/"
+                                                 model_path='C:/Users/beths/Desktop/LANDING/data_wifi_problems/data/'
+                                                 # model_path="//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/"
                                                  )
     files_ukv_surf = file_read.order_model_stashes('ukv', file_dict_ukv_surf, 'H')
 
@@ -133,8 +136,8 @@ def main(obs_site, DOYstart, DOYstop, variable, savepath, saveyn, run, instrumen
 ########################################################################################################################
 # c h o i c e s
 # CHANGE HERE
-DOYstart_choice = 2016142
-DOYstop_choice = 2016142
+DOYstart_choice = 2016126
+DOYstop_choice = 2016126
 
 sample = '1min'
 obs_level = 'L1'

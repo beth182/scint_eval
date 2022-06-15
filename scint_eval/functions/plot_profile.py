@@ -17,8 +17,6 @@ def plot_model_profile(variable,
                        savepath,
                        obs_file,
                        surface_file):
-    # choices dependent on variable choice
-    label_string = look_up.variable_info[variable][0]
 
     modlon_ncfile = nc.Dataset(file)
     modlon_ncfile_surf = nc.Dataset(surface_file)
@@ -150,22 +148,35 @@ def plot_model_profile(variable,
     for i in range(len(modtimeslon)):
         qh_at_1_time = var_grid[i, :]
 
-        plt.plot(qh_at_1_time, modheightlon, label=str(i), color=colour_list[i], marker='.')
+        plt.plot(qh_at_1_time, modheightlon, label=str(i), color=colour_list[i], marker='o', linestyle='dotted')
+
+        plt.scatter(var_surf_grid[i], 0, color=colour_list[i], marker='x')
 
     # read observation file
     obs_ncfile = nc.Dataset(obs_file)
+
+    file_time = obs_ncfile.variables['time']
+    time_dt = nc.num2date(file_time[:], file_time.units)
+
+    doy_string = time_dt[0].strftime('%j')
+
+    plt.title('Clear (DOY ' + doy_string + ')')
+
     z_f = obs_ncfile.variables['z_f'][:]
     max_z_f = np.nanmax(z_f)
     min_z_f = np.nanmin(z_f)
     plt.axhspan(min_z_f, max_z_f, alpha=0.2, color='red')
 
-    plt.scatter(var_surf_grid, np.zeros(len(var_surf_grid)), color='k', marker='x')
+    # plt.scatter(var_surf_grid, np.zeros(len(var_surf_grid)), color='k', marker='x')
 
-    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 10})
-    plt.ylim(-10, 150)
-    plt.xlim(-50, 200)
-    plt.ylabel('z (m)')
-    plt.xlabel(label_string)
-    plt.savefig(savepath + 'yeeeeee.png')
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), prop={'size': 15})
+
+    plt.ylim(-2, 150)
+    plt.xlim(-50, max(var_surf_grid) + 10)
+    plt.ylabel("Height above $z_{ES}$ (m)")
+    plt.xlabel('$Q_{H}$ (W m$^{-2}$)')
+
+
+    plt.savefig(savepath + 'yeeeeee.png', bbox_inches='tight')
 
     print('end')

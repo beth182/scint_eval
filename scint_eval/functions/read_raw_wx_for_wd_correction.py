@@ -19,90 +19,112 @@ import datetime as dt
 from matplotlib.dates import DateFormatter
 
 
-def read_BCT_raw(site, target_DOY, average_how='1T'):
+def read_BCT_raw(site, DOY_start, DOY_stop, average_how='1T'):
     """
 
     :return:
     """
 
-    print(target_DOY)
+    DOY_start_year = str(DOY_start)[0:4]
+    DOY_stop_year = str(DOY_stop)[0:4]
 
-    # CHANGE HERE
+    # ToDo: handle different years between start and stop
+    assert DOY_start_year == DOY_stop_year
 
-    DOY_selected = dt.datetime.strptime(str(target_DOY), '%Y%j')
-    filedir = "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_raw/RAW/" + DOY_selected.strftime('%Y') + \
-              "/London/" + site + "/Davis/Daily/" + DOY_selected.strftime('%m') + "/"
-    filename = DOY_selected.strftime('%Y') + DOY_selected.strftime('%m') + DOY_selected.strftime(
-        '%d') + "_davis_" + site + ".txt"
-    filepath = filedir + filename
-    # filepath = 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/20160521_davis_BCT.txt'
-    # filepath = 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/20160420_davis_BCT.txt'
+    DOY_start_day = int(str(DOY_start)[4:])
+    DOY_stop_day = int(str(DOY_stop)[4:])
 
-    # read raw data
-    df_raw = pd.read_csv(filepath, header=None, sep=" ", error_bad_lines=False)
+    DOY_list = []
+    for i in range(DOY_start_day, DOY_stop_day + 1):
+        DOY_construct = int(DOY_start_year + str(i).zfill(3))
+        DOY_list.append(DOY_construct)
 
-    # get rid of weird character at start of txt file
-    df_raw[0] = df_raw[0].str.replace(r'\x1a', '')
+    list_of_DOY_df = []
 
-    # replace any empty spaces with nan
-    df_raw.replace(r'^\s*$', np.nan, regex=True)
+    for DOY in DOY_list:
+        print(DOY)
 
-    # add a time col in
-    df_raw['time'] = df_raw[0] + ' ' + df_raw[1]
-    df_raw['time'] = pd.to_datetime(df_raw['time'], dayfirst=True)
+        DOY_selected = dt.datetime.strptime(str(DOY), '%Y%j')
+        filedir = "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_raw/RAW/" + DOY_selected.strftime('%Y') + \
+                  "/London/" + site + "/Davis/Daily/" + DOY_selected.strftime('%m') + "/"
+        filename = DOY_selected.strftime('%Y') + DOY_selected.strftime('%m') + DOY_selected.strftime(
+            '%d') + "_davis_" + site + ".txt"
+        filepath = filedir + filename
+        # filepath = 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/20160521_davis_BCT.txt'
+        # filepath = 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/20160420_davis_BCT.txt'
 
-    # set index
-    df_raw.index = df_raw['time']
-    df_raw.index = df_raw.index.round('1s')
+        # read raw data
+        df_raw = pd.read_csv(filepath, header=None, sep=" ", error_bad_lines=False)
 
-    # removing all NaT values in index by creating a temp col
-    df_raw["TMP"] = df_raw.index.values  # index is a DateTimeIndex
-    df_raw = df_raw[df_raw.TMP.notnull()]  # remove all NaT values
-    df_raw.drop(["TMP"], axis=1, inplace=True)
+        # get rid of weird character at start of txt file
+        df_raw[0] = df_raw[0].str.replace(r'\x1a', '')
 
-    # make sure there are no duplicated times
-    if len(df_raw[df_raw.index.duplicated()]) != 0:
-        dup_ind = np.where(df_raw.index.duplicated() == True)[0]
-        for item in dup_ind:
-            dup_val = df_raw.index[item]
-            where_dup = np.where(df_raw.index == dup_val)[0]
-            assert df_raw.iloc[where_dup[1]].all() == df_raw.iloc[where_dup[0]].all()
-        drop_rows = df_raw.index[dup_ind]
-        df_raw = df_raw.drop(drop_rows)
-    assert len(df_raw[df_raw.index.duplicated()]) == 0
+        # replace any empty spaces with nan
+        df_raw.replace(r'^\s*$', np.nan, regex=True)
 
-    wind_speed = df_raw[6]
-    wind_dir = df_raw[7]
+        # add a time col in
+        df_raw['time'] = df_raw[0] + ' ' + df_raw[1]
+        df_raw['time'] = pd.to_datetime(df_raw['time'], dayfirst=True)
 
-    # correct here
-    wd_adj = apply_wd_correction(wind_dir)
+        # set index
+        df_raw.index = df_raw['time']
+        df_raw.index = df_raw.index.round('1s')
 
-    component_df = wx_u_v_components.ws_wd_to_u_v(wind_speed, wd_adj)
-    df_raw = pd.concat([df_raw, component_df], axis=1)
+        # removing all NaT values in index by creating a temp col
+        df_raw["TMP"] = df_raw.index.values  # index is a DateTimeIndex
+        df_raw = df_raw[df_raw.TMP.notnull()]  # remove all NaT values
+        df_raw.drop(["TMP"], axis=1, inplace=True)
 
-    if average_how == 'LCY':
-        # half hour averages time-ending at 20 past and 50 min past the hour
-        averaged_df = df_raw.resample('30T', closed='right', label='right', base=20).mean()
-        # get rid of last row where
-        if averaged_df.index[-1].hour == 0:
-            averaged_df = averaged_df[:-1]
+        # make sure there are no duplicated times
+        if len(df_raw[df_raw.index.duplicated()]) != 0:
+            dup_ind = np.where(df_raw.index.duplicated() == True)[0]
+            for item in dup_ind:
+                dup_val = df_raw.index[item]
+                where_dup = np.where(df_raw.index == dup_val)[0]
+                assert df_raw.iloc[where_dup[1]].all() == df_raw.iloc[where_dup[0]].all()
+            drop_rows = df_raw.index[dup_ind]
+            df_raw = df_raw.drop(drop_rows)
+        assert len(df_raw[df_raw.index.duplicated()]) == 0
+
+        wind_speed = df_raw[6]
+        wind_dir = df_raw[7]
+
+        # correct here
+        wd_adj = apply_wd_correction(wind_dir)
+
+        component_df = wx_u_v_components.ws_wd_to_u_v(wind_speed, wd_adj)
+        df_raw = pd.concat([df_raw, component_df], axis=1)
+
+        if average_how == 'LCY':
+            # half hour averages time-ending at 20 past and 50 min past the hour
+            averaged_df = df_raw.resample('30T', closed='right', label='right', base=20).mean()
+            # get rid of last row where
+            if averaged_df.index[-1].hour == 0:
+                averaged_df = averaged_df[:-1]
+
+            av_comp = wx_u_v_components.u_v_to_ws_wd(averaged_df['u_component'], averaged_df['v_component'])
+            averaged_df = pd.concat([averaged_df, av_comp], axis=1)
+        else:
+
+            # other averages averages
+            averaged_df = df_raw.resample(average_how, closed='right', label='right').mean()
+
+            if average_how == '60T':
+                # get rid of first row where
+                if averaged_df.index[0].hour == 0:
+                    averaged_df = averaged_df[1:]
 
         av_comp = wx_u_v_components.u_v_to_ws_wd(averaged_df['u_component'], averaged_df['v_component'])
         averaged_df = pd.concat([averaged_df, av_comp], axis=1)
-    else:
 
-        # other averages averages
-        averaged_df = df_raw.resample(average_how, closed='right', label='right').mean()
+        # remove any insdtances where DOY is not target DOY (midnight next day etc.)
+        averaged_df = averaged_df.drop(averaged_df.index[np.where(np.array(averaged_df.index.strftime('%j')) != DOY_selected.strftime('%j'))[0]])
 
-        if average_how == '60T':
-            # get rid of first row where
-            if averaged_df.index[0].hour == 0:
-                averaged_df = averaged_df[1:]
+        list_of_DOY_df.append(averaged_df)
 
-    av_comp = wx_u_v_components.u_v_to_ws_wd(averaged_df['u_component'], averaged_df['v_component'])
-    averaged_df = pd.concat([averaged_df, av_comp], axis=1)
+    df = pd.concat(list_of_DOY_df)
 
-    return averaged_df
+    return df
 
 
 def apply_wd_correction(wd,
@@ -231,6 +253,8 @@ z0zdlist = roughness.roughness_and_displacement(1, 0.8, look_up.obs_z0_macdonald
 ####################################################################################################################
 # OBS
 
+BCT_raw_df = read_BCT_raw('BCT', DOYstart, DOYstop, average_how='1T')
+
 
 LC_df = read_ceda_heathrow.read_NOAA_LCairport(
     'C:/Users/beths/OneDrive - University of Reading/London_2016_wind_obs/London_city_2016_03768399999.csv',
@@ -248,7 +272,7 @@ df_LHR = df_LHR.rename(columns={'WD': 'LHR_WD', 'WS': 'LHR_WS'})
 
 
 
-BCT_raw_df = read_BCT_raw('BCT', DOYstart, DOYstop, average_how='1T')
+
 
 ####################################################################################################################
 # MODEL

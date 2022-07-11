@@ -14,7 +14,7 @@ from scint_eval.functions import roughness
 from scint_eval.functions import observations_new_scint
 
 
-def read_ceda_heathrow(filepath, target_DOY):
+def read_ceda_heathrow(filepath, DOY_start, DOY_stop):
     """
 
     :return:
@@ -27,29 +27,50 @@ def read_ceda_heathrow(filepath, target_DOY):
     df_year['ob_end_time'] = pd.to_datetime(df_year['ob_end_time'], format='%Y-%m-%d %H:%M')
     df_year = df_year.set_index('ob_end_time')
 
-    DOY_selected = dt.datetime.strptime(str(target_DOY), '%Y%j')
+    DOY_start_year = str(DOY_start)[0:4]
+    DOY_stop_year = str(DOY_stop)[0:4]
 
-    # next DOY
-    DOY_next = DOY_selected + dt.timedelta(days=1)
+    # ToDo: handle different years between start and stop
+    assert DOY_start_year == DOY_stop_year
 
-    # discard all rows with index time being bigger or equal to 1 in the morning on the next DOY
-    DOY_1am = DOY_next + dt.timedelta(hours=1)  # construct 1am datetime for that DOY
+    DOY_start_day = int(str(DOY_start)[4:])
+    DOY_stop_day = int(str(DOY_stop)[4:])
 
-    mask = (df_year.index > DOY_selected) & (df_year.index < DOY_1am)
+    DOY_list = []
+    for i in range(DOY_start_day, DOY_stop_day + 1):
+        DOY_construct = int(DOY_start_year + str(i).zfill(3))
+        DOY_list.append(DOY_construct)
 
-    df_DOY = df_year.loc[mask]
+    list_of_DOY_df = []
 
-    df = df_DOY[[' mean_wind_dir', ' mean_wind_speed']].copy()
+    for DOY in DOY_list:
+        DOY_selected = dt.datetime.strptime(str(DOY), '%Y%j')
 
-    df = df.rename(columns={' mean_wind_dir': 'WD', ' mean_wind_speed': 'WS'})
+        # next DOY
+        DOY_next = DOY_selected + dt.timedelta(days=1)
 
-    df.WS = pd.to_numeric(df.WS, errors='coerce')
-    df.WD = pd.to_numeric(df.WD, errors='coerce')
+        # discard all rows with index time being bigger or equal to 1 in the morning on the next DOY
+        DOY_12am = DOY_next + dt.timedelta(hours=0)
 
-    return df
+        mask = (df_year.index >= DOY_selected) & (df_year.index < DOY_12am)
+
+        df_DOY = df_year.loc[mask]
+
+        df = df_DOY[[' mean_wind_dir', ' mean_wind_speed']].copy()
+
+        df = df.rename(columns={' mean_wind_dir': 'WD', ' mean_wind_speed': 'WS'})
+
+        df.WS = pd.to_numeric(df.WS, errors='coerce')
+        df.WD = pd.to_numeric(df.WD, errors='coerce')
+
+        list_of_DOY_df.append(df)
+
+    df_all = pd.concat(list_of_DOY_df)
+
+    return df_all
 
 
-def read_NOAA_LCairport(filepath, target_DOY):
+def read_NOAA_LCairport(filepath, DOY_start, DOY_stop):
     """
 
     :param filepath:
@@ -63,73 +84,93 @@ def read_NOAA_LCairport(filepath, target_DOY):
     # convert times from string to datetime
     df_year['DATE'] = pd.to_datetime(df_year['DATE'], format='%Y-%m-%dT%H:%M:%S')
 
-    DOY_selected = dt.datetime.strptime(str(target_DOY), '%Y%j')
+    DOY_start_year = str(DOY_start)[0:4]
+    DOY_stop_year = str(DOY_stop)[0:4]
 
-    df_DOY = df_year.loc[
-        (df_year['DATE'].dt.day == DOY_selected.day) & (df_year['DATE'].dt.month == DOY_selected.month)]
+    # ToDo: handle different years between start and stop
+    assert DOY_start_year == DOY_stop_year
 
-    df = df_DOY[['DATE', 'WND']].copy()
+    DOY_start_day = int(str(DOY_start)[4:])
+    DOY_stop_day = int(str(DOY_stop)[4:])
 
-    wd_val = df.WND.str.split(',').str[0]
-    ws_str = df.WND.str.split(',').str[3]
+    DOY_list = []
+    for i in range(DOY_start_day, DOY_stop_day + 1):
+        DOY_construct = int(DOY_start_year + str(i).zfill(3))
+        DOY_list.append(DOY_construct)
 
-    df['WD'] = df.WND.str.split(',').str[0]
-    df['WS'] = df.WND.str.split(',').str[3]
+    list_of_DOY_df = []
 
-    df['WD'] = df['WD'].astype(int)
-    # WIND SPEED IS MULTIPLIED BY 10 IN THIS DATASET. SOURCE OF DOCUMENTATION ON THAT:
-    # https://www.visualcrossing.com/resources/documentation/weather-data/how-we-process-integrated-surface-database-historical-weather-data/
-    df['WS'] = df['WS'].astype(int) / 10
+    for DOY in DOY_list:
 
-    df = df.replace(999, np.nan)
+        DOY_selected = dt.datetime.strptime(str(DOY), '%Y%j')
 
-    df = df.rename(columns={'DATE': 'time'})
+        df_DOY = df_year.loc[
+            (df_year['DATE'].dt.day == DOY_selected.day) & (df_year['DATE'].dt.month == DOY_selected.month)]
 
-    df.WD = pd.to_numeric(df.WD, errors='coerce')
-    df.WS = pd.to_numeric(df.WS, errors='coerce')
+        df = df_DOY[['DATE', 'WND']].copy()
 
-    df = df.drop('WND', 1)
+        wd_val = df.WND.str.split(',').str[0]
+        ws_str = df.WND.str.split(',').str[3]
 
-    # check if the length of the df is 48?
-    if len(df_DOY) != 48:
+        df['WD'] = df.WND.str.split(',').str[0]
+        df['WS'] = df.WND.str.split(',').str[3]
 
-        times = pd.to_datetime(df['time'])
-        start = pd.to_datetime(str(times.min()))
-        end = pd.to_datetime(str(times.max()))
-        dates = pd.date_range(start=start, end=end, freq='30Min')
+        df['WD'] = df['WD'].astype(int)
+        # WIND SPEED IS MULTIPLIED BY 10 IN THIS DATASET. SOURCE OF DOCUMENTATION ON THAT:
+        # https://www.visualcrossing.com/resources/documentation/weather-data/how-we-process-integrated-surface-database-historical-weather-data/
+        df['WS'] = df['WS'].astype(int) / 10
 
-        # make sure the missing value isnt at the start or at the end
-        # assert len(dates) == 48:
+        df = df.replace(999, np.nan)
 
-        df = df.set_index('time').reindex(dates)
-        # assert len(df) == 48
+        df = df.rename(columns={'DATE': 'time'})
 
-    else:
-        df = df.set_index('time')
+        df.WD = pd.to_numeric(df.WD, errors='coerce')
+        df.WS = pd.to_numeric(df.WS, errors='coerce')
 
-    # LC data is twich an hour, one at 20 mins past, 1 at 50
-    # so I am taking the 20 min past data for hourly comparison to other sites
-    # df = df[(df['time'].dt.minute == 20)]
+        df = df.drop('WND', 1)
+
+        # check if the length of the df is 48?
+        if len(df_DOY) != 48:
+
+            times = pd.to_datetime(df['time'])
+            start = pd.to_datetime(str(times.min()))
+            end = pd.to_datetime(str(times.max()))
+            dates = pd.date_range(start=start, end=end, freq='30Min')
+
+            # make sure the missing value isnt at the start or at the end
+            # assert len(dates) == 48:
+
+            df = df.set_index('time').reindex(dates)
+            # assert len(df) == 48
+
+        else:
+            df = df.set_index('time')
+
+        # LC data is twich an hour, one at 20 mins past, 1 at 50
+        # so I am taking the 20 min past data for hourly comparison to other sites
+        # df = df[(df['time'].dt.minute == 20)]
+
+        # # return the df with hourly index - and separate cols for 20 past and 50 past the hour
+        # df_20 = df[(df['time'].dt.minute == 20)]
+        # df_50 = df[(df['time'].dt.minute == 50)]
+        #
+        # df_20 = df_20.set_index('time')
+        # df_50 = df_50.set_index('time')
+        #
+        # df_50.index = df_50.index + dt.timedelta(minutes=10)
+        # df_20.index = df_20.index + dt.timedelta(minutes=40)
+        #
+        # df_50 = df_50.rename(columns={'WD': 'WD_50_mins'})
+        # df_20 = df_20.rename(columns={'WD': 'WD_20_mins'})
+        #
+        # df_combine = pd.concat([df_50, df_20], axis=1)
+
+        list_of_DOY_df.append(df)
+
+    df_all = pd.concat(list_of_DOY_df)
 
     # return the whole df
-    return df
-
-    # # return the df with hourly index - and seperate cols for 20 past and 50 past the hour
-    # df_20 = df[(df['time'].dt.minute == 20)]
-    # df_50 = df[(df['time'].dt.minute == 50)]
-    #
-    # df_20 = df_20.set_index('time')
-    # df_50 = df_50.set_index('time')
-    #
-    # df_50.index = df_50.index + dt.timedelta(minutes=10)
-    # df_20.index = df_20.index + dt.timedelta(minutes=40)
-    #
-    # df_50 = df_50.rename(columns={'WD': 'WD_50_mins'})
-    # df_20 = df_20.rename(columns={'WD': 'WD_20_mins'})
-    #
-    # df_combine = pd.concat([df_50, df_20], axis=1)
-    #
-    # return df_combine
+    return df_all
 
 
 def read_SWT_sheet(filepath, target_DOY):
@@ -248,7 +289,6 @@ def read_BCT_raw(site, target_DOY, average_how='LCY'):
 
         av_comp = wx_u_v_components.u_v_to_ws_wd(averaged_df['u_component'], averaged_df['v_component'])
         averaged_df = pd.concat([averaged_df, av_comp], axis=1)
-
 
     return averaged_df
 
@@ -507,10 +547,6 @@ df_BCT_RAW.loc[(df_BCT_RAW.index > bad_data_start) & (df_BCT_RAW.index <= bad_da
 print('end')
 """
 
-
-
-
-
 """
 ##############################################################################################################
 # Read LHR obs
@@ -533,7 +569,6 @@ df_LHR = df_LHR.rename(columns={'WD': 'LHR_WD', 'WS': 'LHR_WS'})
 print('end')
 
 """
-
 
 """
 ##############################################################################################################
@@ -559,7 +594,6 @@ print('end')
 
 """
 
-
 """
 # upsample LHR to be the same time resolution as LCY
 
@@ -582,23 +616,6 @@ df_LHR_upsample.sort_index(inplace=True)
 df_ap = pd.concat([df_LCY, df_LHR_upsample], axis=1)
 
 """
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 """
 # calculating the hit rate
@@ -648,9 +665,6 @@ intercept_corr = -26.154468937819814
 # y = mx + c  ->  x = (y - c)/m, where x will be BCT adjusted, y will be BCT raw
 bct_adj = (BCT_HR_0 - intercept_corr) / gradient_corr
 """
-
-
-
 
 """
 # scatter plot
@@ -788,17 +802,6 @@ plt.show()
 print('end')
 """
 
-
-
-
-
-
-
-
-
-
-
-
 """
 ##############################################################################################################
 
@@ -824,7 +827,6 @@ print('end')
 
 """
 
-
 """
 # read L1 BCT files
 ###############################################################################################################
@@ -845,11 +847,6 @@ df_BCT_L1 = df_BCT_L1.rename(columns={'wind_direction_convert': 'BCT_L1_WD', 'wi
 
 """
 
-
-
-
-
-
 """
 # looking at raw data and L1 data
 # combine the dataframes
@@ -859,44 +856,6 @@ df_BCT['DIFF_RAW_L1'] = df_BCT['BCT_RAW_WD'] - df_BCT['BCT_L1_WD']
 # Adjust L1 back to RAW
 df_BCT['LA_ADJ_TO_RAW'] = df_BCT['BCT_L1_WD'] + 55
 """
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 """
 # Create the averaged raw obs csv files
@@ -922,8 +881,6 @@ for i in range(doy_start, doy_stop+1):
 print('end')
 
 """
-
-
 
 """
 # read BCT used in scint (L2 tier processing)
@@ -968,8 +925,6 @@ df_BCT_newdata = pd.concat(BCT_newdata_df_list)
 
 """
 
-
-
 """
 # modular test
 
@@ -981,9 +936,3 @@ BCT_HR_0[np.where((LCY_HR_0 > 180) & (BCT_HR_0 < 180))[0]] = BCT_HR_0[np.where((
 mbe_bct_lcy = mbe(LCY_HR_0, BCT_HR_0)
 
 """
-
-
-
-
-
-

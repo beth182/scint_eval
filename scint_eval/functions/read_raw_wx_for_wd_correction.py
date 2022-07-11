@@ -80,8 +80,24 @@ def read_BCT_raw(site, target_DOY, average_how='1T'):
     component_df = wx_u_v_components.ws_wd_to_u_v(wind_speed, wd_adj)
     df_raw = pd.concat([df_raw, component_df], axis=1)
 
-    # other averages averages
-    averaged_df = df_raw.resample(average_how, closed='right', label='right').mean()
+    if average_how == 'LCY':
+        # half hour averages time-ending at 20 past and 50 min past the hour
+        averaged_df = df_raw.resample('30T', closed='right', label='right', base=20).mean()
+        # get rid of last row where
+        if averaged_df.index[-1].hour == 0:
+            averaged_df = averaged_df[:-1]
+
+        av_comp = wx_u_v_components.u_v_to_ws_wd(averaged_df['u_component'], averaged_df['v_component'])
+        averaged_df = pd.concat([averaged_df, av_comp], axis=1)
+    else:
+
+        # other averages averages
+        averaged_df = df_raw.resample(average_how, closed='right', label='right').mean()
+
+        if average_how == '60T':
+            # get rid of first row where
+            if averaged_df.index[0].hour == 0:
+                averaged_df = averaged_df[1:]
 
     av_comp = wx_u_v_components.u_v_to_ws_wd(averaged_df['u_component'], averaged_df['v_component'])
     averaged_df = pd.concat([averaged_df, av_comp], axis=1)

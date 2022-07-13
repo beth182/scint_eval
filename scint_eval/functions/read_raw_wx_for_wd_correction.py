@@ -118,7 +118,8 @@ def read_BCT_raw(site, DOY_start, DOY_stop, average_how='1T'):
         averaged_df = pd.concat([averaged_df, av_comp], axis=1)
 
         # remove any insdtances where DOY is not target DOY (midnight next day etc.)
-        averaged_df = averaged_df.drop(averaged_df.index[np.where(np.array(averaged_df.index.strftime('%j')) != DOY_selected.strftime('%j'))[0]])
+        averaged_df = averaged_df.drop(
+            averaged_df.index[np.where(np.array(averaged_df.index.strftime('%j')) != DOY_selected.strftime('%j'))[0]])
 
         list_of_DOY_df.append(averaged_df)
 
@@ -216,8 +217,8 @@ obs_level = 'L1'
 savepath = 'C:/Users/beths/Desktop/LANDING/'
 
 # CHANGE HERE
-DOYstart = 2016130
-DOYstop = 2016131
+DOYstart = 2017054
+DOYstop = 2017058
 
 # Finding model files
 if run == '21Z':
@@ -248,31 +249,36 @@ DOYstop_mod = DOYstop - 1
 z0zdlist = roughness.roughness_and_displacement(1, 0.8, look_up.obs_z0_macdonald[obs_site],
                                                 look_up.obs_zd_macdonald[obs_site])
 
-
-
 ####################################################################################################################
 # OBS
 
-BCT_raw_df = read_BCT_raw('BCT', DOYstart, DOYstop, average_how='1T')
+DOY_start_year = str(DOYstart)[0:4]
+DOY_stop_year = str(DOYstop)[0:4]
 
-
-LC_df = read_ceda_heathrow.read_NOAA_LCairport(
-    'C:/Users/beths/OneDrive - University of Reading/London_2016_wind_obs/London_city_2016_03768399999.csv',
-    DOYstart, DOYstop)
-
-LC_df.index.rename('time', inplace=True)
-LC_df = LC_df.rename(columns={'WD': 'WD_LCY', 'WS': 'WS_LCY'})
+# ToDo: handle different years between start and stop
+assert DOY_start_year == DOY_stop_year
 
 
 df_LHR = read_ceda_heathrow.read_ceda_heathrow(
-    'C:/Users/beths/OneDrive - University of Reading/London_2016_wind_obs/Heathrow Mean Wind/station_data-201601010000-201612312359_w.csv',
+    'C:/Users/beths/OneDrive - University of Reading/London_2016_wind_obs/Heathrow Mean Wind/station_data-' +
+    DOY_start_year + '01010000-' + DOY_start_year + '12312359_w.csv',
     DOYstart, DOYstop)
+
 df_LHR.index.rename('time', inplace=True)
 df_LHR = df_LHR.rename(columns={'WD': 'LHR_WD', 'WS': 'LHR_WS'})
 
+# only have data for LCY for 2016
+if int(DOY_start_year) != 2016:
+    pass
+else:
+    LC_df = read_ceda_heathrow.read_NOAA_LCairport(
+        'C:/Users/beths/OneDrive - University of Reading/London_2016_wind_obs/London_city_2016_03768399999.csv',
+        DOYstart, DOYstop)
 
+    LC_df.index.rename('time', inplace=True)
+    LC_df = LC_df.rename(columns={'WD': 'WD_LCY', 'WS': 'WS_LCY'})
 
-
+BCT_raw_df = read_BCT_raw('BCT', DOYstart, DOYstop, average_how='1T')
 
 ####################################################################################################################
 # MODEL
@@ -302,46 +308,36 @@ files_ukv_wind = file_read.order_model_stashes('ukv', file_dict_ukv_wind, 'wind'
 
 av_disheight = 145
 
-
-
-"""
-ukv_dict = get_model_data_out('E')
-plt.scatter(BCT_raw_df.index, BCT_raw_df.wind_direction_convert, marker='.', color='k')
-plt.plot(mod_time_wd, mod_vals_wd, label='UKV @ %s' % float('%.3g' % ukv_height))
-plt.plot(mod_time_wd0, mod_vals_wd0, label='UKV @ %s' % float('%.3g' % ukv_height0))
-plt.plot(mod_time_wd2, mod_vals_wd2, label='UKV @ %s' % float('%.3g' % ukv_height2))
-plt.legend()
-plt.xlabel('time')
-plt.ylabel('WD')
-"""
-
-# """
-ukv_dictA = get_model_data_out('A')
-ukv_dictB = get_model_data_out('B')
-ukv_dictC = get_model_data_out('C')
-ukv_dictD = get_model_data_out('D')
+# ukv_dictA = get_model_data_out('A')
+# ukv_dictB = get_model_data_out('B')
+# ukv_dictC = get_model_data_out('C')
+# ukv_dictD = get_model_data_out('D')
 ukv_dictE = get_model_data_out('E')
-ukv_dictF = get_model_data_out('F')
-ukv_dictG = get_model_data_out('G')
-ukv_dictH = get_model_data_out('H')
-ukv_dictI = get_model_data_out('I')
+# ukv_dictF = get_model_data_out('F')
+# ukv_dictG = get_model_data_out('G')
+# ukv_dictH = get_model_data_out('H')
+# ukv_dictI = get_model_data_out('I')
 
 plt.close('all')
 
 plt.figure()
 plt.scatter(BCT_raw_df.index, BCT_raw_df.wind_direction_convert, marker='.', color='grey', label='Obs')
 
-plt.plot(ukv_dictA['mod_time_wd'], ukv_dictA['mod_vals_wd'], label='UKV A')
-plt.plot(ukv_dictB['mod_time_wd'], ukv_dictB['mod_vals_wd'], label='UKV B')
-plt.plot(ukv_dictC['mod_time_wd'], ukv_dictC['mod_vals_wd'], label='UKV C')
-plt.plot(ukv_dictD['mod_time_wd'], ukv_dictD['mod_vals_wd'], label='UKV D')
+# plt.plot(ukv_dictA['mod_time_wd'], ukv_dictA['mod_vals_wd'], label='UKV A')
+# plt.plot(ukv_dictB['mod_time_wd'], ukv_dictB['mod_vals_wd'], label='UKV B')
+# plt.plot(ukv_dictC['mod_time_wd'], ukv_dictC['mod_vals_wd'], label='UKV C')
+# plt.plot(ukv_dictD['mod_time_wd'], ukv_dictD['mod_vals_wd'], label='UKV D')
 plt.plot(ukv_dictE['mod_time_wd'], ukv_dictE['mod_vals_wd'], label='UKV E')
-plt.plot(ukv_dictF['mod_time_wd'], ukv_dictF['mod_vals_wd'], label='UKV F')
-plt.plot(ukv_dictG['mod_time_wd'], ukv_dictG['mod_vals_wd'], label='UKV G')
-plt.plot(ukv_dictH['mod_time_wd'], ukv_dictH['mod_vals_wd'], label='UKV H')
-plt.plot(ukv_dictI['mod_time_wd'], ukv_dictI['mod_vals_wd'], label='UKV I')
+# plt.plot(ukv_dictF['mod_time_wd'], ukv_dictF['mod_vals_wd'], label='UKV F')
+# plt.plot(ukv_dictG['mod_time_wd'], ukv_dictG['mod_vals_wd'], label='UKV G')
+# plt.plot(ukv_dictH['mod_time_wd'], ukv_dictH['mod_vals_wd'], label='UKV H')
+# plt.plot(ukv_dictI['mod_time_wd'], ukv_dictI['mod_vals_wd'], label='UKV I')
 
-plt.scatter(LC_df.index, LC_df.WD_LCY, label='LCY', color='orange', marker='o')
+if int(DOY_start_year) != 2016:
+    pass
+else:
+    plt.scatter(LC_df.index, LC_df.WD_LCY, label='LCY', color='orange', marker='o')
+
 plt.scatter(df_LHR.index, df_LHR.LHR_WD, label='LHR', color='magenta', marker='o')
 
 plt.gca().xaxis.set_major_formatter(DateFormatter('%j %H'))
@@ -350,7 +346,5 @@ plt.legend()
 plt.xlabel('time')
 plt.ylabel('WD')
 plt.show()
-# """
-
 
 print('end')

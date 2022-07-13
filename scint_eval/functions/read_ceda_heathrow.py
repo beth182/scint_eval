@@ -27,11 +27,8 @@ def read_ceda_heathrow(filepath, DOY_start, DOY_stop):
     df_year['ob_end_time'] = pd.to_datetime(df_year['ob_end_time'], format='%Y-%m-%d %H:%M')
     df_year = df_year.set_index('ob_end_time')
 
+    # currently start year has to be the same as stop year
     DOY_start_year = str(DOY_start)[0:4]
-    DOY_stop_year = str(DOY_stop)[0:4]
-
-    # ToDo: handle different years between start and stop
-    assert DOY_start_year == DOY_stop_year
 
     DOY_start_day = int(str(DOY_start)[4:])
     DOY_stop_day = int(str(DOY_stop)[4:])
@@ -85,10 +82,6 @@ def read_NOAA_LCairport(filepath, DOY_start, DOY_stop):
     df_year['DATE'] = pd.to_datetime(df_year['DATE'], format='%Y-%m-%dT%H:%M:%S')
 
     DOY_start_year = str(DOY_start)[0:4]
-    DOY_stop_year = str(DOY_stop)[0:4]
-
-    # ToDo: handle different years between start and stop
-    assert DOY_start_year == DOY_stop_year
 
     DOY_start_day = int(str(DOY_start)[4:])
     DOY_stop_day = int(str(DOY_stop)[4:])

@@ -217,8 +217,8 @@ obs_level = 'L1'
 savepath = 'C:/Users/beths/Desktop/LANDING/'
 
 # CHANGE HERE
-DOYstart = 2017054
-DOYstop = 2017058
+DOYstart = 2018052
+DOYstop = 2018058
 
 # Finding model files
 if run == '21Z':

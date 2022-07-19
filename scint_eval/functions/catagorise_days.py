@@ -21,6 +21,8 @@ from scint_eval.functions import sort_model
 from scint_eval.functions import array_retrieval
 from scint_eval.functions import file_read
 
+from scint_flux.functions import wx_data
+
 
 def read_L1_davis_tier_raw(target_DOY, site, average_period, filepath_in, level='L1'):
     """
@@ -65,15 +67,6 @@ def read_L1_davis_tier_raw(target_DOY, site, average_period, filepath_in, level=
     df = df.set_index('time')
 
     return df
-
-
-
-
-
-
-
-
-
 
 
 def determine_predominant_wd(wind_speed, wind_dir):
@@ -269,35 +262,18 @@ def catagorize_one_day(DOY_choice):
 
     # read the observations
     # CHANGE HERE
-    # L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/Davis_teir_raw_L1/Davis_BCT_2016142_1min.nc')
-    # L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/Davis_teir_raw_L1/Davis_BCT_2016111_1min.nc')
-    L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_raw/data/")
-    # L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1, '/storage/basic/micromet/Tier_raw/data/')
-
-
-    # L2_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1,
-    #                                "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_scint/data/",
-    #                                level='L2')
-    # L2_to_L1_wd = return_L2_TP_to_L1_TR(L2_df.wd_L1)
-    # # change the L2_to_L1 back to 'raw'
-    # L2_to_L1_to_raw_wd = return_L1_to_raw_wd(L2_to_L1_wd)
-    # # correct L2_to_L1_to_raw_wd
-    # L2_corrected = correct_obs_wd(L2_to_L1_to_raw_wd)
-
+    L1_df = read_L1_davis_tier_raw(DOY_choice, 'BCT', 1,
+                                   "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_raw/data/")
 
     # change the L1 wind direction back to the raw state (reset & undo the incorrect metadata system yaw adjustment)
-    L1_to_raw_wd = return_L1_to_raw_wd(L1_df.wd_L1)
+    L1_to_raw_wd = wx_data.return_L1_to_raw_wd(L1_df.wd_L1)
     L1_to_raw_wd = L1_to_raw_wd.rename('wd_undo_yaw')
 
     obs_df = pd.concat([L1_df, L1_to_raw_wd], axis=1)
 
     # correct the wind direction with the new correction
-    corrected_wd = correct_obs_wd(obs_df.wd_undo_yaw)
+    corrected_wd = wx_data.correct_obs_wd(obs_df.wd_undo_yaw)
     corrected_wd = corrected_wd.rename('corrected_wd')
-
-
-
-
 
     # put corrected wind back into the observation dataframe
     obs_df = pd.concat([obs_df, corrected_wd], axis=1)
@@ -329,24 +305,12 @@ def catagorize_one_day(DOY_choice):
     # MODEL WORK
 
     # CHANGE HERE
-    # files_ukv_wind = [
-    #     {'ukv2016141': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016052021Z_m01s00i002_LON_IMU.nc'},
-    #     {'ukv2016141': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016052021Z_m01s00i003_LON_IMU.nc'}]
-    files_ukv_wind = [
-        {'ukv2016110': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016041921Z_m01s00i002_LON_IMU.nc'},
-        {'ukv2016110': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016041921Z_m01s00i003_LON_IMU.nc'}]
 
-    # files_ukv_kdown = {
-    #     'ukv2016141': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016052021Z_m01s01i235_LON_IMU.nc'}
-    files_ukv_kdown = {
-        'ukv2016110': 'C:/Users/beths/Desktop/LANDING/data_wifi_problems/MOUKV_FC2016041921Z_m01s01i235_LON_IMU.nc'}
 
-    model_dict_wind = get_model_data_out(DOY_choice, files_ukv_wind, 'wind')
-    # model_dict_wind = get_model_data_out(DOY_choice, "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/", 'wind')
+    model_dict_wind = get_model_data_out(DOY_choice, "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/", 'wind')
     # model_dict_wind = get_model_data_out(DOY_choice, "/storage/basic/micromet/Tier_processing/rv006011/new_data_storage/", 'wind')
 
-    model_dict_kdown = get_model_data_out(DOY_choice, files_ukv_kdown, 'kdown')
-    # model_dict_kdown = get_model_data_out(DOY_choice, "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/", 'kdown')
+    model_dict_kdown = get_model_data_out(DOY_choice, "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/", 'kdown')
     # model_dict_kdown = get_model_data_out(DOY_choice, "/storage/basic/micromet/Tier_processing/rv006011/new_data_storage/", 'kdown')
 
     # check if times are the same between kdown and wind model
@@ -423,10 +387,10 @@ def catagorize_one_day(DOY_choice):
     # CHANGE HERE
     # savefig_path = '/storage/basic/micromet/Tier_processing/rv006011/temp/'
     # savefig_path = '//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/temp/'
-    savefig_path = 'C:/Users/beths/Desktop/LANDING/'
+    savefig_path = 'C:/Users/beths/OneDrive - University of Reading/Paper 2/data_avail/categorize_days/'
 
-    # csv_filepath = 'C:/Users/beths/Desktop/LANDING/categorize_days.csv'
-    csv_filepath = '/storage/basic/micromet/Tier_processing/rv006011/temp/categorize_days.csv'
+    csv_filepath = 'C:/Users/beths/OneDrive - University of Reading/Paper 2/data_avail/categorize_days/categorize_days.csv'
+    # csv_filepath = '/storage/basic/micromet/Tier_processing/rv006011/temp/categorize_days.csv'
     # csv_filepath = '//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/temp/categorize_days.csv'
 
     # Tau figure
@@ -487,7 +451,10 @@ def catagorize_one_day(DOY_choice):
     combine_df.to_csv(csv_filepath)
 
 
+########################################################################################################################
+# FOR A SET OF CONSECUTIVE DAYS
 # CHANGE HERE
+"""
 # choices
 DOY_start = 111
 DOY_stop = 111
@@ -499,6 +466,15 @@ DOY_list_in = []
 for i in range(DOY_start, DOY_stop + 1):
     DOY_construct = int('2016' + str(i).zfill(3))
     DOY_list_in.append(DOY_construct)
+
+loop_over_days(DOY_list_in)
+"""
+
+# READING IN FROM CSV
+
+csv_in_path = 'C:/Users/beths/OneDrive - University of Reading/Paper 2/data_avail/categorize_days/all_days.csv'
+csv_in_path_df = pd.read_csv(csv_in_path)
+DOY_list_in = list((csv_in_path_df.Year.astype(str) + csv_in_path_df.DOY.astype(str).str.zfill(3)).astype(int))
 
 loop_over_days(DOY_list_in)
 

@@ -23,6 +23,9 @@ from scint_eval.functions import file_read
 
 from scint_flux.functions import wx_data
 
+def myround(x, base=5):
+    return base * round(x/base)
+
 
 def read_L1_davis_tier_raw(target_DOY, site, average_period, filepath_in, level='L1'):
     """
@@ -69,30 +72,32 @@ def read_L1_davis_tier_raw(target_DOY, site, average_period, filepath_in, level=
     return df
 
 
-def determine_predominant_wd(wind_speed, wind_dir):
+def determine_predominant_wd(wind_speed, wind_dir, binsize=10):
     """
     Find the average wind direction for a given day
     :return:
     """
 
+    # bin the wind directions based on given binsize
+    wd_bins = myround(wind_dir, binsize)
+    frequent_bin = wd_bins.mode()
+    count_frequent_bin = wd_bins.value_counts().max()
+
     # convert to u and v components
     component_df = wx_u_v_components.ws_wd_to_u_v(wind_speed, wind_dir)
 
-    # take the day's average (only during daytime hours)
-    start = dt.time(6, 0, 0)
-    end = dt.time(20, 0, 0)
-    df_daytime = component_df.between_time(start, end)
-
     # take the daytime average
-    u_mean = df_daytime['u_component'].mean()
-    v_mean = df_daytime['v_component'].mean()
+    u_mean = component_df['u_component'].mean()
+    v_mean = component_df['v_component'].mean()
 
     mean_components = pd.DataFrame.from_dict({'u_component': [u_mean], 'v_component': [v_mean]})
 
     # convert back to a wind speed and direction
     av_daytime_wind = wx_u_v_components.u_v_to_ws_wd(mean_components['u_component'], mean_components['v_component'])
 
-    return av_daytime_wind
+    av_daytime_wind_bin = myround(av_daytime_wind.wind_direction_convert, binsize)
+
+    return {'av_daytime_wind': av_daytime_wind, 'av_daytime_wind_bin': av_daytime_wind_bin, 'frequent_bin': frequent_bin, 'count_frequent_bin': count_frequent_bin}
 
 
 def get_model_data_out(DOY_target, files_ukv_wind_in, variable):
@@ -303,7 +308,12 @@ def catagorize_one_day(DOY_choice):
     obs_df_averaged = pd.concat([hour_ending_obs_15min, hour_ending_obs_1min], axis=1)
 
     # find the predominant wind direction
-    predominant_wind = determine_predominant_wd(obs_df.ws_L1, obs_df.corrected_wd)
+    predominant_wind_dict = determine_predominant_wd(obs_df.ws_L1, obs_df.corrected_wd)
+
+    predominant_wind = predominant_wind_dict['av_daytime_wind']
+    av_daytime_wind_bin = predominant_wind_dict['av_daytime_wind_bin']
+    frequent_bin = predominant_wind_dict['frequent_bin']
+    count_frequent_bin = predominant_wind_dict['count_frequent_bin']
 
     # MODEL WORK
 
@@ -348,13 +358,18 @@ def catagorize_one_day(DOY_choice):
     num_hours_kdn_50 = len(np.where(compare_df['UKV_obs_kdown_diff'] <= 50)[0])
 
 
-    # average wind direction bin
+
     # most frequant wind direction bin
+    # count of most frequant wd bin
+
     # average kdown
 
     # year
     # month
     # decimal time
+
+    # daytime hours
+    # daytime minutes
 
     # create a dataframe with info that I want to retain
     df_return_dict = {'DOY': [DOY_choice], 'predominant_wind': [predominant_wind.wind_direction_convert[0]],

@@ -278,6 +278,9 @@ def catagorize_one_day(DOY_choice):
     # put corrected wind back into the observation dataframe
     obs_df = pd.concat([obs_df, corrected_wd], axis=1)
 
+    # only take times where kdown is bigger than 50 Wm2
+    obs_df = obs_df.iloc[np.where(obs_df.kdn_L1 > 50)[0][0]:np.where(obs_df.kdn_L1 > 50)[0][-1]]
+
     # average kdown
     # UKV averages of radiation are 15-minute averages time STARTING -- so I am setting the resample to be
     # left instead of right (which is used normally, as obs are usually averaged to be time-ending)
@@ -331,6 +334,9 @@ def catagorize_one_day(DOY_choice):
     # KDOWN
     compare_df['UKV_obs_kdown_diff'] = np.abs(compare_df['kdown_UKV'] - compare_df['kdn_L1_15'])
 
+    # drop nan rows
+    day_length = len(obs_df_averaged)
+
     # find the number of hours where this difference in wd is less than 10 degrees
     num_hours_wd_10 = len(np.where((compare_df['UKV_obs_wd_diff'] >= 350) | (compare_df['UKV_obs_wd_diff'] <= 10))[0])
     num_hours_wd_20 = len(np.where((compare_df['UKV_obs_wd_diff'] >= 340) | (compare_df['UKV_obs_wd_diff'] <= 20))[0])
@@ -340,6 +346,15 @@ def catagorize_one_day(DOY_choice):
     num_hours_kdn_30 = len(np.where(compare_df['UKV_obs_kdown_diff'] <= 30)[0])
     num_hours_kdn_40 = len(np.where(compare_df['UKV_obs_kdown_diff'] <= 40)[0])
     num_hours_kdn_50 = len(np.where(compare_df['UKV_obs_kdown_diff'] <= 50)[0])
+
+
+    # average wind direction bin
+    # most frequant wind direction bin
+    # average kdown
+
+    # year
+    # month
+    # decimal time
 
     # create a dataframe with info that I want to retain
     df_return_dict = {'DOY': [DOY_choice], 'predominant_wind': [predominant_wind.wind_direction_convert[0]],

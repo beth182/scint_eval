@@ -11,6 +11,7 @@ from matplotlib.dates import DateFormatter
 # import matplotlib
 # matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+import os
 
 from scint_fp.functions import wx_u_v_components
 
@@ -23,8 +24,9 @@ from scint_eval.functions import file_read
 
 from scint_flux.functions import wx_data
 
+
 def myround(x, base=5):
-    return base * round(x/base)
+    return base * round(x / base)
 
 
 def read_L1_davis_tier_raw(target_DOY, site, average_period, filepath_in, level='L1'):
@@ -97,7 +99,8 @@ def determine_predominant_wd(wind_speed, wind_dir, binsize=10):
 
     av_daytime_wind_bin = myround(av_daytime_wind.wind_direction_convert, binsize)
 
-    return {'av_daytime_wind': av_daytime_wind, 'av_daytime_wind_bin': av_daytime_wind_bin, 'frequent_bin': frequent_bin, 'count_frequent_bin': count_frequent_bin}
+    return {'av_daytime_wind': av_daytime_wind, 'av_daytime_wind_bin': av_daytime_wind_bin,
+            'frequent_bin': frequent_bin, 'count_frequent_bin': count_frequent_bin}
 
 
 def get_model_data_out(DOY_target, files_ukv_wind_in, variable):
@@ -311,19 +314,22 @@ def catagorize_one_day(DOY_choice):
     predominant_wind_dict = determine_predominant_wd(obs_df.ws_L1, obs_df.corrected_wd)
 
     predominant_wind = predominant_wind_dict['av_daytime_wind']
-    av_daytime_wind_bin = predominant_wind_dict['av_daytime_wind_bin']
-    frequent_bin = predominant_wind_dict['frequent_bin']
+    av_daytime_wind_bin = int(predominant_wind_dict['av_daytime_wind_bin'])
+    frequent_bin = int(predominant_wind_dict['frequent_bin'])
     count_frequent_bin = predominant_wind_dict['count_frequent_bin']
 
     # MODEL WORK
 
     # CHANGE HERE
 
-
-    model_dict_wind = get_model_data_out(DOY_choice, "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/", 'wind')
+    model_dict_wind = get_model_data_out(DOY_choice,
+                                         "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/",
+                                         'wind')
     # model_dict_wind = get_model_data_out(DOY_choice, "/storage/basic/micromet/Tier_processing/rv006011/new_data_storage/", 'wind')
 
-    model_dict_kdown = get_model_data_out(DOY_choice, "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/", 'kdown')
+    model_dict_kdown = get_model_data_out(DOY_choice,
+                                          "//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/new_data_storage/",
+                                          'kdown')
     # model_dict_kdown = get_model_data_out(DOY_choice, "/storage/basic/micromet/Tier_processing/rv006011/new_data_storage/", 'kdown')
 
     # check if times are the same between kdown and wind model
@@ -344,9 +350,6 @@ def catagorize_one_day(DOY_choice):
     # KDOWN
     compare_df['UKV_obs_kdown_diff'] = np.abs(compare_df['kdown_UKV'] - compare_df['kdn_L1_15'])
 
-    # drop nan rows
-    day_length = len(obs_df_averaged)
-
     # find the number of hours where this difference in wd is less than 10 degrees
     num_hours_wd_10 = len(np.where((compare_df['UKV_obs_wd_diff'] >= 350) | (compare_df['UKV_obs_wd_diff'] <= 10))[0])
     num_hours_wd_20 = len(np.where((compare_df['UKV_obs_wd_diff'] >= 340) | (compare_df['UKV_obs_wd_diff'] <= 20))[0])
@@ -357,30 +360,55 @@ def catagorize_one_day(DOY_choice):
     num_hours_kdn_40 = len(np.where(compare_df['UKV_obs_kdown_diff'] <= 40)[0])
     num_hours_kdn_50 = len(np.where(compare_df['UKV_obs_kdown_diff'] <= 50)[0])
 
-
-
-    # most frequant wind direction bin
-    # count of most frequant wd bin
-
     # average kdown
+    kdn_mean = obs_df.kdn_L1.mean()
 
-    # year
-    # month
+    # first daytime index in df for date reference
+    dt_ref = obs_df.index[0]
+
     # decimal time
+    if isleap(dt_ref.year):
+        dectime = int(dt_ref.strftime('%j')) / 366 + dt_ref.year
+    else:
+        dectime = int(dt_ref.strftime('%j')) / 365 + dt_ref.year
+
+    # month
+    dt_ref_month = dt_ref.month
+    # year
+    dt_ref_year = dt_ref.year
+    # DOY
+    dt_ref_DOY = int(dt_ref.strftime('%j'))
 
     # daytime hours
+    day_length_hours = len(obs_df_averaged)
+
     # daytime minutes
+    day_length_minutes = len(obs_df)
 
     # create a dataframe with info that I want to retain
-    df_return_dict = {'DOY': [DOY_choice], 'predominant_wind': [predominant_wind.wind_direction_convert[0]],
-                      'Model_wd_score_10': [num_hours_wd_10], 'Model_wd_score_20': [num_hours_wd_20],
+    df_return_dict = {'year': [dt_ref_year],
+                      'DOY': [dt_ref_DOY],
+                      'month': [dt_ref_month],
+                      'dec_time': [dectime],
+                      'count_day_hour': [day_length_hours],
+                      'count_day_min': [day_length_minutes],
+
+                      'av_wd': [predominant_wind.wind_direction_convert[0]],
+                      'av_wd_bin': [av_daytime_wind_bin],
+                      'freq_wd_bin': [frequent_bin],
+                      'count_freq_wd_bin': [count_frequent_bin],
+
+                      'av_kdn': [kdn_mean],
+
+                      'Model_wd_score_10': [num_hours_wd_10],
+                      'Model_wd_score_20': [num_hours_wd_20],
                       'Model_wd_score_30': [num_hours_wd_30],
                       'Model_kdown_score_30': [num_hours_kdn_30],
                       'Model_kdown_score_40': [num_hours_kdn_40],
                       'Model_kdown_score_50': [num_hours_kdn_50]}
 
     df_return = pd.DataFrame.from_dict(df_return_dict)
-    df_return = df_return.set_index('DOY')
+    df_return = df_return.set_index('dec_time')
 
     import pysolar
     dt_ob = dt.datetime.strptime(str(DOY_choice), '%Y%j')
@@ -422,6 +450,7 @@ def catagorize_one_day(DOY_choice):
     csv_filepath = 'C:/Users/beths/OneDrive - University of Reading/Paper 2/data_avail/categorize_days/categorize_days.csv'
     # csv_filepath = '/storage/basic/micromet/Tier_processing/rv006011/temp/categorize_days.csv'
     # csv_filepath = '//rdg-home.ad.rdg.ac.uk/research-nfs/basic/micromet/Tier_processing/rv006011/temp/categorize_days.csv'
+
 
     # Tau figure
     plt.figure(figsize=(7, 5))
@@ -472,13 +501,21 @@ def catagorize_one_day(DOY_choice):
     # df_return.to_csv(csv_filepath)
 
     # open existing csv
-    existing_csv = pd.read_csv(csv_filepath)
-    existing_csv = existing_csv.set_index('DOY')
 
-    combine_df = pd.concat([existing_csv, df_return])
-    combine_df = combine_df[~combine_df.index.duplicated(keep='last')]
 
-    combine_df.to_csv(csv_filepath)
+    if os.path.exists(csv_filepath):
+
+        existing_csv = pd.read_csv(csv_filepath)
+        existing_csv = existing_csv.set_index('dec_time')
+
+        combine_df = pd.concat([existing_csv, df_return])
+        combine_df = combine_df[~combine_df.index.duplicated(keep='last')]
+
+        combine_df.to_csv(csv_filepath)
+
+    else:
+        df_return.to_csv(csv_filepath)
+
 
 
 ########################################################################################################################

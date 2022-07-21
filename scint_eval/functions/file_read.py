@@ -437,7 +437,7 @@ def findfiles(modpath,
             elif MO_format == 'new':
                 obsDOYs = []
                 for item in obvsexistlist:
-                    DOY = item[-11:-8]
+                    DOY = item.split('_')[-2][-3:]
                     obsDOYs.append(DOY)
                 # Making a list of the index where the DOY changes
                 doychangeobs = []
